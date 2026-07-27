@@ -4,6 +4,7 @@ import { use, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { CreateCarpoolModal } from "@/components/CreateCarpoolModal";
+import { BookingModal } from "@/components/BookingModal";
 import Link from "next/link";
 
 interface EventPageProps {
@@ -13,6 +14,8 @@ interface EventPageProps {
 export default function EventPage({ params }: EventPageProps) {
   const { slug } = use(params);
   const [isCarpoolModalOpen, setIsCarpoolModalOpen] = useState(false);
+  const [selectedCarpool, setSelectedCarpool] = useState<any | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [copied, setCopied] = useState(false);
 
   const event = useQuery(api.events.getEventBySlug, { slug });
@@ -26,6 +29,15 @@ export default function EventPage({ params }: EventPageProps) {
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };
+
+  const filteredCarpools = (carpools || []).filter((c) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      c.departureAddress.toLowerCase().includes(q) ||
+      c.driverName.toLowerCase().includes(q)
+    );
+  });
 
   if (event === undefined) {
     return (
@@ -119,40 +131,57 @@ export default function EventPage({ params }: EventPageProps) {
           </div>
         </div>
 
-        {/* Carpool Listings Section */}
+        {/* Carpool Listings & Search Section */}
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-white tracking-tight">
-              Trajets de covoiturage disponibles
-            </h2>
-            <span className="text-slate-400 text-xs font-mono">
-              {carpools ? `${carpools.length} trajet(s)` : "Chargement..."}
-            </span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-white tracking-tight">
+                Trajets de covoiturage disponibles
+              </h2>
+              <p className="text-slate-400 text-xs mt-0.5">
+                Recherchez par ville ou adresse de départ pour trouver votre trajet.
+              </p>
+            </div>
+
+            {/* Search Filter */}
+            <div className="w-full sm:w-72">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="🔍 Filtrer par ville de départ..."
+                className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+              />
+            </div>
           </div>
 
           {carpools === undefined ? (
             <div className="py-12 text-center text-slate-500 animate-pulse">
               Chargement des trajets en cours...
             </div>
-          ) : carpools.length === 0 ? (
+          ) : filteredCarpools.length === 0 ? (
             <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-12 text-center space-y-4">
               <div className="text-4xl">🚗</div>
               <h3 className="text-lg font-bold text-white">
-                Aucun trajet proposé pour le moment
+                {searchQuery
+                  ? "Aucun trajet correspondant à votre recherche"
+                  : "Aucun trajet proposé pour le moment"}
               </h3>
               <p className="text-slate-400 text-sm max-w-md mx-auto">
-                Vous avez une voiture et vous vous rendez à cet événement ? Soyez le premier à proposer des places à bord !
+                {searchQuery
+                  ? "Essayez une autre recherche ou proposez un trajet depuis votre ville !"
+                  : "Vous avez une voiture et vous vous rendez à cet événement ? Soyez le premier à proposer des places à bord !"}
               </p>
               <button
                 onClick={() => setIsCarpoolModalOpen(true)}
                 className="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-sm hover:bg-amber-400 transition-all"
               >
-                Proposer le 1er trajet
+                Proposer un trajet
               </button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {carpools.map((c) => (
+              {filteredCarpools.map((c) => (
                 <div
                   key={c._id}
                   className="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-6 transition-all shadow-lg flex flex-col justify-between"
@@ -201,7 +230,8 @@ export default function EventPage({ params }: EventPageProps) {
                     </span>
                     <button
                       disabled={c.availableSeats <= 0}
-                      className="px-4 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-semibold transition-all disabled:opacity-40 disabled:pointer-events-none"
+                      onClick={() => setSelectedCarpool(c)}
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-bold transition-all shadow-md shadow-amber-500/10 disabled:opacity-40 disabled:pointer-events-none"
                     >
                       Réserver 1 place
                     </button>
@@ -213,7 +243,7 @@ export default function EventPage({ params }: EventPageProps) {
         </div>
       </main>
 
-      {/* Modal Proposer Trajet */}
+      {/* Modals */}
       {event && (
         <CreateCarpoolModal
           eventId={event._id}
@@ -222,6 +252,12 @@ export default function EventPage({ params }: EventPageProps) {
           onClose={() => setIsCarpoolModalOpen(false)}
         />
       )}
+
+      <BookingModal
+        carpool={selectedCarpool}
+        isOpen={!!selectedCarpool}
+        onClose={() => setSelectedCarpool(null)}
+      />
     </div>
   );
 }

@@ -4,9 +4,9 @@
 
 **Blocked by:** 03 — Page Événement Publique & Publication de Trajet Conducteur
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Les passagers peuvent rechercher et filtrer la liste des trajets par lieu de départ ou proximité.
-- [ ] Le passager peut sélectionner un trajet et demander une place en fournissant son prénom et son téléphone.
-- [ ] L'application génère un `validationToken` unique et pré-remplit un message WhatsApp (ou SMS/Web Share) destiné au conducteur avec le lien de confirmation 1-clic.
-- [ ] La réservation passe en statut `pending` (en attente de confirmation).
+- [x] Les passagers peuvent rechercher et filtrer la liste des trajets par lieu de départ ou proximité.
+- [x] Le passager peut sélectionner un trajet et demander une place en fournissant son prénom et son téléphone.
+- [x] L'application génère un `validationToken` unique et pré-remplit un message WhatsApp (ou SMS/Web Share) destiné au conducteur avec le lien de confirmation 1-clic.
+- [x] La réservation passe en statut `pending` (en attente de confirmation).
