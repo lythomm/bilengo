@@ -4,9 +4,9 @@
 
 **Blocked by:** 01 — Setup Projet, Convex & ConvexAuth
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] L'organisateur peut s'inscrire et se connecter avec email et mot de passe via ConvexAuth.
-- [ ] L'organisateur connecté peut créer un événement avec le nom, l'adresse exacte (autocomplétée via l'API BAN / OpenStreetMap), et la date/heure.
-- [ ] La mutation de création d'événement applique la règle freemium (< 50 participants autorisés en version gratuite).
-- [ ] L'organisateur accède à son tableau de bord d'administration pour visualiser ses événements créés et copier le lien public.
+- [x] L'organisateur peut s'inscrire et se connecter avec email et mot de passe via ConvexAuth.
+- [x] L'organisateur connecté peut créer un événement avec le nom, l'adresse exacte (autocomplétée via l'API BAN / OpenStreetMap), et la date/heure.
+- [x] La mutation de création d'événement applique la règle freemium (< 50 participants autorisés en version gratuite).
+- [x] L'organisateur accède à son tableau de bord d'administration pour visualiser ses événements créés et copier le lien public.

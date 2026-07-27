@@ -9,6 +9,8 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as carpools from "../carpools.js";
+import type * as events from "../events.js";
 import type * as http from "../http.js";
 
 import type {
@@ -19,6 +21,8 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  carpools: typeof carpools;
+  events: typeof events;
   http: typeof http;
 }>;
 
