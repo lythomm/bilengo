@@ -1,20 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useConvexAuth } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
+import { useRouter } from "next/navigation";
 import { api } from "@/convex/_generated/api";
-import { AuthModal } from "@/components/AuthModal";
-import { CreateEventModal } from "@/components/CreateEventModal";
 import Link from "next/link";
 
 export default function DashboardPage() {
   const { isAuthenticated, isLoading: isAuthLoading } = useConvexAuth();
   const { signOut } = useAuthActions();
+  const router = useRouter();
 
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
+
+  // Route Guard: Redirect to home page if not authenticated
+  useEffect(() => {
+    if (!isAuthLoading && !isAuthenticated) {
+      router.replace("/");
+    }
+  }, [isAuthLoading, isAuthenticated, router]);
 
   const myEvents = useQuery(
     api.events.getMyEvents,
@@ -28,50 +33,15 @@ export default function DashboardPage() {
     setTimeout(() => setCopiedSlug(null), 2500);
   };
 
-  if (isAuthLoading) {
+  const handleSignOut = async () => {
+    await signOut();
+    router.replace("/");
+  };
+
+  if (isAuthLoading || !isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-400">
-        <div className="animate-pulse text-lg">Chargement de votre espace...</div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-amber-500 selection:text-slate-950">
-        <header className="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-amber-500/20">
-                B
-              </div>
-              <span className="text-xl font-bold tracking-tight text-white">
-                Bilengo
-              </span>
-            </Link>
-          </div>
-        </header>
-
-        <main className="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto space-y-6">
-          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-3xl flex items-center justify-center">
-            🔒
-          </div>
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-white">Accès restreint</h1>
-            <p className="text-slate-400 text-sm">
-              Vous devez être connecté à votre compte organisateur pour accéder au tableau de bord.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setIsAuthOpen(true)}
-            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-sm transition-colors shadow-lg shadow-amber-500/20"
-          >
-            Se connecter / S'inscrire
-          </button>
-        </main>
-
-        <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+        <div className="animate-pulse text-lg">Vérification de votre session...</div>
       </div>
     );
   }
@@ -96,16 +66,15 @@ export default function DashboardPage() {
           </Link>
 
           <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setIsCreateOpen(true)}
+            <Link
+              href="/events/create"
               className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-sm transition-colors shadow-md"
             >
               + Créer un événement
-            </button>
+            </Link>
             <button
               type="button"
-              onClick={() => signOut()}
+              onClick={handleSignOut}
               className="px-4 py-2 rounded-xl border border-slate-800 hover:bg-slate-900 text-slate-300 text-sm transition-colors"
             >
               Déconnexion
@@ -126,13 +95,12 @@ export default function DashboardPage() {
                 Gérez vos événements et facilitez le covoiturage pour vos participants.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => setIsCreateOpen(true)}
+            <Link
+              href="/events/create"
               className="self-start sm:self-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-semibold text-sm transition-colors shadow-lg shadow-amber-500/20"
             >
               + Créer un nouvel événement
-            </button>
+            </Link>
           </div>
 
           {myEvents === undefined ? (
@@ -148,13 +116,12 @@ export default function DashboardPage() {
               <p className="text-slate-400 text-sm max-w-md mx-auto">
                 Créez votre premier événement en 1 clic et partagez son lien public à vos invités pour organiser le covoiturage.
               </p>
-              <button
-                type="button"
-                onClick={() => setIsCreateOpen(true)}
-                className="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-sm hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20"
+              <Link
+                href="/events/create"
+                className="inline-block px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-sm hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20"
               >
                 + Créer mon premier événement
-              </button>
+              </Link>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -215,15 +182,6 @@ export default function DashboardPage() {
       <footer className="border-t border-slate-800/80 py-8 text-center text-xs text-slate-500">
         <p>© 2026 Bilengo. Tous droits réservés.</p>
       </footer>
-
-      {/* Modals */}
-      <CreateEventModal
-        isOpen={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
-        onSuccess={(slug) => {
-          setIsCreateOpen(false);
-        }}
-      />
     </div>
   );
 }

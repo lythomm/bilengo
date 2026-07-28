@@ -102,3 +102,120 @@ export const getEventBySlug = query({
     };
   },
 });
+
+export const getOrganizerEventData = query({
+  args: { eventId: v.id("events") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
+
+    const event = await ctx.db.get(args.eventId);
+    if (!event || event.organizerId !== userId) {
+      return null;
+    }
+
+    const carpools = await ctx.db
+      .query("carpools")
+      .withIndex("by_event", (q) => q.eq("eventId", args.eventId))
+      .collect();
+
+    const carpoolDetails = [];
+    const guestsMap = new Map<
+      string,
+      {
+        name: string;
+        phone: string;
+        proposesCarpool: boolean;
+        isInCarpool: boolean;
+        details: string[];
+      }
+    >();
+
+    for (const c of carpools) {
+      const bookings = await ctx.db
+        .query("bookings")
+        .withIndex("by_carpool", (q) => q.eq("carpoolId", c._id))
+        .collect();
+
+      const confirmedBookings = bookings.filter((b) => b.status === "confirmed");
+      const pendingBookings = bookings.filter((b) => b.status === "pending");
+
+      carpoolDetails.push({
+        ...c,
+        confirmedBookingsCount: confirmedBookings.length,
+        pendingBookingsCount: pendingBookings.length,
+        bookings: bookings.map((b) => ({
+          _id: b._id,
+          passengerName: b.passengerName,
+          passengerPhone: b.passengerPhone,
+          status: b.status,
+        })),
+      });
+
+      // Add driver to guests list
+      const driverKey = (c.driverPhone || c.driverName).trim().toLowerCase();
+      let driverEntry = guestsMap.get(driverKey);
+      if (!driverEntry) {
+        driverEntry = {
+          name: c.driverName,
+          phone: c.driverPhone,
+          proposesCarpool: true,
+          isInCarpool: false,
+          details: [`Départ : ${c.departureAddress} (${c.totalSeats} places)`],
+        };
+        guestsMap.set(driverKey, driverEntry);
+      } else {
+        driverEntry.proposesCarpool = true;
+        driverEntry.details.push(
+          `Départ : ${c.departureAddress} (${c.totalSeats} places)`
+        );
+      }
+
+      // Add passengers to guests list
+      for (const b of bookings) {
+        if (b.status === "cancelled") continue;
+        const passengerKey = (b.passengerPhone || b.passengerName)
+          .trim()
+          .toLowerCase();
+        let passengerEntry = guestsMap.get(passengerKey);
+        if (!passengerEntry) {
+          passengerEntry = {
+            name: b.passengerName,
+            phone: b.passengerPhone,
+            proposesCarpool: false,
+            isInCarpool: true,
+            details: [
+              `Passager avec ${c.driverName} (${b.status === "confirmed" ? "confirmé" : "en attente"})`,
+            ],
+          };
+          guestsMap.set(passengerKey, passengerEntry);
+        } else {
+          passengerEntry.isInCarpool = true;
+          passengerEntry.details.push(
+            `Passager avec ${c.driverName} (${b.status === "confirmed" ? "confirmé" : "en attente"})`
+          );
+        }
+      }
+    }
+
+    const guests = Array.from(guestsMap.values());
+    const totalDrivers = carpools.length;
+    const totalSeatsOffered = carpools.reduce((s, c) => s + c.totalSeats, 0);
+    const totalSeatsAvailable = carpools.reduce((s, c) => s + c.availableSeats, 0);
+    const totalSeatsBooked = totalSeatsOffered - totalSeatsAvailable;
+
+    return {
+      isOrganizer: true,
+      event,
+      carpools: carpoolDetails,
+      guests,
+      stats: {
+        totalGuests: guests.length,
+        totalDrivers,
+        totalSeatsOffered,
+        totalSeatsBooked,
+        totalSeatsAvailable,
+      },
+    };
+  },
+});

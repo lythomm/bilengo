@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAuthActions } from "@convex-dev/auth/react";
+import { useRouter } from "next/navigation";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface AuthModalProps {
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const { signIn } = useAuthActions();
+  const router = useRouter();
   const [step, setStep] = useState<"signIn" | "signUp">("signIn");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,6 +44,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         });
       }
       onClose();
+      router.push("/dashboard");
     } catch (err: any) {
       console.error(err);
       setError(

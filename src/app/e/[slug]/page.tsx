@@ -1,10 +1,12 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { CreateCarpoolModal } from "@/components/CreateCarpoolModal";
+import { EventMapContainer } from "@/components/EventMapContainer";
+import { EventDrawer } from "@/components/EventDrawer";
 import { BookingModal } from "@/components/BookingModal";
+import { OrganizerEventView } from "@/components/OrganizerEventView";
 import Link from "next/link";
 
 interface EventPageProps {
@@ -13,16 +15,69 @@ interface EventPageProps {
 
 export default function EventPage({ params }: EventPageProps) {
   const { slug } = use(params);
-  const [isCarpoolModalOpen, setIsCarpoolModalOpen] = useState(false);
   const [selectedCarpool, setSelectedCarpool] = useState<any | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [bookingCarpool, setBookingCarpool] = useState<any | null>(null);
   const [copied, setCopied] = useState(false);
+  const [viewMode, setViewMode] = useState<"organizer" | "map">("organizer");
 
   const event = useQuery(api.events.getEventBySlug, { slug });
   const carpools = useQuery(
     api.carpools.getCarpoolsByEvent,
     event?._id ? { eventId: event._id } : "skip"
   );
+  const organizerData = useQuery(
+    api.events.getOrganizerEventData,
+    event?._id ? { eventId: event._id } : "skip"
+  );
+
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+
+  useEffect(() => {
+    if (!event) return;
+
+    // Check if valid coordinates are stored in database
+    if (
+      typeof event.destinationLat === "number" &&
+      typeof event.destinationLng === "number" &&
+      !isNaN(event.destinationLat) &&
+      !isNaN(event.destinationLng)
+    ) {
+      setCoords({ lat: event.destinationLat, lng: event.destinationLng });
+      return;
+    }
+
+    // Geocode fallback for legacy events or uncaptured coordinates
+    if (event.destinationAddress) {
+      fetch(
+        `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(
+          event.destinationAddress
+        )}&limit=1`
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          const first = data.features?.[0];
+          if (first?.geometry?.coordinates) {
+            const lng = first.geometry.coordinates[0];
+            const lat = first.geometry.coordinates[1];
+            if (
+              typeof lat === "number" &&
+              typeof lng === "number" &&
+              !isNaN(lat) &&
+              !isNaN(lng)
+            ) {
+              setCoords({ lat, lng });
+              return;
+            }
+          }
+          setCoords({ lat: 48.8566, lng: 2.3522 });
+        })
+        .catch(() => {
+          setCoords({ lat: 48.8566, lng: 2.3522 });
+        });
+    } else {
+      setCoords({ lat: 48.8566, lng: 2.3522 });
+    }
+  }, [event]);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -30,16 +85,7 @@ export default function EventPage({ params }: EventPageProps) {
     setTimeout(() => setCopied(false), 2500);
   };
 
-  const filteredCarpools = (carpools || []).filter((c) => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      c.departureAddress.toLowerCase().includes(q) ||
-      c.driverName.toLowerCase().includes(q)
-    );
-  });
-
-  if (event === undefined) {
+  if (event === undefined || !coords) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-400">
         <div className="animate-pulse text-lg">Chargement de l'événement...</div>
@@ -64,203 +110,95 @@ export default function EventPage({ params }: EventPageProps) {
     );
   }
 
+  // If user is the organizer and current viewMode is "organizer", show Organizer Dashboard View
+  if (organizerData?.isOrganizer && viewMode === "organizer") {
+    return (
+      <OrganizerEventView
+        organizerData={organizerData as any}
+        onSwitchToMap={() => setViewMode("map")}
+        onCopyLink={handleCopyLink}
+        copied={copied}
+      />
+    );
+  }
+
+  // Guest Map View (or Organizer switched to Map View)
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
-      {/* Top Header */}
-      <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-amber-500 text-slate-950 font-black flex items-center justify-center text-base">
-              B
-            </div>
-            <span className="font-bold text-white tracking-tight">Bilengo</span>
+    <div className="fixed inset-0 overflow-hidden bg-slate-950 text-slate-100 select-none">
+      {/* Top Floating Banner */}
+      <header className="fixed top-4 left-4 right-4 z-30 max-w-4xl mx-auto bg-slate-950/85 backdrop-blur-md border border-slate-800 rounded-2xl p-3.5 shadow-2xl flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 overflow-hidden">
+          <Link
+            href="/"
+            className="w-9 h-9 rounded-xl bg-amber-500 text-slate-950 font-black flex items-center justify-center text-lg flex-shrink-0 shadow-lg shadow-amber-500/20"
+          >
+            B
           </Link>
+          <div className="truncate">
+            <h1 className="font-extrabold text-white text-sm tracking-tight truncate">
+              {event.title}
+            </h1>
+            <p className="text-[11px] text-slate-400 truncate">
+              📅{" "}
+              {new Date(event.eventDate).toLocaleDateString("fr-FR", {
+                day: "numeric",
+                month: "short",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}{" "}
+              • 📍 {event.destinationAddress}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {organizerData?.isOrganizer && (
+            <button
+              type="button"
+              onClick={() => setViewMode("organizer")}
+              className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 text-xs font-bold transition-colors flex items-center gap-1.5"
+            >
+              <span>📊 Vue Organisateur</span>
+            </button>
+          )}
 
           <button
             type="button"
             onClick={handleCopyLink}
-            className="px-3.5 py-1.5 rounded-xl border border-slate-700 hover:bg-slate-800 text-slate-300 text-xs font-medium transition-colors"
+            className="flex-shrink-0 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold hover:bg-amber-500/20 transition-colors"
           >
-            {copied ? "✓ Link copié !" : "Partager l'événement"}
+            {copied ? "✓ Copié" : "🔗 Partager"}
           </button>
         </div>
       </header>
 
-      {/* Main Event Hero & Carpool Board */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Event Info Card */}
-        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-          <div className="absolute -top-24 -right-24 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-            <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold">
-                📍 Tous les covoiturages vont ici
-              </div>
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                {event.title}
-              </h1>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-slate-300 text-sm">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-amber-400">📅</span>
-                  <span>
-                    {new Date(event.eventDate).toLocaleDateString("fr-FR", {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-amber-400">🏁</span>
-                  <span>{event.destinationAddress}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setIsCarpoolModalOpen(true)}
-                className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-sm shadow-xl shadow-amber-500/20 transition-colors text-center"
-              >
-                + Proposer un trajet
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Carpool Listings & Search Section */}
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-bold text-white tracking-tight">
-                Trajets de covoiturage disponibles
-              </h2>
-              <p className="text-slate-400 text-xs mt-0.5">
-                Recherchez par ville ou adresse de départ pour trouver votre trajet.
-              </p>
-            </div>
-
-            {/* Search Filter */}
-            <div className="w-full sm:w-72">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="🔍 Filtrer par ville de départ..."
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-              />
-            </div>
-          </div>
-
-          {carpools === undefined ? (
-            <div className="py-12 text-center text-slate-500 animate-pulse">
-              Chargement des trajets en cours...
-            </div>
-          ) : filteredCarpools.length === 0 ? (
-            <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-12 text-center space-y-4">
-              <div className="text-4xl">🚗</div>
-              <h3 className="text-lg font-bold text-white">
-                {searchQuery
-                  ? "Aucun trajet correspondant à votre recherche"
-                  : "Aucun trajet proposé pour le moment"}
-              </h3>
-              <p className="text-slate-400 text-sm max-w-md mx-auto">
-                {searchQuery
-                  ? "Essayez une autre recherche ou proposez un trajet depuis votre ville !"
-                  : "Vous avez une voiture et vous vous rendez à cet événement ? Soyez le premier à proposer des places à bord !"}
-              </p>
-              <button
-                type="button"
-                onClick={() => setIsCarpoolModalOpen(true)}
-                className="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-sm hover:bg-amber-400 transition-colors"
-              >
-                Proposer un trajet
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredCarpools.map((c) => (
-                <div
-                  key={c._id}
-                  className="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-6 transition-colors shadow-lg flex flex-col justify-between"
-                >
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <span className="text-xs text-slate-400 font-medium">Conducteur</span>
-                        <h4 className="text-lg font-bold text-white">{c.driverName}</h4>
-                      </div>
-                      <span
-                        className={`text-xs px-3 py-1 rounded-full font-semibold ${
-                          c.availableSeats > 0
-                            ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
-                            : "bg-red-500/10 border border-red-500/20 text-red-400"
-                        }`}
-                      >
-                        {c.availableSeats > 0
-                          ? `${c.availableSeats} place(s) libre(s)`
-                          : "Complet"}
-                      </span>
-                    </div>
-
-                    <div className="space-y-2 text-sm text-slate-300">
-                      <div className="flex items-start gap-2">
-                        <span className="text-amber-400">🚗 Départ :</span>
-                        <span className="font-medium text-white">{c.departureAddress}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-amber-400">⏰ Heure :</span>
-                        <span>
-                          {new Date(c.departureTime).toLocaleDateString("fr-FR", {
-                            day: "numeric",
-                            month: "short",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 mt-4 border-t border-slate-800/80 flex items-center justify-between">
-                    <span className="text-xs text-slate-500">
-                      Capacité : {c.totalSeats} places au total
-                    </span>
-                    <button
-                      type="button"
-                      disabled={c.availableSeats <= 0}
-                      onClick={() => setSelectedCarpool(c)}
-                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-bold transition-colors shadow-md shadow-amber-500/10 disabled:opacity-40 disabled:pointer-events-none"
-                    >
-                      Réserver 1 place
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </main>
-
-      {/* Modals */}
-      {event && (
-        <CreateCarpoolModal
-          eventId={event._id}
-          eventTitle={event.title}
-          isOpen={isCarpoolModalOpen}
-          onClose={() => setIsCarpoolModalOpen(false)}
+      {/* Fullscreen OpenStreetMap Layer */}
+      <div className="absolute inset-0 z-0">
+        <EventMapContainer
+          destinationLat={coords.lat}
+          destinationLng={coords.lng}
+          destinationTitle={event.title}
+          carpools={carpools || []}
+          selectedCarpool={selectedCarpool}
+          onSelectCarpool={(c) => setSelectedCarpool(c)}
         />
-      )}
+      </div>
 
+      {/* Bottom Sheet Drawer */}
+      <EventDrawer
+        eventId={event._id}
+        eventTitle={event.title}
+        carpools={carpools || []}
+        selectedCarpool={selectedCarpool}
+        onSelectCarpool={(c) => setSelectedCarpool(c)}
+        onOpenBooking={(c) => setBookingCarpool(c)}
+      />
+
+      {/* Booking Modal */}
       <BookingModal
-        carpool={selectedCarpool}
-        isOpen={!!selectedCarpool}
-        onClose={() => setSelectedCarpool(null)}
+        carpool={bookingCarpool}
+        isOpen={!!bookingCarpool}
+        onClose={() => setBookingCarpool(null)}
       />
     </div>
   );
