@@ -47,13 +47,13 @@ export default function Home() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setIsCreateOpen(true)}
-                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-sm transition-all shadow-md"
+                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-sm transition-colors shadow-md"
                 >
                   + Créer un événement
                 </button>
                 <button
                   onClick={() => signOut()}
-                  className="px-4 py-2 rounded-xl border border-slate-800 hover:bg-slate-900 text-slate-300 text-sm transition-all"
+                  className="px-4 py-2 rounded-xl border border-slate-800 hover:bg-slate-900 text-slate-300 text-sm transition-colors"
                 >
                   Déconnexion
                 </button>
@@ -61,7 +61,7 @@ export default function Home() {
             ) : (
               <button
                 onClick={() => setIsAuthOpen(true)}
-                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-sm transition-all shadow-lg shadow-amber-500/15"
+                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-sm transition-colors shadow-lg shadow-amber-500/15"
               >
                 Espace Organisateur
               </button>
@@ -86,7 +86,7 @@ export default function Home() {
               </div>
               <button
                 onClick={() => setIsCreateOpen(true)}
-                className="self-start sm:self-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-semibold text-sm transition-all shadow-lg shadow-amber-500/20"
+                className="self-start sm:self-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-semibold text-sm transition-colors shadow-lg shadow-amber-500/20"
               >
                 + Créer un nouvel événement
               </button>
@@ -96,7 +96,7 @@ export default function Home() {
               {myEvents.map((evt: any) => (
                 <div
                   key={evt._id}
-                  className="bg-slate-900/90 border border-slate-800 hover:border-slate-700 rounded-2xl p-6 transition-all shadow-xl flex flex-col justify-between"
+                  className="bg-slate-900/90 border border-slate-800 hover:border-slate-700 rounded-2xl p-6 transition-colors shadow-xl flex flex-col justify-between"
                 >
                   <div className="space-y-3">
                     <div className="flex justify-between items-start">
@@ -133,7 +133,7 @@ export default function Home() {
                     </Link>
                     <button
                       onClick={() => handleCopyLink(evt.slug)}
-                      className="px-3.5 py-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-xs font-medium transition-all"
+                      className="px-3.5 py-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-xs font-medium transition-colors"
                     >
                       {copiedSlug === evt.slug ? "✓ Copié !" : "Copier le lien"}
                     </button>
@@ -164,7 +164,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
               <button
                 onClick={() => setIsAuthOpen(true)}
-                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-lg transition-all shadow-xl shadow-amber-500/25"
+                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-lg transition-colors shadow-xl shadow-amber-500/25"
               >
                 Créer mon premier événement gratuit
               </button>

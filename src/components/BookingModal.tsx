@@ -161,7 +161,7 @@ export function BookingModal({ carpool, isOpen, onClose }: BookingModalProps) {
                 href={bookingSuccess.whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition-all"
+                className="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition-colors"
               >
                 <span>💬</span>
                 <span>Envoyer via WhatsApp (Recommandé)</span>
@@ -230,7 +230,7 @@ export function BookingModal({ carpool, isOpen, onClose }: BookingModalProps) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-sm transition-all duration-200 disabled:opacity-50 mt-2 shadow-lg shadow-amber-500/20"
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-sm transition-colors duration-200 disabled:opacity-50 mt-2 shadow-lg shadow-amber-500/20"
             >
               {loading ? "Préparation de la demande..." : "Demander ma place"}
             </button>

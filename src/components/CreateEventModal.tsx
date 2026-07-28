@@ -147,7 +147,7 @@ export function CreateEventModal({
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-semibold transition-all duration-200 disabled:opacity-50"
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-semibold transition-colors duration-200 disabled:opacity-50"
           >
             {loading ? "Création en cours..." : "Publier l'événement"}
           </button>

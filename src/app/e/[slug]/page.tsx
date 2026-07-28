@@ -56,7 +56,7 @@ export default function EventPage({ params }: EventPageProps) {
         </p>
         <Link
           href="/"
-          className="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold hover:bg-amber-400 transition-all"
+          className="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold hover:bg-amber-400 transition-colors"
         >
           Retourner à l'accueil
         </Link>
@@ -78,7 +78,7 @@ export default function EventPage({ params }: EventPageProps) {
 
           <button
             onClick={handleCopyLink}
-            className="px-3.5 py-1.5 rounded-xl border border-slate-700 hover:bg-slate-800 text-slate-300 text-xs font-medium transition-all"
+            className="px-3.5 py-1.5 rounded-xl border border-slate-700 hover:bg-slate-800 text-slate-300 text-xs font-medium transition-colors"
           >
             {copied ? "✓ Link copié !" : "Partager l'événement"}
           </button>
@@ -123,7 +123,7 @@ export default function EventPage({ params }: EventPageProps) {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <button
                 onClick={() => setIsCarpoolModalOpen(true)}
-                className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-sm shadow-xl shadow-amber-500/20 transition-all text-center"
+                className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-sm shadow-xl shadow-amber-500/20 transition-colors text-center"
               >
                 + Proposer un trajet
               </button>
@@ -174,7 +174,7 @@ export default function EventPage({ params }: EventPageProps) {
               </p>
               <button
                 onClick={() => setIsCarpoolModalOpen(true)}
-                className="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-sm hover:bg-amber-400 transition-all"
+                className="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-sm hover:bg-amber-400 transition-colors"
               >
                 Proposer un trajet
               </button>
@@ -184,7 +184,7 @@ export default function EventPage({ params }: EventPageProps) {
               {filteredCarpools.map((c) => (
                 <div
                   key={c._id}
-                  className="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-6 transition-all shadow-lg flex flex-col justify-between"
+                  className="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-6 transition-colors shadow-lg flex flex-col justify-between"
                 >
                   <div className="space-y-4">
                     <div className="flex justify-between items-start">
@@ -231,7 +231,7 @@ export default function EventPage({ params }: EventPageProps) {
                     <button
                       disabled={c.availableSeats <= 0}
                       onClick={() => setSelectedCarpool(c)}
-                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-bold transition-all shadow-md shadow-amber-500/10 disabled:opacity-40 disabled:pointer-events-none"
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-bold transition-colors shadow-md shadow-amber-500/10 disabled:opacity-40 disabled:pointer-events-none"
                     >
                       Réserver 1 place
                     </button>

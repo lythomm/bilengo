@@ -87,7 +87,7 @@ function ConfirmBookingContent() {
           {bookingInfo?.eventSlug && (
             <Link
               href={`/e/${bookingInfo.eventSlug}`}
-              className="inline-block px-5 py-2.5 rounded-xl bg-slate-800 text-white font-medium text-sm hover:bg-slate-700 transition-all mt-2"
+              className="inline-block px-5 py-2.5 rounded-xl bg-slate-800 text-white font-medium text-sm hover:bg-slate-700 transition-colors mt-2"
             >
               Voir l'événement
             </Link>
@@ -132,7 +132,7 @@ function ConfirmBookingContent() {
               </div>
               <a
                 href={`tel:${resultData.passengerPhone}`}
-                className="px-3.5 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold hover:bg-emerald-500/20 transition-all"
+                className="px-3.5 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold hover:bg-emerald-500/20 transition-colors"
               >
                 📞 Appeler
               </a>
@@ -152,7 +152,7 @@ function ConfirmBookingContent() {
           {resultData.eventSlug && (
             <Link
               href={`/e/${resultData.eventSlug}`}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-sm transition-all block text-center shadow-lg shadow-amber-500/20"
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-sm transition-colors block text-center shadow-lg shadow-amber-500/20"
             >
               Accéder à la page de l'événement
             </Link>
