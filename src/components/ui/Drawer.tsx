@@ -19,7 +19,7 @@ export function Drawer({
   onToggleExpand,
   onClose,
   children,
-  maxHeightClass = "max-h-[85vh]",
+  maxHeightClass = "max-h-[60vh]",
   allowCollapseToHandle = true,
   className = "",
 }: DrawerProps) {

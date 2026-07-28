@@ -224,13 +224,6 @@ export function ProposeFinalizeDrawer({
             </div>
           </div>
 
-          {driverName && (
-            <div className="text-sm text-neutral-700 bg-neutral-50 px-3.5 py-2.5 rounded-lg border border-neutral-200/60 flex items-center justify-between font-medium">
-              <span>Conducteur : <strong className="text-neutral-900">{driverName}</strong></span>
-              <span className="font-mono text-neutral-600">{driverPhone}</span>
-            </div>
-          )}
-
           <div className="flex items-center justify-between gap-3 pt-2">
             <Button
               type="button"

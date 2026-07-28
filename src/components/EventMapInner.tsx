@@ -12,6 +12,7 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { MapPin, LocateFixed } from "lucide-react";
 
 // Leaflet custom icons
 const eventDestinationIcon = L.divIcon({
@@ -21,18 +22,45 @@ const eventDestinationIcon = L.divIcon({
   iconAnchor: [18, 18],
 });
 
-const carpoolDepartureIcon = L.divIcon({
-  className: "custom-carpool-icon",
-  html: `<div style="background-color: #10b981; color: #ffffff; font-weight: 700; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-size: 14px;">🚗</div>`,
-  iconSize: [32, 32],
-  iconAnchor: [16, 16],
-});
+function createCarpoolMarkerIcon(driverName: string, isSelected: boolean) {
+  const firstName = driverName ? driverName.split(" ")[0] : "Conducteur";
+  const bgCircle = isSelected ? "#3b82f6" : "#10b981";
+  const size = isSelected ? 36 : 30;
+  const shadow = isSelected
+    ? "0 8px 20px rgba(59,130,246,0.6)"
+    : "0 4px 12px rgba(0,0,0,0.25)";
 
-const selectedCarpoolIcon = L.divIcon({
-  className: "custom-carpool-selected-icon",
-  html: `<div style="background-color: #3b82f6; color: #ffffff; font-weight: 900; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #ffffff; box-shadow: 0 10px 25px rgba(59,130,246,0.6); font-size: 18px; transform: scale(1.15);">🚗</div>`,
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
+  return L.divIcon({
+    className: "custom-carpool-marker-with-name",
+    html: `
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; transform: translate(-50%, -50%);">
+        <div style="background-color: ${bgCircle}; color: #ffffff; font-weight: 900; width: ${size}px; height: ${size}px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2.5px solid #ffffff; box-shadow: ${shadow}; font-size: ${isSelected ? "17px" : "14px"}; flex-shrink: 0;">
+          🚗
+        </div>
+        <div style="margin-top: 2px; background-color: #ffffff; color: #111111; font-weight: 700; font-size: 11px; padding: 2px 7px; border-radius: 20px; border: 1px solid rgba(0,0,0,0.12); box-shadow: 0 2px 6px rgba(0,0,0,0.15); white-space: nowrap; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;">
+          ${firstName}
+        </div>
+      </div>
+    `,
+    iconSize: [0, 0],
+    iconAnchor: [0, 0],
+  });
+}
+
+const userLocationIcon = L.divIcon({
+  className: "custom-user-location-icon",
+  html: `<div style="position: relative; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
+    <div style="position: absolute; width: 24px; height: 24px; border-radius: 50%; background-color: rgba(59, 130, 246, 0.35); animation: user-pulse 2s infinite ease-out;"></div>
+    <div style="width: 14px; height: 14px; border-radius: 50%; background-color: #2563eb; border: 3px solid #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 10;"></div>
+  </div>
+  <style>
+    @keyframes user-pulse {
+      0% { transform: scale(0.6); opacity: 1; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+  </style>`,
+  iconSize: [24, 24],
+  iconAnchor: [12, 12],
 });
 
 interface CarpoolItem {
@@ -153,6 +181,62 @@ function MapController({
   return null;
 }
 
+function MapActionButtons({
+  destinationLat,
+  destinationLng,
+  userLocation,
+  onLocateUser,
+  isPickingLocation,
+}: {
+  destinationLat: number;
+  destinationLng: number;
+  userLocation: { lat: number; lng: number } | null;
+  onLocateUser: () => void;
+  isPickingLocation?: boolean;
+}) {
+  const map = useMap();
+
+  const handleCenterUser = () => {
+    if (userLocation) {
+      map.flyTo([userLocation.lat, userLocation.lng], 15, { duration: 0.8 });
+    } else {
+      onLocateUser();
+    }
+  };
+
+  const handleCenterEvent = () => {
+    map.flyTo([destinationLat, destinationLng], 14, { duration: 0.8 });
+  };
+
+  if (isPickingLocation) return null;
+
+  return (
+    <div className="absolute bottom-28 right-4 z-[400] flex flex-col gap-2.5">
+      {/* Center Event Button */}
+      <button
+        type="button"
+        onClick={handleCenterEvent}
+        className="w-10 h-10 rounded-full bg-white text-neutral-900 shadow-lg border border-neutral-200/90 flex items-center justify-center hover:bg-neutral-50 active:scale-95 transition-all cursor-pointer"
+        title="Centrer sur l'événement"
+        aria-label="Centrer sur l'événement"
+      >
+        <MapPin className="w-5 h-5 text-neutral-900" />
+      </button>
+
+      {/* Center User Location Button */}
+      <button
+        type="button"
+        onClick={handleCenterUser}
+        className="w-10 h-10 rounded-full bg-white text-neutral-900 shadow-lg border border-neutral-200/90 flex items-center justify-center hover:bg-neutral-50 active:scale-95 transition-all cursor-pointer"
+        title="Centrer sur ma position"
+        aria-label="Centrer sur ma position"
+      >
+        <LocateFixed className="w-5 h-5 text-neutral-900" />
+      </button>
+    </div>
+  );
+}
+
 export default function EventMapInner({
   destinationLat,
   destinationLng,
@@ -165,6 +249,28 @@ export default function EventMapInner({
   pickedLocation,
 }: EventMapInnerProps) {
   const [routePolyline, setRoutePolyline] = useState<[number, number][]>([]);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  const requestUserLocation = () => {
+    if (typeof window !== "undefined" && "geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (err) => {
+          console.log("Géolocalisation indisponible:", err.message);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      );
+    }
+  };
+
+  useEffect(() => {
+    requestUserLocation();
+  }, []);
 
   // Fetch OSRM route when a carpool is selected
   useEffect(() => {
@@ -237,6 +343,31 @@ export default function EventMapInner({
           pickedLocation={pickedLocation}
         />
 
+        <MapActionButtons
+          destinationLat={destinationLat}
+          destinationLng={destinationLng}
+          userLocation={userLocation}
+          onLocateUser={requestUserLocation}
+          isPickingLocation={isPickingLocation}
+        />
+
+        {/* User Location Marker */}
+        {userLocation && (
+          <Marker
+            position={[userLocation.lat, userLocation.lng]}
+            icon={userLocationIcon}
+          >
+            <Popup>
+              <div className="text-center font-sans p-1">
+                <strong className="text-slate-900 block text-sm font-semibold">
+                  Votre position
+                </strong>
+                <span className="text-xs text-neutral-500">Vous êtes ici</span>
+              </div>
+            </Popup>
+          </Marker>
+        )}
+
         {/* Destination Event Marker */}
         <Marker
           position={[destinationLat, destinationLng]}
@@ -263,7 +394,7 @@ export default function EventMapInner({
             <Marker
               key={c._id}
               position={[c.departureLat, c.departureLng]}
-              icon={isSelected ? selectedCarpoolIcon : carpoolDepartureIcon}
+              icon={createCarpoolMarkerIcon(c.driverName, isSelected)}
               eventHandlers={{
                 click: () => onSelectCarpool(c),
               }}

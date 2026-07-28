@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const createCarpool = mutation({
   args: {
@@ -109,14 +110,45 @@ export const cancelCarpool = mutation({
       .collect();
 
     for (const b of bookings) {
-      await ctx.db.patch(b._id, { status: "cancelled" });
+      await ctx.db.delete(b._id);
     }
 
-    await ctx.db.patch(args.carpoolId, {
-      status: "cancelled",
-      availableSeats: 0,
-    });
+    await ctx.db.delete(args.carpoolId);
 
+    return true;
+  },
+});
+
+export const deleteCarpoolByOrganizer = mutation({
+  args: {
+    carpoolId: v.id("carpools"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Non authentifié.");
+    }
+
+    const carpool = await ctx.db.get(args.carpoolId);
+    if (!carpool) {
+      throw new Error("Trajet introuvable.");
+    }
+
+    const event = await ctx.db.get(carpool.eventId);
+    if (!event || event.organizerId !== userId) {
+      throw new Error("Action non autorisée.");
+    }
+
+    const bookings = await ctx.db
+      .query("bookings")
+      .withIndex("by_carpool", (q) => q.eq("carpoolId", args.carpoolId))
+      .collect();
+
+    for (const b of bookings) {
+      await ctx.db.delete(b._id);
+    }
+
+    await ctx.db.delete(args.carpoolId);
     return true;
   },
 });
@@ -206,6 +238,7 @@ export const getCarpoolsByEvent = query({
     const carpools = await ctx.db
       .query("carpools")
       .withIndex("by_event", (q) => q.eq("eventId", args.eventId))
+      .filter((q) => q.neq(q.field("status"), "cancelled"))
       .order("desc")
       .collect();
 
@@ -280,7 +313,7 @@ export const seedMockCarpools = mutation({
         eventId: event._id,
         driverName: driver.name,
         driverPhone: driver.phone,
-        departureAddress: `${driver.city} (~${Math.round(radiusKm)} km)`,
+        departureAddress: driver.city,
         departureLat: depLat,
         departureLng: depLng,
         departureTime: timeStr,

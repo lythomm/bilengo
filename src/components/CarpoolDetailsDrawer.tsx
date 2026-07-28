@@ -59,12 +59,12 @@ export function CarpoolDetailsDrawer({
   );
 
   const handleCancel = async () => {
-    if (!userPhone) return;
+    const phoneToSend = userPhone || carpool.driverPhone || "";
     try {
       setIsDeleting(true);
       await cancelCarpoolMutation({
         carpoolId: carpool._id as Id<"carpools">,
-        driverPhone: userPhone,
+        driverPhone: phoneToSend,
       });
       setIsConfirmingDelete(false);
       onClose();
@@ -107,7 +107,7 @@ export function CarpoolDetailsDrawer({
           <Card variant="gray" className="space-y-3 p-4">
             <div className="flex items-start gap-2 text-sm text-neutral-800">
               <span className="font-bold text-neutral-900">Départ :</span>
-              <span>{carpool.departureAddress}</span>
+              <span>{carpool.departureAddress.replace(/\s*\([^)]*km\)/gi, "")}</span>
             </div>
 
             <div className="flex items-center gap-2 text-sm text-neutral-800">

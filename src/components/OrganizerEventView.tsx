@@ -1,13 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { PillGroup } from "@/components/ui/PillGroup";
 import { Toast } from "@/components/ui/Toast";
-import { Share2, Map, MapPin, Calendar, Check, ArrowLeft, Search } from "lucide-react";
+import { Modal } from "@/components/ui/Modal";
+import { Share2, Map, MapPin, Calendar, Check, ArrowLeft, Search, Trash2 } from "lucide-react";
 
 interface Guest {
   name: string;
@@ -75,8 +79,28 @@ export function OrganizerEventView({
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"guests" | "carpools">("guests");
   const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("Lien de l'événement copié !");
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const deleteCarpoolByOrganizer = useMutation(api.carpools.deleteCarpoolByOrganizer);
 
   const { event, stats, guests, carpools } = organizerData;
+
+  const handleDeleteCarpool = async () => {
+    if (!confirmDeleteId) return;
+    try {
+      setIsDeleting(true);
+      await deleteCarpoolByOrganizer({ carpoolId: confirmDeleteId as Id<"carpools"> });
+      setConfirmDeleteId(null);
+      setToastMessage("Covoiturage supprimé avec succès.");
+      setShowToast(true);
+    } catch (err: any) {
+      alert(err.message || "Erreur lors de la suppression du covoiturage.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const filteredGuests = guests.filter((g) => {
     if (!searchQuery.trim()) return true;
@@ -112,6 +136,7 @@ export function OrganizerEventView({
               size="sm"
               onClick={() => {
                 onCopyLink();
+                setToastMessage("Lien de l'événement copié !");
                 setShowToast(true);
               }}
               title={copied ? "Lien copié !" : "Partager le lien"}
@@ -352,6 +377,18 @@ export function OrganizerEventView({
                           </div>
                         )}
                       </div>
+
+                      {/* Actions */}
+                      <div className="pt-2 border-t border-neutral-200/80 flex justify-end">
+                        <Button
+                          variant="danger-outline"
+                          size="sm"
+                          leftIcon={<Trash2 className="w-3.5 h-3.5" />}
+                          onClick={() => setConfirmDeleteId(c._id)}
+                        >
+                          Supprimer
+                        </Button>
+                      </div>
                     </Card>
                   ))}
                 </div>
@@ -361,10 +398,37 @@ export function OrganizerEventView({
         </Card>
       </main>
 
+      {/* Confirmation Modal */}
+      <Modal
+        isOpen={!!confirmDeleteId}
+        onClose={() => setConfirmDeleteId(null)}
+        title="Supprimer le covoiturage"
+        description="Êtes-vous sûr de vouloir supprimer ce covoiturage ? Cette action est définitive et annulera toutes les réservations associées."
+        maxWidthClass="max-w-md"
+      >
+        <div className="flex justify-end gap-2.5 pt-2">
+          <Button
+            variant="secondary"
+            size="md"
+            onClick={() => setConfirmDeleteId(null)}
+          >
+            Annuler
+          </Button>
+          <Button
+            variant="danger"
+            size="md"
+            isLoading={isDeleting}
+            onClick={handleDeleteCarpool}
+          >
+            Confirmer la suppression
+          </Button>
+        </div>
+      </Modal>
+
       <Toast
         isOpen={showToast}
         onClose={() => setShowToast(false)}
-        message="Lien de l'événement copié !"
+        message={toastMessage}
         variant="success"
       />
     </div>

@@ -11,6 +11,7 @@ import { AddressAutocomplete } from "@/components/AddressAutocomplete";
 import { GuestAuthModal } from "@/components/GuestAuthModal";
 import { getParticipantSession } from "@/lib/session";
 import { Button } from "@/components/ui/Button";
+import { Toast } from "@/components/ui/Toast";
 import Link from "next/link";
 import { LayoutDashboard, Share2, Check } from "lucide-react";
 
@@ -23,6 +24,7 @@ export function EventClient({ params }: EventClientProps) {
   const [selectedCarpool, setSelectedCarpool] = useState<any | null>(null);
   const [bookingCarpool, setBookingCarpool] = useState<any | null>(null);
   const [copied, setCopied] = useState(false);
+  const [showToast, setShowToast] = useState(false);
   const [viewMode, setViewMode] = useState<"organizer" | "map">("organizer");
   const [isGuestAuthOpen, setIsGuestAuthOpen] = useState(false);
 
@@ -116,6 +118,7 @@ export function EventClient({ params }: EventClientProps) {
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     setCopied(true);
+    setShowToast(true);
     setTimeout(() => setCopied(false), 2500);
   };
 
@@ -263,13 +266,13 @@ export function EventClient({ params }: EventClientProps) {
             {organizerData?.isOrganizer && (
               <Button
                 type="button"
-                variant="secondary"
+                variant="primary"
                 size="sm"
                 onClick={() => setViewMode("organizer")}
                 title="Vue Organisateur"
                 aria-label="Vue Organisateur"
               >
-                <LayoutDashboard className="w-4 h-4 text-neutral-800" />
+                <LayoutDashboard className="w-4 h-4" />
               </Button>
             )}
 
@@ -284,7 +287,7 @@ export function EventClient({ params }: EventClientProps) {
               {copied ? (
                 <Check className="w-4 h-4 text-emerald-600" />
               ) : (
-                <Share2 className="w-4 h-4 text-neutral-800" />
+                <Share2 className="w-4 h-4" />
               )}
             </Button>
           </div>
@@ -312,8 +315,8 @@ export function EventClient({ params }: EventClientProps) {
           eventId={event._id}
           eventTitle={event.title}
           destinationAddress={event.destinationAddress}
-          destinationLat={event.destinationLat}
-          destinationLng={event.destinationLng}
+          destinationLat={coords?.lat ?? event.destinationLat}
+          destinationLng={coords?.lng ?? event.destinationLng}
           carpools={carpools || []}
           selectedCarpool={selectedCarpool}
           onSelectCarpool={(c) => setSelectedCarpool(c)}
@@ -336,6 +339,14 @@ export function EventClient({ params }: EventClientProps) {
         isOpen={isGuestAuthOpen}
         eventTitle={event.title}
         onAuthenticated={() => setIsGuestAuthOpen(false)}
+      />
+
+      {/* Copy Link Toast */}
+      <Toast
+        isOpen={showToast}
+        onClose={() => setShowToast(false)}
+        message="Lien de l'événement copié !"
+        variant="success"
       />
     </div>
   );
