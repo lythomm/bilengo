@@ -4,7 +4,7 @@ import { ButtonHTMLAttributes, ReactNode } from "react";
 import { Loader2 } from "lucide-react";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "ghost" | "danger";
+  variant?: "primary" | "secondary" | "ghost" | "danger" | "danger-outline";
   size?: "sm" | "md" | "lg";
   isLoading?: boolean;
   leftIcon?: ReactNode;
@@ -27,7 +27,8 @@ export function Button({
     primary: "cal-button-primary",
     secondary: "cal-button-secondary",
     ghost: "cal-button-ghost",
-    danger: "bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md px-4 py-2 text-sm transition-colors border-none cursor-pointer inline-flex items-center justify-center gap-2",
+    danger: "cal-button-danger",
+    "danger-outline": "cal-button-danger-outline",
   }[variant];
 
   const sizeClass = {

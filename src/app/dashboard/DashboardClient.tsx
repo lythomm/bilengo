@@ -2,22 +2,20 @@
 
 import { useState, useEffect } from "react";
 import { useQuery, useConvexAuth } from "convex/react";
-import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import Link from "next/link";
-import { Plus, Copy, Check, LogOut, MapPin, Calendar, ExternalLink, CalendarPlus, Menu, X } from "lucide-react";
+import { Plus, Copy, Check, MapPin, Calendar, ExternalLink, CalendarPlus } from "lucide-react";
+import { Navbar } from "@/components/Navbar";
 
 export function DashboardClient() {
   const { isAuthenticated, isLoading: isAuthLoading } = useConvexAuth();
-  const { signOut } = useAuthActions();
   const router = useRouter();
 
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
@@ -37,11 +35,6 @@ export function DashboardClient() {
     setTimeout(() => setCopiedSlug(null), 2000);
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-    router.replace("/");
-  };
-
   if (isAuthLoading || !isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white text-neutral-500">
@@ -55,81 +48,14 @@ export function DashboardClient() {
   return (
     <div className="min-h-screen flex flex-col bg-white text-neutral-900">
       {/* Top Navigation */}
-      <header className="sticky top-0 z-50 w-full border-b border-neutral-200/80 bg-white/90 backdrop-blur-md relative">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2.5 shrink-0">
-            <span className="text-xl font-bold tracking-tight text-neutral-900 font-heading whitespace-nowrap">
-              BilenGo
-            </span>
-            <Badge variant="default" className="hidden sm:inline-flex">
-              Espace Organisateur
-            </Badge>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <div className="hidden sm:flex items-center gap-3 shrink-0">
-            <Link href="/events/create" className="shrink-0">
-              <Button
-                variant="primary"
-                size="sm"
-                leftIcon={<Plus className="w-3.5 h-3.5" />}
-              >
-                Créer un événement
-              </Button>
-            </Link>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSignOut}
-              leftIcon={<LogOut className="w-3.5 h-3.5" />}
-              title="Déconnexion"
-              aria-label="Déconnexion"
-            >
-              Déconnexion
-            </Button>
-          </div>
-
-          {/* Mobile Hamburger Button */}
-          <div className="sm:hidden flex items-center">
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-lg text-neutral-700 hover:bg-neutral-100 transition-colors border-none bg-transparent cursor-pointer"
-              aria-label="Menu principal"
-              aria-expanded={isMobileMenuOpen}
-            >
-              {isMobileMenuOpen ? (
-                <X className="w-6 h-6 text-neutral-900" />
-              ) : (
-                <Menu className="w-6 h-6 text-neutral-900" />
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Dropdown Menu (Overlay - shadcn style) */}
-        {isMobileMenuOpen && (
-          <div className="absolute top-full left-0 right-0 z-50 sm:hidden border-b border-neutral-200/90 bg-white/95 backdrop-blur-md px-4 py-3 space-y-2 shadow-xl">
-            <Link
-              href="/events/create"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center gap-2.5 w-full p-2.5 rounded-lg text-sm font-semibold bg-neutral-900 text-white hover:bg-neutral-800 transition-colors justify-center"
-            >
-              <Plus className="w-4 h-4" />
-              Créer un événement
-            </Link>
-            <button
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                handleSignOut();
-              }}
-              className="flex items-center gap-2.5 w-full p-2.5 rounded-lg text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors border-none bg-transparent cursor-pointer text-left"
-            >
-              <LogOut className="w-4 h-4 text-red-600" />
-              Déconnexion
-            </button>
-          </div>
-        )}
-      </header>
+      <Navbar
+        isDashboard
+        badge={
+          <Badge variant="default" className="hidden sm:inline-flex">
+            Espace Organisateur
+          </Badge>
+        }
+      />
 
       {/* Main Dashboard Content */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-12">
@@ -216,10 +142,9 @@ export function DashboardClient() {
                   <div className="pt-4 mt-6 border-t border-neutral-100 flex items-center gap-2">
                     <Link href={`/e/${evt.slug}`} className="flex-1">
                       <Button
-                        variant="secondary"
+                        variant="primary"
                         size="sm"
                         className="w-full"
-                        rightIcon={<ExternalLink className="w-3.5 h-3.5" />}
                       >
                         Voir la page
                       </Button>

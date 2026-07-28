@@ -13,6 +13,11 @@
   --cal-primary-hover: #242424;
   --cal-primary-active: #000000;
   --cal-on-primary: #ffffff;
+
+  --cal-danger: #dc2626;
+  --cal-danger-hover: #b91c1c;
+  --cal-danger-active: #991b1b;
+  --cal-on-danger: #ffffff;
   
   --cal-surface-soft: #f8f9fa;
   --cal-surface-card: #f5f5f5;
@@ -137,6 +142,55 @@ body {
 .cal-button-ghost:hover {
   color: var(--cal-ink);
   background-color: var(--cal-surface-soft);
+}
+
+.cal-button-danger {
+  background-color: var(--cal-danger);
+  color: var(--cal-on-danger);
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: var(--cal-radius-md);
+  padding: 0.5rem 1rem;
+  transition: background-color 150ms ease, transform 100ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  border: none;
+  white-space: nowrap;
+}
+.cal-button-danger:hover {
+  background-color: var(--cal-danger-hover);
+}
+.cal-button-danger:active {
+  background-color: var(--cal-danger-active);
+  transform: scale(0.99);
+}
+
+.cal-button-danger-outline {
+  background-color: var(--cal-canvas);
+  color: var(--cal-danger);
+  border: 1px solid var(--cal-danger);
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: var(--cal-radius-md);
+  padding: 0.5rem 1rem;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.cal-button-danger-outline:hover {
+  background-color: #fef2f2;
+  border-color: var(--cal-danger-hover);
+  color: var(--cal-danger-hover);
+}
+.cal-button-danger-outline:active {
+  background-color: #fee2e2;
 }
 
 .cal-card {

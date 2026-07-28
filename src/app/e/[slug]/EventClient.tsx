@@ -255,11 +255,9 @@ export function EventClient({ params }: EventClientProps) {
         </>
       ) : (
         <header className="fixed top-4 left-4 right-4 z-30 max-w-4xl mx-auto bg-white/90 backdrop-blur-md border border-neutral-200 rounded-xl p-3 shadow-lg flex items-center justify-between gap-3">
-          <Link href="/" className="flex items-center flex-shrink-0">
-            <span className="text-lg font-bold text-neutral-900 tracking-tight font-heading">
-              BilenGo
-            </span>
-          </Link>
+          <span className="text-lg font-bold text-neutral-900 tracking-tight font-heading">
+            BilenGo
+          </span>
 
           <div className="flex items-center gap-2">
             {organizerData?.isOrganizer && (

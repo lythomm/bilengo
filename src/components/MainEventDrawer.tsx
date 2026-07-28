@@ -1,15 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Drawer } from "@/components/ui/Drawer";
+import { Modal } from "@/components/ui/Modal";
 import { getParticipantSession } from "@/lib/session";
 import { PillGroup } from "@/components/ui/PillGroup";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
+import { Trash2 } from "lucide-react";
 import Image from "next/image";
 import googleMapsIcon from "@/assets/icons/google-maps.svg";
 import wazeIcon from "@/assets/icons/waze.webp";
@@ -59,7 +61,10 @@ export function MainEventDrawer({
 }: MainEventDrawerProps) {
   const [activeTab, setActiveTab] = useState<"search" | "propose">("search");
   const [isExpanded, setIsExpanded] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
+  const cancelCarpoolMutation = useMutation(api.carpools.cancelCarpool);
 
   useEffect(() => {
     if (selectedCarpool) {
@@ -77,6 +82,23 @@ export function MainEventDrawer({
       : "")
   );
 
+  const handleCancelCarpool = async (carpoolId: Id<"carpools">) => {
+    if (!userPhone) return;
+    try {
+      setIsDeleting(true);
+      await cancelCarpoolMutation({
+        carpoolId,
+        driverPhone: userPhone,
+      });
+      setConfirmDeleteId(null);
+      onSelectCarpool(null);
+    } catch (err: any) {
+      alert(err.message || "Erreur lors de la suppression.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const userRole = useQuery(
     api.carpools.getUserEventRole,
     eventId && userPhone ? { eventId, userPhone } : "skip"
@@ -92,24 +114,17 @@ export function MainEventDrawer({
     return false;
   });
 
-  const filteredCarpools = carpools.filter((c) => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      c.departureAddress.toLowerCase().includes(q) ||
-      c.driverName.toLowerCase().includes(q)
-    );
-  });
-
   return (
-    <Drawer
-      isExpanded={isExpanded}
-      onToggleExpand={() => setIsExpanded(!isExpanded)}
-      allowCollapseToHandle={true}
-    >
+    <>
+      <Drawer
+        isExpanded={isExpanded}
+        onToggleExpand={() => setIsExpanded(!isExpanded)}
+        allowCollapseToHandle={true}
+      >
       {/* Signature Cal.com Pill Group Tabs */}
       <div className="px-4 pb-3 border-b border-neutral-100 flex items-center justify-center">
         <PillGroup
+          fullWidth
           value={activeTab}
           onChange={(val) => {
             setActiveTab(val as "search" | "propose");
@@ -122,7 +137,7 @@ export function MainEventDrawer({
             },
             {
               id: "propose",
-              label: `Je propose ${myProposedCarpools.length > 0 ? "(1)" : ""}`,
+              label: "Je propose",
             },
           ]}
         />
@@ -148,20 +163,14 @@ export function MainEventDrawer({
               </div>
             )}
 
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Filtrer par ville ou départ..."
-              className="cal-input text-sm"
-            />
+            <h3 className="text-lg font-bold text-neutral-900 tracking-tight font-heading">
+              Covoit à proximité
+            </h3>
 
-            {filteredCarpools.length === 0 ? (
+            {carpools.length === 0 ? (
               <div className="py-8 text-center text-neutral-500 space-y-2">
                 <p className="text-sm font-medium">
-                  {searchQuery
-                    ? "Aucun trajet trouvé"
-                    : "Aucun trajet disponible"}
+                  Aucun trajet disponible
                 </p>
                 {!isDriver && !isPassenger && (
                   <Button
@@ -175,7 +184,7 @@ export function MainEventDrawer({
               </div>
             ) : (
               <div className="space-y-2.5">
-                {filteredCarpools.map((c) => (
+                {carpools.map((c) => (
                   <div
                     key={c._id}
                     onClick={() => onSelectCarpool(c)}
@@ -238,8 +247,8 @@ export function MainEventDrawer({
         ) : myProposedCarpools.length > 0 ? (
           /* My Proposed Carpool View */
           <div className="space-y-3">
-            <h3 className="text-base font-bold text-neutral-900 font-heading">
-              Mon covoiturage proposé
+            <h3 className="text-lg font-bold text-neutral-900 font-heading">
+              Gérer ton covoit
             </h3>
 
             {myProposedCarpools.slice(0, 1).map((c) => (
@@ -275,14 +284,26 @@ export function MainEventDrawer({
                   </div>
                 </div>
 
-                <Button
-                  variant="secondary"
-                  size="md"
-                  onClick={() => onSelectCarpool(c)}
-                  className="w-full font-semibold"
-                >
-                  Voir sur la carte →
-                </Button>
+                <div className="flex items-center gap-2 pt-2 border-t border-neutral-100">
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    onClick={() => onSelectCarpool(c)}
+                    className="flex-1 font-semibold"
+                  >
+                    Voir sur la carte →
+                  </Button>
+
+                  <Button
+                    variant="danger-outline"
+                    size="md"
+                    onClick={() => setConfirmDeleteId(c._id)}
+                    leftIcon={<Trash2 className="w-4 h-4" />}
+                    className="shrink-0"
+                  >
+                    Supprimer
+                  </Button>
+                </div>
               </Card>
             ))}
           </div>
@@ -311,14 +332,16 @@ export function MainEventDrawer({
             </Button>
           </div>
         )}
+      </div>
 
-        {/* Bottom Navigation Box: Event Name + Google Maps & Waze Buttons */}
-        <div className="mt-4 pt-3 border-t border-neutral-100 flex items-center justify-between gap-3 bg-neutral-50 p-3.5 rounded-xl border border-neutral-200/80">
+      {/* Pinned Bottom Navigation Box: Event Name + Google Maps & Waze Buttons */}
+      <div className="sticky bottom-0 bg-white/95 backdrop-blur-md p-3.5 sm:p-4 pt-2 border-t border-neutral-200/80 shrink-0 z-10">
+        <div className="flex items-center justify-between gap-3 bg-neutral-900 text-white p-3.5 rounded-2xl shadow-xl border border-neutral-800">
           <div className="truncate flex-1">
-            <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider block">
+            <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider block">
               Événement
             </span>
-            <h4 className="text-sm font-bold text-neutral-900 truncate font-heading">
+            <h4 className="text-sm sm:text-base font-bold text-white truncate font-heading tracking-tight">
               {eventTitle || "Lieu de l'événement"}
             </h4>
           </div>
@@ -332,9 +355,10 @@ export function MainEventDrawer({
               }
               target="_blank"
               rel="noopener noreferrer"
-              className="cal-button-secondary p-3! text-xs font-bold flex items-center gap-1.5 hover:bg-white transition-colors"
+              title="Ouvrir dans Google Maps"
+              className="bg-neutral-800 hover:bg-neutral-700 border border-neutral-700/80 p-2.5 rounded-xl transition-all flex items-center justify-center hover:scale-105 active:scale-95"
             >
-              <Image src={googleMapsIcon} alt="Google Maps" className="w-4 h-4 object-contain" />
+              <Image src={googleMapsIcon} alt="Google Maps" className="w-5 h-5 object-contain" />
             </a>
 
             <a
@@ -345,13 +369,44 @@ export function MainEventDrawer({
               }
               target="_blank"
               rel="noopener noreferrer"
-              className="cal-button-secondary p-3! text-xs font-bold flex items-center gap-1.5 hover:bg-white transition-colors"
+              title="Ouvrir dans Waze"
+              className="bg-neutral-800 hover:bg-neutral-700 border border-neutral-700/80 p-2.5 rounded-xl transition-all flex items-center justify-center hover:scale-105 active:scale-95"
             >
-              <Image src={wazeIcon} alt="Waze" className="w-4 h-4 object-contain" />
+              <Image src={wazeIcon} alt="Waze" className="w-5 h-5 object-contain" />
             </a>
           </div>
         </div>
       </div>
     </Drawer>
-  );
+
+    {/* Confirmation Modal for Carpool Deletion */}
+    <Modal
+      isOpen={!!confirmDeleteId}
+      onClose={() => setConfirmDeleteId(null)}
+      title="Supprimer mon covoiturage"
+      description="Êtes-vous sûr de vouloir supprimer votre trajet ? Cette action est définitive et annulera toutes les réservations associées."
+      maxWidthClass="max-w-md"
+    >
+      <div className="flex justify-end gap-2.5 pt-2">
+        <Button
+          variant="secondary"
+          size="md"
+          onClick={() => setConfirmDeleteId(null)}
+        >
+          Annuler
+        </Button>
+        <Button
+          variant="danger"
+          size="md"
+          disabled={isDeleting}
+          onClick={() => {
+            if (confirmDeleteId) handleCancelCarpool(confirmDeleteId as any);
+          }}
+        >
+          {isDeleting ? "Suppression..." : "Confirmer la suppression"}
+        </Button>
+      </div>
+    </Modal>
+  </>
+);
 }

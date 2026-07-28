@@ -43,7 +43,7 @@ export function Drawer({
   const transformClass = allowCollapseToHandle
     ? expanded
       ? "translate-y-0"
-      : "translate-y-[calc(100%-32px)]"
+      : "translate-y-[calc(100%-40px)]"
     : "translate-y-0";
 
   return (
@@ -53,9 +53,9 @@ export function Drawer({
       {/* Drag Handle & Header */}
       <div
         onClick={handleToggle}
-        className="w-full pt-3 pb-2 flex flex-col items-center cursor-pointer select-none group"
+        className="w-full pt-5 pb-3.5 flex flex-col items-center cursor-pointer select-none group"
       >
-        <div className="w-12 h-1.5 rounded-full bg-neutral-300 group-hover:bg-neutral-400 transition-colors" />
+        <div className="w-16 h-1.5 rounded-full bg-neutral-300 group-hover:bg-neutral-400 transition-colors" />
       </div>
 
       {/* Content */}
