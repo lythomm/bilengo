@@ -181,9 +181,9 @@ body {
 }
 
 .cal-pill-item {
-  padding: 6px 14px;
+  padding: 8px 16px;
   border-radius: var(--cal-radius-pill);
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-weight: 500;
   color: var(--cal-muted);
   transition: all 150ms ease;
@@ -202,9 +202,9 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.25rem 0.75rem;
+  padding: 0.3rem 0.8rem;
   border-radius: var(--cal-radius-pill);
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   background-color: var(--cal-surface-soft);
   color: var(--cal-ink);

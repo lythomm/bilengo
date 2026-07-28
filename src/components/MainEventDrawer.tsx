@@ -10,6 +10,9 @@ import { PillGroup } from "@/components/ui/PillGroup";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
+import Image from "next/image";
+import googleMapsIcon from "@/assets/icons/google-maps.svg";
+import wazeIcon from "@/assets/icons/waze.webp";
 
 export interface CarpoolItem {
   _id: string;
@@ -26,6 +29,10 @@ export interface CarpoolItem {
 
 interface MainEventDrawerProps {
   eventId: Id<"events">;
+  eventTitle?: string;
+  destinationAddress?: string;
+  destinationLat?: number;
+  destinationLng?: number;
   carpools: CarpoolItem[];
   selectedCarpool: CarpoolItem | null;
   onSelectCarpool: (carpool: CarpoolItem | null) => void;
@@ -40,6 +47,10 @@ function cleanPhone(p?: string) {
 
 export function MainEventDrawer({
   eventId,
+  eventTitle,
+  destinationAddress,
+  destinationLat,
+  destinationLng,
   carpools,
   selectedCarpool,
   onSelectCarpool,
@@ -47,7 +58,7 @@ export function MainEventDrawer({
   onStartPickLocation,
 }: MainEventDrawerProps) {
   const [activeTab, setActiveTab] = useState<"search" | "propose">("search");
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -59,11 +70,11 @@ export function MainEventDrawer({
   const session = getParticipantSession();
   const userPhone = cleanPhone(
     session?.phone ||
-      (typeof window !== "undefined"
-        ? localStorage.getItem("bilengo_driver_phone") ||
-          localStorage.getItem("bilengo_phone") ||
-          ""
-        : "")
+    (typeof window !== "undefined"
+      ? localStorage.getItem("bilengo_driver_phone") ||
+      localStorage.getItem("bilengo_phone") ||
+      ""
+      : "")
   );
 
   const userRole = useQuery(
@@ -123,7 +134,7 @@ export function MainEventDrawer({
           /* Search Rides Tab */
           <div className="space-y-3">
             {isPassenger && userRole?.carpool && (
-              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-xs flex items-center justify-between">
+              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-sm font-medium flex items-center justify-between">
                 <span>
                   ✓ Place réservée chez <strong>{userRole.carpool.driverName}</strong>
                 </span>
@@ -142,12 +153,12 @@ export function MainEventDrawer({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Filtrer par ville ou départ..."
-              className="cal-input"
+              className="cal-input text-sm"
             />
 
             {filteredCarpools.length === 0 ? (
               <div className="py-8 text-center text-neutral-500 space-y-2">
-                <p className="text-xs">
+                <p className="text-sm font-medium">
                   {searchQuery
                     ? "Aucun trajet trouvé"
                     : "Aucun trajet disponible"}
@@ -163,16 +174,16 @@ export function MainEventDrawer({
                 )}
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {filteredCarpools.map((c) => (
                   <div
                     key={c._id}
                     onClick={() => onSelectCarpool(c)}
-                    className="p-3.5 bg-neutral-50 border border-neutral-200/80 hover:border-neutral-300 rounded-xl cursor-pointer transition-colors flex items-center justify-between gap-3"
+                    className="p-4 bg-neutral-50 border border-neutral-200/80 hover:border-neutral-300 rounded-xl cursor-pointer transition-colors flex items-center justify-between gap-3"
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-neutral-900 text-sm font-heading">
+                        <span className="font-bold text-neutral-900 text-base font-heading">
                           {c.driverName}
                         </span>
                         <Badge
@@ -183,19 +194,19 @@ export function MainEventDrawer({
                             : "Complet"}
                         </Badge>
                       </div>
-                      <p className="text-xs text-neutral-500 line-clamp-1">
+                      <p className="text-sm text-neutral-600 font-medium line-clamp-1">
                         Départ : {c.departureAddress}
                       </p>
                     </div>
 
                     <div className="text-right flex flex-col items-end shrink-0">
-                      <span className="text-xs font-semibold text-neutral-900">
+                      <span className="text-sm font-bold text-neutral-900">
                         {new Date(c.departureTime).toLocaleTimeString("fr-FR", {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
                       </span>
-                      <span className="text-[11px] text-neutral-400 mt-1">
+                      <span className="text-xs font-semibold text-neutral-500 mt-1">
                         Itinéraire →
                       </span>
                     </div>
@@ -207,10 +218,10 @@ export function MainEventDrawer({
         ) : isPassenger ? (
           /* Passenger Restriction Banner */
           <div className="py-6 flex flex-col items-center text-center space-y-3">
-            <h3 className="text-base font-bold text-neutral-900 font-heading">
+            <h3 className="text-lg font-bold text-neutral-900 font-heading">
               Vous êtes déjà passager
             </h3>
-            <p className="text-xs text-neutral-500 max-w-xs leading-relaxed">
+            <p className="text-sm text-neutral-600 max-w-xs leading-relaxed">
               Vous avez réservé 1 place chez{" "}
               <strong>{userRole?.carpool?.driverName || "un conducteur"}</strong>.
             </p>
@@ -227,7 +238,7 @@ export function MainEventDrawer({
         ) : myProposedCarpools.length > 0 ? (
           /* My Proposed Carpool View */
           <div className="space-y-3">
-            <h3 className="text-sm font-bold text-neutral-900 font-heading">
+            <h3 className="text-base font-bold text-neutral-900 font-heading">
               Mon covoiturage proposé
             </h3>
 
@@ -235,10 +246,10 @@ export function MainEventDrawer({
               <Card key={c._id} variant="gray" className="space-y-3 p-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                    <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
                       Conducteur (Vous)
                     </span>
-                    <h4 className="text-base font-bold text-neutral-900 font-heading">
+                    <h4 className="text-lg font-bold text-neutral-900 font-heading">
                       {c.driverName}
                     </h4>
                   </div>
@@ -249,9 +260,9 @@ export function MainEventDrawer({
                   </Badge>
                 </div>
 
-                <div className="space-y-1 text-xs text-neutral-600 bg-white p-3 rounded-lg border border-neutral-200/60">
+                <div className="space-y-1.5 text-sm text-neutral-700 bg-white p-3.5 rounded-lg border border-neutral-200/60 font-medium">
                   <div>
-                    Départ : <span className="font-semibold text-neutral-900">{c.departureAddress}</span>
+                    Départ : <span className="font-bold text-neutral-900">{c.departureAddress}</span>
                   </div>
                   <div>
                     Heure :{" "}
@@ -266,9 +277,9 @@ export function MainEventDrawer({
 
                 <Button
                   variant="secondary"
-                  size="sm"
+                  size="md"
                   onClick={() => onSelectCarpool(c)}
-                  className="w-full"
+                  className="w-full font-semibold"
                 >
                   Voir sur la carte →
                 </Button>
@@ -282,7 +293,7 @@ export function MainEventDrawer({
               Proposer un trajet
             </h3>
 
-            <p className="text-xs text-neutral-500 max-w-xs leading-relaxed">
+            <p className="text-sm text-neutral-600 max-w-xs leading-relaxed">
               Proposez vos places libres pour cet événement.
             </p>
 
@@ -300,6 +311,46 @@ export function MainEventDrawer({
             </Button>
           </div>
         )}
+
+        {/* Bottom Navigation Box: Event Name + Google Maps & Waze Buttons */}
+        <div className="mt-4 pt-3 border-t border-neutral-100 flex items-center justify-between gap-3 bg-neutral-50 p-3.5 rounded-xl border border-neutral-200/80">
+          <div className="truncate flex-1">
+            <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider block">
+              Événement
+            </span>
+            <h4 className="text-sm font-bold text-neutral-900 truncate font-heading">
+              {eventTitle || "Lieu de l'événement"}
+            </h4>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <a
+              href={
+                destinationLat && destinationLng
+                  ? `https://www.google.com/maps/dir/?api=1&destination=${destinationLat},${destinationLng}`
+                  : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destinationAddress || eventTitle || "")}`
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cal-button-secondary p-3! text-xs font-bold flex items-center gap-1.5 hover:bg-white transition-colors"
+            >
+              <Image src={googleMapsIcon} alt="Google Maps" className="w-4 h-4 object-contain" />
+            </a>
+
+            <a
+              href={
+                destinationLat && destinationLng
+                  ? `https://waze.com/ul?ll=${destinationLat},${destinationLng}&navigate=yes`
+                  : `https://waze.com/ul?q=${encodeURIComponent(destinationAddress || eventTitle || "")}&navigate=yes`
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cal-button-secondary p-3! text-xs font-bold flex items-center gap-1.5 hover:bg-white transition-colors"
+            >
+              <Image src={wazeIcon} alt="Waze" className="w-4 h-4 object-contain" />
+            </a>
+          </div>
+        </div>
       </div>
     </Drawer>
   );

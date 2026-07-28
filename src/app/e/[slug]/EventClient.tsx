@@ -12,6 +12,7 @@ import { GuestAuthModal } from "@/components/GuestAuthModal";
 import { getParticipantSession } from "@/lib/session";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
+import { LayoutDashboard, Share2, Check } from "lucide-react";
 
 interface EventClientProps {
   params: Promise<{ slug: string }>;
@@ -254,28 +255,14 @@ export function EventClient({ params }: EventClientProps) {
         </>
       ) : (
         <header className="fixed top-4 left-4 right-4 z-30 max-w-4xl mx-auto bg-white/90 backdrop-blur-md border border-neutral-200 rounded-xl p-3 shadow-lg flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 overflow-hidden">
-            <Link
-              href="/"
-              className="w-8 h-8 rounded-lg bg-neutral-900 text-white font-bold flex items-center justify-center text-sm flex-shrink-0"
-            >
+          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-neutral-900 text-white font-bold flex items-center justify-center text-sm">
               B
-            </Link>
-            <div className="truncate">
-              <h1 className="font-bold text-neutral-900 text-sm tracking-tight truncate font-heading">
-                {event.title}
-              </h1>
-              <p className="text-xs text-neutral-500 truncate">
-                {new Date(event.eventDate).toLocaleDateString("fr-FR", {
-                  day: "numeric",
-                  month: "short",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}{" "}
-                • {event.destinationAddress}
-              </p>
             </div>
-          </div>
+            <span className="text-base font-bold text-neutral-900 tracking-tight font-heading">
+              BilenGo
+            </span>
+          </Link>
 
           <div className="flex items-center gap-2">
             {organizerData?.isOrganizer && (
@@ -284,18 +271,26 @@ export function EventClient({ params }: EventClientProps) {
                 variant="secondary"
                 size="sm"
                 onClick={() => setViewMode("organizer")}
+                title="Vue Organisateur"
+                aria-label="Vue Organisateur"
               >
-                Vue Organisateur
+                <LayoutDashboard className="w-4 h-4 text-neutral-800" />
               </Button>
             )}
 
             <Button
               type="button"
-              variant="ghost"
+              variant="secondary"
               size="sm"
               onClick={handleCopyLink}
+              title={copied ? "Lien copié !" : "Partager"}
+              aria-label="Partager"
             >
-              {copied ? "✓ Copié" : "Partager"}
+              {copied ? (
+                <Check className="w-4 h-4 text-emerald-600" />
+              ) : (
+                <Share2 className="w-4 h-4 text-neutral-800" />
+              )}
             </Button>
           </div>
         </header>
@@ -321,6 +316,9 @@ export function EventClient({ params }: EventClientProps) {
         <EventDrawer
           eventId={event._id}
           eventTitle={event.title}
+          destinationAddress={event.destinationAddress}
+          destinationLat={event.destinationLat}
+          destinationLng={event.destinationLng}
           carpools={carpools || []}
           selectedCarpool={selectedCarpool}
           onSelectCarpool={(c) => setSelectedCarpool(c)}

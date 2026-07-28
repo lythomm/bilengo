@@ -13,6 +13,9 @@ export type { CarpoolItem };
 interface EventDrawerProps {
   eventId: Id<"events">;
   eventTitle: string;
+  destinationAddress?: string;
+  destinationLat?: number;
+  destinationLng?: number;
   carpools: CarpoolItem[];
   selectedCarpool: CarpoolItem | null;
   onSelectCarpool: (carpool: CarpoolItem | null) => void;
@@ -29,6 +32,10 @@ function cleanPhone(p?: string) {
 
 export function EventDrawer({
   eventId,
+  eventTitle,
+  destinationAddress,
+  destinationLat,
+  destinationLng,
   carpools,
   selectedCarpool,
   onSelectCarpool,
@@ -61,6 +68,10 @@ export function EventDrawer({
       {!selectedCarpool && (
         <MainEventDrawer
           eventId={eventId}
+          eventTitle={eventTitle}
+          destinationAddress={destinationAddress}
+          destinationLat={destinationLat}
+          destinationLng={destinationLng}
           carpools={carpools}
           selectedCarpool={selectedCarpool}
           onSelectCarpool={onSelectCarpool}

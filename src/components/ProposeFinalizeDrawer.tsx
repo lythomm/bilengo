@@ -152,7 +152,7 @@ export function ProposeFinalizeDrawer({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1">
+            <label className="block text-xs sm:text-sm font-bold text-neutral-800 uppercase tracking-wider mb-1">
               Lieu de départ
             </label>
             <input
@@ -161,16 +161,16 @@ export function ProposeFinalizeDrawer({
               value={departureAddress}
               onChange={(e) => setDepartureAddress(e.target.value)}
               placeholder="Ex: Paris 11e"
-              className="cal-input font-medium"
+              className="cal-input text-sm font-medium"
             />
           </div>
 
           <div>
             <div className="flex justify-between items-center mb-1">
-              <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider">
+              <label className="block text-xs sm:text-sm font-bold text-neutral-800 uppercase tracking-wider">
                 Note / Description (Optionnel)
               </label>
-              <span className="text-[11px] text-neutral-400 font-mono">
+              <span className="text-xs text-neutral-500 font-mono">
                 {description.length} / 256
               </span>
             </div>
@@ -180,30 +180,30 @@ export function ProposeFinalizeDrawer({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Ex: Musique à fond, petite pause prévue..."
-              className="cal-input resize-none"
+              className="cal-input text-sm resize-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1">
+              <label className="block text-xs sm:text-sm font-bold text-neutral-800 uppercase tracking-wider mb-1">
                 Places disponibles
               </label>
-              <div className="flex items-center justify-between px-3 py-1.5 rounded-md border border-neutral-200 bg-white">
+              <div className="flex items-center justify-between px-3 py-2 rounded-md border border-neutral-200 bg-white">
                 <button
                   type="button"
                   onClick={() => setTotalSeats(Math.max(1, totalSeats - 1))}
-                  className="w-7 h-7 rounded bg-neutral-100 text-neutral-800 font-bold flex items-center justify-center border-none cursor-pointer hover:bg-neutral-200"
+                  className="w-8 h-8 rounded bg-neutral-100 text-neutral-800 font-bold flex items-center justify-center border-none cursor-pointer hover:bg-neutral-200"
                 >
                   -
                 </button>
-                <span className="font-bold text-neutral-900 text-sm">
+                <span className="font-bold text-neutral-900 text-base">
                   {totalSeats}
                 </span>
                 <button
                   type="button"
                   onClick={() => setTotalSeats(Math.min(8, totalSeats + 1))}
-                  className="w-7 h-7 rounded bg-neutral-100 text-neutral-800 font-bold flex items-center justify-center border-none cursor-pointer hover:bg-neutral-200"
+                  className="w-8 h-8 rounded bg-neutral-100 text-neutral-800 font-bold flex items-center justify-center border-none cursor-pointer hover:bg-neutral-200"
                 >
                   +
                 </button>
@@ -211,7 +211,7 @@ export function ProposeFinalizeDrawer({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1">
+              <label className="block text-xs sm:text-sm font-bold text-neutral-800 uppercase tracking-wider mb-1">
                 Heure de départ
               </label>
               <input
@@ -219,15 +219,15 @@ export function ProposeFinalizeDrawer({
                 required
                 value={departureTime}
                 onChange={(e) => setDepartureTime(e.target.value)}
-                className="cal-input"
+                className="cal-input text-sm"
               />
             </div>
           </div>
 
           {driverName && (
-            <div className="text-xs text-neutral-500 bg-neutral-50 px-3 py-2 rounded-lg border border-neutral-200/60 flex items-center justify-between">
+            <div className="text-sm text-neutral-700 bg-neutral-50 px-3.5 py-2.5 rounded-lg border border-neutral-200/60 flex items-center justify-between font-medium">
               <span>Conducteur : <strong className="text-neutral-900">{driverName}</strong></span>
-              <span className="font-mono">{driverPhone}</span>
+              <span className="font-mono text-neutral-600">{driverPhone}</span>
             </div>
           )}
 

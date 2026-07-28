@@ -35,10 +35,10 @@ export function CarpoolDetailsDrawer({
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>
-            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
+            <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
               Détails du covoiturage
             </span>
-            <h3 className="text-lg font-bold text-neutral-900 font-heading">
+            <h3 className="text-xl font-bold text-neutral-900 font-heading">
               {carpool.driverName}
             </h3>
           </div>
@@ -46,7 +46,7 @@ export function CarpoolDetailsDrawer({
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="p-1"
+            className="p-1.5 text-neutral-600"
           >
             ✕
           </Button>
@@ -54,13 +54,13 @@ export function CarpoolDetailsDrawer({
 
         {/* Details Card */}
         <Card variant="gray" className="space-y-3 p-4">
-          <div className="flex items-start gap-2 text-xs text-neutral-700">
-            <span className="font-semibold text-neutral-900">Départ :</span>
+          <div className="flex items-start gap-2 text-sm text-neutral-800">
+            <span className="font-bold text-neutral-900">Départ :</span>
             <span>{carpool.departureAddress}</span>
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-neutral-700">
-            <span className="font-semibold text-neutral-900">Heure :</span>
+          <div className="flex items-center gap-2 text-sm text-neutral-800">
+            <span className="font-bold text-neutral-900">Heure :</span>
             <span>
               {new Date(carpool.departureTime).toLocaleDateString("fr-FR", {
                 day: "numeric",
@@ -71,15 +71,15 @@ export function CarpoolDetailsDrawer({
             </span>
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-neutral-700">
-            <span className="font-semibold text-neutral-900">Places libres :</span>
+          <div className="flex items-center gap-2 text-sm text-neutral-800">
+            <span className="font-bold text-neutral-900">Places libres :</span>
             <Badge variant={carpool.availableSeats > 0 ? "emerald" : "default"}>
               {carpool.availableSeats} / {carpool.totalSeats}
             </Badge>
           </div>
 
           {carpool.description && (
-            <div className="text-xs text-neutral-600 bg-white p-3 rounded-lg border border-neutral-200/60 italic">
+            <div className="text-sm text-neutral-700 bg-white p-3.5 rounded-lg border border-neutral-200/60 italic">
               "{carpool.description}"
             </div>
           )}
@@ -87,11 +87,11 @@ export function CarpoolDetailsDrawer({
 
         {/* Action Button */}
         {isDriver ? (
-          <div className="p-3 bg-neutral-100 border border-neutral-200 rounded-lg text-neutral-700 text-xs text-center font-medium">
+          <div className="p-3.5 bg-neutral-100 border border-neutral-200 rounded-lg text-neutral-800 text-sm text-center font-medium">
             Vous proposez déjà un covoiturage pour cet événement.
           </div>
         ) : isPassenger ? (
-          <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-xs text-center font-medium">
+          <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900 text-sm text-center font-medium">
             ✓ Vous avez réservé 1 place pour cet événement.
           </div>
         ) : (
@@ -100,7 +100,7 @@ export function CarpoolDetailsDrawer({
             size="md"
             disabled={carpool.availableSeats <= 0}
             onClick={() => onOpenBooking(carpool)}
-            className="w-full"
+            className="w-full text-base font-semibold py-3"
           >
             Réserver 1 place
           </Button>
