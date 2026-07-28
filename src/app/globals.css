@@ -2,28 +2,213 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Cal.com Design System Tokens */
+  --cal-canvas: #ffffff;
+  --cal-ink: #111111;
+  --cal-body: #374151;
+  --cal-muted: #6b7280;
+  --cal-muted-soft: #9ca3af;
+  
+  --cal-primary: #111111;
+  --cal-primary-hover: #242424;
+  --cal-primary-active: #000000;
+  --cal-on-primary: #ffffff;
+  
+  --cal-surface-soft: #f8f9fa;
+  --cal-surface-card: #f5f5f5;
+  --cal-surface-strong: #e5e7eb;
+  --cal-surface-dark: #101010;
+  --cal-surface-dark-elevated: #1a1a1a;
+  
+  --cal-hairline: #e5e7eb;
+  --cal-hairline-soft: #f3f4f6;
+
+  --cal-radius-sm: 6px;
+  --cal-radius-md: 8px;
+  --cal-radius-lg: 12px;
+  --cal-radius-xl: 16px;
+  --cal-radius-pill: 9999px;
+
+  --font-inter: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: "Plus Jakarta Sans", "Inter", -apple-system, sans-serif;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-canvas: var(--cal-canvas);
+  --color-ink: var(--cal-ink);
+  --color-body: var(--cal-body);
+  --color-muted: var(--cal-muted);
+  --color-primary: var(--cal-primary);
+  --color-surface-card: var(--cal-surface-card);
+  --color-surface-soft: var(--cal-surface-soft);
+  --color-surface-dark: var(--cal-surface-dark);
+  --color-hairline: var(--cal-hairline);
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-heading);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--cal-canvas);
+  color: var(--cal-body);
+  font-family: var(--font-inter);
+}
+
+/* Cal Sans Display Typography (Geometric 600 weight with negative tracking) */
+.cal-headline {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--cal-ink);
+}
+
+.cal-subheading {
+  font-family: var(--font-inter);
+  color: var(--cal-muted);
+  line-height: 1.5;
+}
+
+/* Centralized Cal.com Utility Classes */
+.cal-button-primary {
+  background-color: var(--cal-primary);
+  color: var(--cal-on-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: var(--cal-radius-md);
+  padding: 0.5rem 1rem;
+  transition: background-color 150ms ease, transform 100ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  border: none;
+}
+.cal-button-primary:hover {
+  background-color: var(--cal-primary-hover);
+}
+.cal-button-primary:active {
+  background-color: var(--cal-primary-active);
+  transform: scale(0.99);
+}
+
+.cal-button-secondary {
+  background-color: var(--cal-canvas);
+  color: var(--cal-ink);
+  border: 1px solid var(--cal-hairline);
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: var(--cal-radius-md);
+  padding: 0.5rem 1rem;
+  transition: background-color 150ms ease, border-color 150ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+.cal-button-secondary:hover {
+  background-color: var(--cal-surface-soft);
+  border-color: var(--cal-surface-strong);
+}
+
+.cal-button-ghost {
+  background-color: transparent;
+  color: var(--cal-body);
+  font-weight: 500;
+  font-size: 0.875rem;
+  border-radius: var(--cal-radius-md);
+  padding: 0.5rem 0.75rem;
+  transition: color 150ms ease, background-color 150ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  border: none;
+}
+.cal-button-ghost:hover {
+  color: var(--cal-ink);
+  background-color: var(--cal-surface-soft);
+}
+
+.cal-card {
+  background-color: var(--cal-surface-card);
+  border-radius: var(--cal-radius-lg);
+  border: 1px solid var(--cal-hairline-soft);
+  padding: 1.5rem;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.cal-card-white {
+  background-color: var(--cal-canvas);
+  border-radius: var(--cal-radius-lg);
+  border: 1px solid var(--cal-hairline);
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.cal-card-dark {
+  background-color: var(--cal-surface-dark);
+  color: #ffffff;
+  border-radius: var(--cal-radius-lg);
+  padding: 1.5rem;
+}
+
+.cal-input {
+  background-color: var(--cal-canvas);
+  border: 1px solid var(--cal-hairline);
+  border-radius: var(--cal-radius-md);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  color: var(--cal-ink);
+  outline: none;
+  width: 100%;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+.cal-input:focus {
+  border-color: var(--cal-ink);
+  box-shadow: 0 0 0 1px var(--cal-ink);
+}
+
+.cal-pill-group {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--cal-surface-soft);
+  border: 1px solid var(--cal-hairline);
+  border-radius: var(--cal-radius-pill);
+  padding: 3px;
+  gap: 2px;
+}
+
+.cal-pill-item {
+  padding: 6px 14px;
+  border-radius: var(--cal-radius-pill);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--cal-muted);
+  transition: all 150ms ease;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+}
+.cal-pill-item-active {
+  background-color: var(--cal-canvas);
+  color: var(--cal-ink);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.cal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--cal-radius-pill);
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: var(--cal-surface-soft);
+  color: var(--cal-ink);
+  border: 1px solid var(--cal-hairline);
 }
 
 /* Hardened Leaflet CSS resets for Tailwind CSS v4 */
@@ -31,7 +216,7 @@ body {
   font-family: inherit;
   width: 100%;
   height: 100%;
-  background-color: #020617 !important;
+  background-color: #f8fafc !important;
 }
 
 .leaflet-container img.leaflet-tile {

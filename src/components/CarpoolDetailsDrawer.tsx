@@ -2,6 +2,9 @@
 
 import { Drawer } from "@/components/ui/Drawer";
 import { CarpoolItem } from "./MainEventDrawer";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { Card } from "@/components/ui/Card";
 
 interface CarpoolDetailsDrawerProps {
   carpool: CarpoolItem | null;
@@ -32,33 +35,32 @@ export function CarpoolDetailsDrawer({
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>
-            <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">
+            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
               Détails du covoiturage
             </span>
-            <h3 className="text-xl font-extrabold text-white">
+            <h3 className="text-lg font-bold text-neutral-900 font-heading">
               {carpool.driverName}
             </h3>
           </div>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-950 border border-slate-800 text-slate-400 hover:text-white font-bold flex items-center justify-center text-xs transition-colors"
+            className="p-1"
           >
             ✕
-          </button>
+          </Button>
         </div>
 
         {/* Details Card */}
-        <div className="space-y-3 bg-slate-950 border border-slate-800 rounded-2xl p-4">
-          <div className="flex items-start gap-2.5 text-xs text-slate-200">
-            <span className="text-amber-400 font-bold">🚗 Départ :</span>
-            <span className="font-semibold text-white">
-              {carpool.departureAddress}
-            </span>
+        <Card variant="gray" className="space-y-3 p-4">
+          <div className="flex items-start gap-2 text-xs text-neutral-700">
+            <span className="font-semibold text-neutral-900">Départ :</span>
+            <span>{carpool.departureAddress}</span>
           </div>
 
-          <div className="flex items-center gap-2.5 text-xs text-slate-200">
-            <span className="text-amber-400 font-bold">⏰ Heure :</span>
+          <div className="flex items-center gap-2 text-xs text-neutral-700">
+            <span className="font-semibold text-neutral-900">Heure :</span>
             <span>
               {new Date(carpool.departureTime).toLocaleDateString("fr-FR", {
                 day: "numeric",
@@ -69,38 +71,39 @@ export function CarpoolDetailsDrawer({
             </span>
           </div>
 
-          <div className="flex items-center gap-2.5 text-xs text-slate-200">
-            <span className="text-emerald-400 font-bold">💺 Places libres :</span>
-            <span className="font-bold text-emerald-400">
+          <div className="flex items-center gap-2 text-xs text-neutral-700">
+            <span className="font-semibold text-neutral-900">Places libres :</span>
+            <Badge variant={carpool.availableSeats > 0 ? "emerald" : "default"}>
               {carpool.availableSeats} / {carpool.totalSeats}
-            </span>
+            </Badge>
           </div>
 
           {carpool.description && (
-            <div className="text-xs text-slate-300 bg-slate-900/80 border border-slate-800 p-3 rounded-xl italic">
+            <div className="text-xs text-neutral-600 bg-white p-3 rounded-lg border border-neutral-200/60 italic">
               "{carpool.description}"
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Action Button */}
         {isDriver ? (
-          <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-400 text-xs text-center font-medium">
-            ⚠️ Vous proposez déjà un covoiturage pour cet événement.
+          <div className="p-3 bg-neutral-100 border border-neutral-200 rounded-lg text-neutral-700 text-xs text-center font-medium">
+            Vous proposez déjà un covoiturage pour cet événement.
           </div>
         ) : isPassenger ? (
-          <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 text-xs text-center font-medium">
-            ✓ Vous avez déjà réservé 1 place pour cet événement.
+          <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-xs text-center font-medium">
+            ✓ Vous avez réservé 1 place pour cet événement.
           </div>
         ) : (
-          <button
-            type="button"
+          <Button
+            variant="primary"
+            size="md"
             disabled={carpool.availableSeats <= 0}
             onClick={() => onOpenBooking(carpool)}
-            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-extrabold text-sm transition-all shadow-xl shadow-amber-500/20 disabled:opacity-40"
+            className="w-full"
           >
             Réserver 1 place
-          </button>
+          </Button>
         )}
       </div>
     </Drawer>

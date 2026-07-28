@@ -1,0 +1,53 @@
+"use client";
+
+import { ButtonHTMLAttributes, ReactNode } from "react";
+import { Loader2 } from "lucide-react";
+
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "primary" | "secondary" | "ghost" | "danger";
+  size?: "sm" | "md" | "lg";
+  isLoading?: boolean;
+  leftIcon?: ReactNode;
+  rightIcon?: ReactNode;
+  children: ReactNode;
+}
+
+export function Button({
+  variant = "primary",
+  size = "md",
+  isLoading = false,
+  leftIcon,
+  rightIcon,
+  children,
+  className = "",
+  disabled,
+  ...props
+}: ButtonProps) {
+  const baseClass = {
+    primary: "cal-button-primary",
+    secondary: "cal-button-secondary",
+    ghost: "cal-button-ghost",
+    danger: "bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md px-4 py-2 text-sm transition-colors border-none cursor-pointer inline-flex items-center justify-center gap-2",
+  }[variant];
+
+  const sizeClass = {
+    sm: "px-3 py-1.5 text-xs",
+    md: "px-4 py-2 text-sm",
+    lg: "px-6 py-3 text-base",
+  }[size];
+
+  return (
+    <button
+      disabled={disabled || isLoading}
+      className={`${baseClass} ${sizeClass} ${disabled || isLoading ? "opacity-50 cursor-not-allowed pointer-events-none" : ""} ${className}`}
+      {...props}
+    >
+      {isLoading && (
+        <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+      )}
+      {!isLoading && leftIcon}
+      <span>{children}</span>
+      {!isLoading && rightIcon}
+    </button>
+  );
+}

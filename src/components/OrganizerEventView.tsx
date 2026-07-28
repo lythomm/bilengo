@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { Card } from "@/components/ui/Card";
+import { PillGroup } from "@/components/ui/PillGroup";
+import { Share2, Map, Check, ArrowLeft } from "lucide-react";
 
 interface Guest {
   name: string;
@@ -82,252 +87,190 @@ export function OrganizerEventView({
   });
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-amber-500 selection:text-slate-950 flex flex-col">
-      {/* Top Header */}
-      <header className="border-b border-slate-800 bg-slate-950/90 backdrop-blur-md sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+    <div className="min-h-screen bg-white text-neutral-900 flex flex-col">
+      {/* Top Navigation */}
+      <header className="border-b border-neutral-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-30">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Link
               href="/dashboard"
-              className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-amber-500/20 hover:scale-105 transition-transform"
+              className="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center text-white font-bold text-sm tracking-tighter"
             >
               B
             </Link>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400">
-                  Vue Organisateur
-                </span>
-                <span className="text-xs text-slate-400 hidden sm:inline">
-                  • {event.title}
-                </span>
-              </div>
-              <h1 className="text-lg font-bold text-white tracking-tight truncate max-w-xs sm:max-w-md">
-                {event.title}
-              </h1>
-            </div>
+            <h1 className="text-base font-bold text-neutral-900 tracking-tight truncate max-w-xs sm:max-w-md font-heading">
+              {event.title}
+            </h1>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
-            <button
-              type="button"
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={onCopyLink}
-              className="px-3.5 py-2 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold transition-colors"
+              title={copied ? "Lien copié !" : "Partager le lien"}
+              aria-label="Partager le lien"
             >
-              {copied ? "✓ Lien copié !" : "🔗 Partager le lien"}
-            </button>
-
-            <button
-              type="button"
+              {copied ? (
+                <Check className="w-4 h-4 text-emerald-600" />
+              ) : (
+                <Share2 className="w-4 h-4" />
+              )}
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
               onClick={onSwitchToMap}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-extrabold shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2"
+              title="Voir la carte"
+              aria-label="Voir la carte"
             >
-              <span>🗺️ Voir la carte</span>
-            </button>
+              <Map className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Banner & Location Info */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
-          <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
-          
-          <div className="space-y-2 max-w-2xl">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
-              Tableau de bord de l'événement
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
-              {event.title}
-            </h2>
-            <p className="text-slate-400 text-sm flex flex-wrap items-center gap-x-4 gap-y-1">
-              <span>📍 {event.destinationAddress}</span>
-              <span>
-                📅{" "}
-                {new Date(event.eventDate).toLocaleDateString("fr-FR", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </span>
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <button
-              type="button"
-              onClick={onSwitchToMap}
-              className="px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-sm font-extrabold shadow-xl shadow-amber-500/20 transition-all text-center flex items-center justify-center gap-2"
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+        <div>
+          <Link href="/dashboard">
+            <Button
+              variant="ghost"
+              size="sm"
+              leftIcon={<ArrowLeft className="w-4 h-4" />}
+              className="text-neutral-600 hover:text-neutral-900 -ml-2"
             >
-              <span>🗺️ Ouvrir la carte des trajets (Vue Invité)</span>
-            </button>
-          </div>
+              Retour
+            </Button>
+          </Link>
         </div>
+        {/* Event Header Banner */}
+        <Card variant="gray" className="p-6 sm:p-8 space-y-3">
+          <span className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+            Tableau de bord de l'événement
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900 font-heading">
+            {event.title}
+          </h2>
+          <p className="text-neutral-600 text-xs sm:text-sm flex flex-wrap items-center gap-x-4 gap-y-1">
+            <span>Destination : {event.destinationAddress}</span>
+            <span>
+              Date :{" "}
+              {new Date(event.eventDate).toLocaleDateString("fr-FR", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
+          </p>
+        </Card>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 shadow-lg">
-            <div className="flex items-center justify-between text-slate-400 text-xs font-medium mb-2">
-              <span>Total Invités</span>
-              <span className="text-xl">👥</span>
-            </div>
-            <div className="text-2xl sm:text-3xl font-black text-white">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card variant="white" className="p-4 space-y-1">
+            <div className="text-neutral-500 text-xs font-semibold">Total Invités</div>
+            <div className="text-2xl font-bold text-neutral-900 font-heading">
               {stats.totalGuests}
             </div>
-            <div className="text-[11px] text-slate-500 mt-1">
-              Participants actifs répertoriés
-            </div>
-          </div>
+          </Card>
 
-          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 shadow-lg">
-            <div className="flex items-center justify-between text-slate-400 text-xs font-medium mb-2">
-              <span>Conducteurs</span>
-              <span className="text-xl">🚗</span>
-            </div>
-            <div className="text-2xl sm:text-3xl font-black text-amber-400">
+          <Card variant="white" className="p-4 space-y-1">
+            <div className="text-neutral-500 text-xs font-semibold">Conducteurs</div>
+            <div className="text-2xl font-bold text-neutral-900 font-heading">
               {stats.totalDrivers}
             </div>
-            <div className="text-[11px] text-slate-500 mt-1">
-              Trajets créés sur la plateforme
-            </div>
-          </div>
+          </Card>
 
-          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 shadow-lg">
-            <div className="flex items-center justify-between text-slate-400 text-xs font-medium mb-2">
-              <span>Places Réservées</span>
-              <span className="text-xl">💺</span>
-            </div>
-            <div className="text-2xl sm:text-3xl font-black text-emerald-400">
+          <Card variant="white" className="p-4 space-y-1">
+            <div className="text-neutral-500 text-xs font-semibold">Places Réservées</div>
+            <div className="text-2xl font-bold text-neutral-900 font-heading">
               {stats.totalSeatsBooked}{" "}
-              <span className="text-sm font-normal text-slate-400">
+              <span className="text-sm font-normal text-neutral-400">
                 / {stats.totalSeatsOffered}
               </span>
             </div>
-            <div className="text-[11px] text-slate-500 mt-1">
-              Places proposées au total
-            </div>
-          </div>
+          </Card>
 
-          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 shadow-lg">
-            <div className="flex items-center justify-between text-slate-400 text-xs font-medium mb-2">
-              <span>Places Libres</span>
-              <span className="text-xl">📍</span>
-            </div>
-            <div className="text-2xl sm:text-3xl font-black text-cyan-400">
+          <Card variant="white" className="p-4 space-y-1">
+            <div className="text-neutral-500 text-xs font-semibold">Places Libres</div>
+            <div className="text-2xl font-bold text-emerald-700 font-heading">
               {stats.totalSeatsAvailable}
             </div>
-            <div className="text-[11px] text-slate-500 mt-1">
-              Encore disponibles pour les passagers
-            </div>
-          </div>
+          </Card>
         </div>
 
         {/* Directory Section */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-xl">
-          {/* Section Header & Tabs */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-5">
-            <div className="flex bg-slate-950 p-1 rounded-2xl border border-slate-800 w-full sm:w-auto">
-              <button
-                type="button"
-                onClick={() => setActiveTab("guests")}
-                className={`px-5 py-2 rounded-xl text-xs font-bold transition-all ${
-                  activeTab === "guests"
-                    ? "bg-amber-500 text-slate-950 shadow-md"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                👥 Répertoire des Invités ({guests.length})
-              </button>
+        <Card variant="white" className="p-6 space-y-6">
+          {/* Tabs & Search */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-100 pb-4">
+            <PillGroup
+              value={activeTab}
+              onChange={(val) => setActiveTab(val as "guests" | "carpools")}
+              options={[
+                { id: "guests", label: `Invités (${guests.length})` },
+                { id: "carpools", label: `Covoiturages (${carpools.length})` },
+              ]}
+            />
 
-              <button
-                type="button"
-                onClick={() => setActiveTab("carpools")}
-                className={`px-5 py-2 rounded-xl text-xs font-bold transition-all ${
-                  activeTab === "carpools"
-                    ? "bg-amber-500 text-slate-950 shadow-md"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                🚗 Trajets & Covoiturages ({carpools.length})
-              </button>
-            </div>
-
-            {/* Search Input */}
-            <div className="relative w-full sm:w-72">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="🔍 Rechercher prénom, tél..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-2 text-xs text-slate-500 hover:text-white"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Rechercher prénom, tél..."
+              className="cal-input sm:w-64"
+            />
           </div>
 
           {/* Tab Content: Guests */}
           {activeTab === "guests" && (
             <div className="space-y-4">
               {filteredGuests.length === 0 ? (
-                <div className="text-center py-12 text-slate-500 space-y-2">
-                  <div className="text-3xl">🔍</div>
-                  <p className="text-sm font-medium">Aucun invité ne correspond à la recherche.</p>
+                <div className="text-center py-8 text-neutral-400 text-xs">
+                  Aucun invité ne correspond à la recherche.
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-xs">
+                  <table className="w-full text-left border-collapse text-xs whitespace-nowrap">
                     <thead>
-                      <tr className="border-b border-slate-800 text-slate-400 font-semibold uppercase tracking-wider">
-                        <th className="py-3 px-4">Invité</th>
-                        <th className="py-3 px-4">Téléphone</th>
-                        <th className="py-3 px-4">Statut Covoiturage</th>
-                        <th className="py-3 px-4">Détails</th>
+                      <tr className="border-b border-neutral-200 text-neutral-500 font-semibold uppercase tracking-wider whitespace-nowrap">
+                        <th className="py-2.5 px-3 whitespace-nowrap">Invité</th>
+                        <th className="py-2.5 px-3 whitespace-nowrap">Téléphone</th>
+                        <th className="py-2.5 px-3 whitespace-nowrap">Statut Covoiturage</th>
+                        <th className="py-2.5 px-3 whitespace-nowrap">Détails</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800/60">
+                    <tbody className="divide-y divide-neutral-100">
                       {filteredGuests.map((guest, idx) => (
-                        <tr key={idx} className="hover:bg-slate-950/40 transition-colors">
-                          <td className="py-3.5 px-4 font-bold text-white">
+                        <tr key={idx} className="hover:bg-neutral-50 whitespace-nowrap">
+                          <td className="py-3 px-3 font-semibold text-neutral-900 whitespace-nowrap">
                             {guest.name}
                           </td>
-                          <td className="py-3.5 px-4 font-mono text-slate-300">
+                          <td className="py-3 px-3 font-mono text-neutral-500 whitespace-nowrap">
                             {guest.phone || "—"}
                           </td>
-                          <td className="py-3.5 px-4">
-                            <div className="flex flex-wrap gap-1.5">
+                          <td className="py-3 px-3 whitespace-nowrap">
+                            <div className="flex items-center gap-1.5 flex-nowrap">
                               {guest.proposesCarpool && (
-                                <span className="px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold text-[11px]">
-                                  🚗 Propose un covoiturage
-                                </span>
+                                <Badge variant="orange">Conducteur</Badge>
                               )}
                               {guest.isInCarpool && (
-                                <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-[11px]">
-                                  💺 Dans un covoiturage
-                                </span>
+                                <Badge variant="emerald">Passager</Badge>
                               )}
                               {!guest.proposesCarpool && !guest.isInCarpool && (
-                                <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 text-[11px]">
-                                  Sans covoiturage
-                                </span>
+                                <Badge variant="default">Sans covoiturage</Badge>
                               )}
                             </div>
                           </td>
-                          <td className="py-3.5 px-4 text-slate-400">
-                            <ul className="list-disc list-inside space-y-0.5">
+                          <td className="py-3 px-3 text-neutral-600 whitespace-nowrap">
+                            <div className="flex items-center gap-2 flex-nowrap">
                               {guest.details.map((det, dIdx) => (
-                                <li key={dIdx}>{det}</li>
+                                <span key={dIdx} className="inline-block bg-neutral-100 text-neutral-700 px-2 py-0.5 rounded text-[11px] whitespace-nowrap">
+                                  {det}
+                                </span>
                               ))}
-                            </ul>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -342,88 +285,64 @@ export function OrganizerEventView({
           {activeTab === "carpools" && (
             <div className="space-y-4">
               {carpools.length === 0 ? (
-                <div className="text-center py-12 text-slate-500 space-y-2">
-                  <div className="text-3xl">🚗</div>
-                  <p className="text-sm font-medium">
-                    Aucun covoiturage n'a été créé pour cet événement pour le moment.
-                  </p>
+                <div className="text-center py-8 text-neutral-400 text-xs">
+                  Aucun covoiturage pour cet événement.
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {carpools.map((c) => (
-                    <div
-                      key={c._id}
-                      className="bg-slate-950 border border-slate-800/80 rounded-2xl p-5 space-y-4"
-                    >
+                    <Card key={c._id} variant="gray" className="p-4 space-y-3">
                       <div className="flex justify-between items-start">
                         <div>
-                          <span className="text-xs text-amber-400 font-semibold">Conducteur</span>
-                          <h4 className="text-lg font-bold text-white">{c.driverName}</h4>
-                          <p className="text-xs font-mono text-slate-400">{c.driverPhone}</p>
+                          <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Conducteur</span>
+                          <h4 className="text-base font-bold text-neutral-900 font-heading">{c.driverName}</h4>
+                          <p className="text-xs font-mono text-neutral-500">{c.driverPhone}</p>
                         </div>
-                        <span
-                          className={`text-xs px-2.5 py-1 rounded-full font-bold ${
-                            c.availableSeats > 0
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                              : "bg-red-500/10 text-red-400 border border-red-500/20"
-                          }`}
-                        >
+                        <Badge variant={c.availableSeats > 0 ? "emerald" : "default"}>
                           {c.availableSeats > 0
-                            ? `${c.availableSeats}/${c.totalSeats} places libres`
+                            ? `${c.availableSeats}/${c.totalSeats} libres`
                             : "Complet"}
-                        </span>
+                        </Badge>
                       </div>
 
-                      <div className="text-xs text-slate-300 space-y-1 bg-slate-900/60 p-3 rounded-xl">
-                        <div>📍 Départ : <span className="font-semibold text-white">{c.departureAddress}</span></div>
-                        <div>⏰ Heure : {new Date(c.departureTime).toLocaleDateString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</div>
+                      <div className="text-xs text-neutral-600 space-y-1 bg-white p-3 rounded-lg border border-neutral-200/60">
+                        <div>Départ : <span className="font-semibold text-neutral-900">{c.departureAddress}</span></div>
+                        <div>Heure : {new Date(c.departureTime).toLocaleDateString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</div>
                       </div>
 
                       {/* Passengers List */}
-                      <div className="space-y-2 pt-2 border-t border-slate-900">
-                        <div className="text-xs font-bold text-slate-400">
+                      <div className="space-y-1.5 pt-2 border-t border-neutral-200">
+                        <div className="text-xs font-bold text-neutral-700">
                           Passagers inscrits ({c.bookings.length}) :
                         </div>
                         {c.bookings.length === 0 ? (
-                          <div className="text-xs text-slate-500 italic">Aucune réservation.</div>
+                          <div className="text-xs text-neutral-400 italic">Aucune réservation.</div>
                         ) : (
-                          <div className="space-y-1.5">
+                          <div className="space-y-1">
                             {c.bookings.map((b) => (
                               <div
                                 key={b._id}
-                                className="flex items-center justify-between text-xs bg-slate-900 px-3 py-2 rounded-lg"
+                                className="flex items-center justify-between text-xs bg-white p-2 rounded border border-neutral-200/60"
                               >
                                 <div>
-                                  <span className="font-semibold text-white">{b.passengerName}</span>
-                                  <span className="text-slate-400 font-mono ml-2">({b.passengerPhone})</span>
+                                  <span className="font-semibold text-neutral-900">{b.passengerName}</span>
+                                  <span className="text-neutral-500 font-mono ml-2">({b.passengerPhone})</span>
                                 </div>
-                                <span
-                                  className={`text-[10px] px-2 py-0.5 rounded font-bold ${
-                                    b.status === "confirmed"
-                                      ? "bg-emerald-500/20 text-emerald-400"
-                                      : b.status === "pending"
-                                      ? "bg-amber-500/20 text-amber-400"
-                                      : "bg-slate-800 text-slate-500"
-                                  }`}
-                                >
-                                  {b.status === "confirmed"
-                                    ? "Confirmé"
-                                    : b.status === "pending"
-                                    ? "En attente"
-                                    : "Annulé"}
-                                </span>
+                                <Badge variant={b.status === "confirmed" ? "emerald" : "default"}>
+                                  {b.status}
+                                </Badge>
                               </div>
                             ))}
                           </div>
                         )}
                       </div>
-                    </div>
+                    </Card>
                   ))}
                 </div>
               )}
             </div>
           )}
-        </div>
+        </Card>
       </main>
     </div>
   );

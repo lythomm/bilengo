@@ -6,6 +6,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Drawer } from "@/components/ui/Drawer";
 import { getParticipantSession } from "@/lib/session";
+import { Button } from "@/components/ui/Button";
 
 interface PrefilledAddress {
   label: string;
@@ -42,7 +43,6 @@ export function ProposeFinalizeDrawer({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load saved session details
   useEffect(() => {
     const session = getParticipantSession();
     if (session) {
@@ -56,7 +56,6 @@ export function ProposeFinalizeDrawer({
     }
   }, [isOpen]);
 
-  // Update when prefilledAddress changes
   useEffect(() => {
     if (prefilledAddress) {
       setDepartureAddress(prefilledAddress.label);
@@ -119,11 +118,9 @@ export function ProposeFinalizeDrawer({
         description,
       });
 
-      // Save driver session locally
       localStorage.setItem("bilengo_driver_name", finalName);
       localStorage.setItem("bilengo_driver_phone", finalPhone);
 
-      // Reset and close
       setDescription("");
       onSuccess();
     } catch (err: any) {
@@ -143,40 +140,37 @@ export function ProposeFinalizeDrawer({
       className="max-w-lg mx-auto"
     >
       <div className="p-6 space-y-4">
-        {/* Title */}
-        <h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-          Derniers réglages
+        <h3 className="text-xl font-bold text-neutral-900 tracking-tight font-heading">
+          Finaliser le trajet
         </h3>
 
         {error && (
-          <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs">
-            ⚠️ {error}
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs font-medium">
+            {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* LIEU DE DÉPART (NOM) */}
           <div>
-            <label className="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1.5">
-              LIEU DE DÉPART (NOM)
+            <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1">
+              Lieu de départ
             </label>
             <input
               type="text"
               required
               value={departureAddress}
               onChange={(e) => setDepartureAddress(e.target.value)}
-              placeholder="Ex: Balma"
-              className="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-white font-bold text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              placeholder="Ex: Paris 11e"
+              className="cal-input font-medium"
             />
           </div>
 
-          {/* DESCRIPTION (OPTIONNEL) */}
           <div>
-            <div className="flex justify-between items-center mb-1.5">
-              <label className="block text-[11px] font-bold tracking-wider text-slate-400 uppercase">
-                DESCRIPTION (OPTIONNEL)
+            <div className="flex justify-between items-center mb-1">
+              <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider">
+                Note / Description (Optionnel)
               </label>
-              <span className="text-[11px] text-slate-500 font-mono">
+              <span className="text-[11px] text-neutral-400 font-mono">
                 {description.length} / 256
               </span>
             </div>
@@ -185,80 +179,76 @@ export function ProposeFinalizeDrawer({
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Ex: Musique à fond, petite pause prévue, ok pour les gros bagages..."
-              className="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-colors"
+              placeholder="Ex: Musique à fond, petite pause prévue..."
+              className="cal-input resize-none"
             />
           </div>
 
-          {/* PLACES DISPONIBLES & HEURE DU DÉPART */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            {/* PLACES DISPONIBLES */}
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1.5">
-                PLACES DISPONIBLES
+              <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1">
+                Places disponibles
               </label>
-              <div className="flex items-center justify-between px-3 py-2 rounded-2xl bg-slate-950 border border-slate-800">
+              <div className="flex items-center justify-between px-3 py-1.5 rounded-md border border-neutral-200 bg-white">
                 <button
                   type="button"
                   onClick={() => setTotalSeats(Math.max(1, totalSeats - 1))}
-                  className="w-8 h-8 rounded-full bg-slate-900 border border-slate-700 text-white font-black flex items-center justify-center hover:bg-slate-800 transition-colors"
+                  className="w-7 h-7 rounded bg-neutral-100 text-neutral-800 font-bold flex items-center justify-center border-none cursor-pointer hover:bg-neutral-200"
                 >
                   -
                 </button>
-                <span className="font-extrabold text-white text-base">
+                <span className="font-bold text-neutral-900 text-sm">
                   {totalSeats}
                 </span>
                 <button
                   type="button"
                   onClick={() => setTotalSeats(Math.min(8, totalSeats + 1))}
-                  className="w-8 h-8 rounded-full bg-slate-900 border border-slate-700 text-white font-black flex items-center justify-center hover:bg-slate-800 transition-colors"
+                  className="w-7 h-7 rounded bg-neutral-100 text-neutral-800 font-bold flex items-center justify-center border-none cursor-pointer hover:bg-neutral-200"
                 >
                   +
                 </button>
               </div>
             </div>
 
-            {/* HEURE DU DÉPART */}
             <div>
-              <label className="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1.5">
-                HEURE DU DÉPART
+              <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1">
+                Heure de départ
               </label>
-              <div className="relative">
-                <input
-                  type="time"
-                  required
-                  value={departureTime}
-                  onChange={(e) => setDepartureTime(e.target.value)}
-                  className="w-full px-4 py-2 rounded-2xl bg-slate-950 border border-slate-800 text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                />
-              </div>
+              <input
+                type="time"
+                required
+                value={departureTime}
+                onChange={(e) => setDepartureTime(e.target.value)}
+                className="cal-input"
+              />
             </div>
           </div>
 
-          {/* Driver session info badge */}
           {driverName && (
-            <div className="text-[11px] text-slate-400 bg-slate-950 px-3.5 py-2 rounded-xl border border-slate-800/80 flex items-center justify-between">
-              <span>Conducteur : <strong className="text-white">{driverName}</strong></span>
-              <span className="font-mono text-slate-500">{driverPhone}</span>
+            <div className="text-xs text-neutral-500 bg-neutral-50 px-3 py-2 rounded-lg border border-neutral-200/60 flex items-center justify-between">
+              <span>Conducteur : <strong className="text-neutral-900">{driverName}</strong></span>
+              <span className="font-mono">{driverPhone}</span>
             </div>
           )}
 
-          {/* Actions */}
-          <div className="flex items-center justify-between gap-3 pt-3">
-            <button
+          <div className="flex items-center justify-between gap-3 pt-2">
+            <Button
               type="button"
+              variant="secondary"
+              size="md"
               onClick={onClose}
-              className="py-3 px-4 rounded-2xl text-slate-400 hover:text-white font-bold text-sm transition-colors"
             >
               Annuler
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isLoading}
-              className="flex-1 py-3.5 px-6 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-sm shadow-xl shadow-blue-600/30 transition-all text-center disabled:opacity-50"
+              variant="primary"
+              size="md"
+              isLoading={isLoading}
+              className="flex-1"
             >
-              {isLoading ? "Publication..." : "Diffuser l'annonce"}
-            </button>
+              Publier le trajet
+            </Button>
           </div>
         </form>
       </div>

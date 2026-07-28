@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { MapPin, Loader2 } from "lucide-react";
 
 interface AddressSuggestion {
   label: string;
@@ -95,25 +96,23 @@ export function AddressAutocomplete({
         onFocus={() => suggestions.length > 0 && setIsOpen(true)}
         placeholder={placeholder}
         required={required}
-        className={
-          inputClassName ||
-          "w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors"
-        }
+        className={inputClassName || "cal-input"}
       />
       {isLoading && (
-        <div className="absolute right-3 top-3 text-xs text-amber-400 animate-pulse">
-          Recherche...
+        <div className="absolute right-3 top-3 text-neutral-400">
+          <Loader2 className="w-4 h-4 animate-spin" />
         </div>
       )}
       {isOpen && suggestions.length > 0 && (
-        <ul className="absolute z-50 w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto">
+        <ul className="absolute z-50 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg overflow-hidden max-h-60 overflow-y-auto">
           {suggestions.map((item, idx) => (
             <li
               key={idx}
               onClick={() => handleSelect(item)}
-              className="px-4 py-2.5 text-sm text-slate-200 hover:bg-slate-800 cursor-pointer border-b border-slate-800/50 last:border-0 transition-colors"
+              className="px-4 py-2.5 text-xs text-neutral-800 hover:bg-neutral-100 cursor-pointer border-b border-neutral-100 last:border-0 transition-colors flex items-center gap-2"
             >
-              {item.label}
+              <MapPin className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+              <span>{item.label}</span>
             </li>
           ))}
         </ul>

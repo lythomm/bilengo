@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { AddressAutocomplete } from "./AddressAutocomplete";
+import { Modal } from "@/components/ui/Modal";
+import { Button } from "@/components/ui/Button";
 
 interface CreateEventModalProps {
   isOpen: boolean;
@@ -26,8 +28,6 @@ export function CreateEventModal({
   const [maxParticipants, setMaxParticipants] = useState(50);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,103 +57,92 @@ export function CreateEventModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-      <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl sm:text-2xl font-bold text-white">
-            Créer un nouvel événement
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors text-2xl font-bold"
-          >
-            &times;
-          </button>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Créer un événement"
+      description="Remplissez les détails pour générer le lien de covoiturage"
+    >
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs font-medium">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1">
+            Nom de l'événement
+          </label>
+          <input
+            type="text"
+            required
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Ex: Mariage Julie & Thomas, Festival d'été"
+            className="cal-input"
+          />
         </div>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
-            {error}
-          </div>
-        )}
+        <div>
+          <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1">
+            Adresse exacte de destination
+          </label>
+          <AddressAutocomplete
+            value={destinationAddress}
+            onChange={setDestinationAddress}
+            onSelect={(addr) => {
+              setDestinationLat(addr.lat);
+              setDestinationLng(addr.lng);
+            }}
+            placeholder="Rechercher une adresse..."
+            required
+          />
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">
-              Nom de l'événement
+            <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1">
+              Date & Heure
             </label>
             <input
-              type="text"
+              type="datetime-local"
               required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ex: Festival de musique de l'été, Mariage Julie & Thomas"
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              value={eventDate}
+              onChange={(e) => setEventDate(e.target.value)}
+              className="cal-input"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">
-              Adresse exacte de destination
+            <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1">
+              Participants Max
             </label>
-            <AddressAutocomplete
-              value={destinationAddress}
-              onChange={setDestinationAddress}
-              onSelect={(addr) => {
-                setDestinationLat(addr.lat);
-                setDestinationLng(addr.lng);
-              }}
-              placeholder="Rechercher une adresse (autocomplétion BAN)..."
-              required
+            <input
+              type="number"
+              min={1}
+              max={50}
+              value={maxParticipants}
+              onChange={(e) => setMaxParticipants(parseInt(e.target.value) || 1)}
+              className="cal-input"
             />
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">
-                Date & Heure de l'événement
-              </label>
-              <input
-                type="datetime-local"
-                required
-                value={eventDate}
-                onChange={(e) => setEventDate(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-              />
-            </div>
+        <div className="p-3 bg-neutral-50 border border-neutral-200 rounded-lg text-xs text-neutral-600 flex items-center gap-2">
+          <span>Offre gratuite : Jusqu'à 50 participants autorisés.</span>
+        </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">
-                Participants max (Gratuit: 50)
-              </label>
-              <input
-                type="number"
-                min={1}
-                max={50}
-                value={maxParticipants}
-                onChange={(e) => setMaxParticipants(parseInt(e.target.value) || 1)}
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-              />
-            </div>
-          </div>
-
-          <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-300 flex items-center gap-2">
-            <span>✨</span>
-            <span>
-              Offre gratuite : Jusqu'à 50 participants autorisés sur cet événement.
-            </span>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-semibold transition-colors duration-200 disabled:opacity-50"
-          >
-            {loading ? "Création en cours..." : "Publier l'événement"}
-          </button>
-        </form>
-      </div>
-    </div>
+        <Button
+          type="submit"
+          variant="primary"
+          size="md"
+          isLoading={loading}
+          className="w-full mt-2"
+        >
+          Publier l'événement
+        </Button>
+      </form>
+    </Modal>
   );
 }

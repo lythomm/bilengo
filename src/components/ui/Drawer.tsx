@@ -2,7 +2,7 @@
 
 import { useState, ReactNode } from "react";
 
-interface DrawerProps {
+export interface DrawerProps {
   isOpen?: boolean;
   isExpanded?: boolean;
   onToggleExpand?: () => void;
@@ -43,19 +43,19 @@ export function Drawer({
   const transformClass = allowCollapseToHandle
     ? expanded
       ? "translate-y-0"
-      : "translate-y-[calc(100%-28px)]"
+      : "translate-y-[calc(100%-32px)]"
     : "translate-y-0";
 
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 z-40 bg-slate-900 border-t border-slate-800 rounded-t-3xl shadow-2xl transition-transform duration-300 ease-in-out flex flex-col ${maxHeightClass} ${transformClass} ${className}`}
+      className={`fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-neutral-200 rounded-t-3xl shadow-2xl transition-transform duration-300 ease-in-out flex flex-col ${maxHeightClass} ${transformClass} ${className}`}
     >
       {/* Drag Handle & Header */}
       <div
         onClick={handleToggle}
         className="w-full pt-3 pb-2 flex flex-col items-center cursor-pointer select-none group"
       >
-        <div className="w-12 h-1.5 rounded-full bg-slate-700 group-hover:bg-slate-500 transition-colors" />
+        <div className="w-12 h-1.5 rounded-full bg-neutral-300 group-hover:bg-neutral-400 transition-colors" />
       </div>
 
       {/* Content */}
