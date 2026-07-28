@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { PillGroup } from "@/components/ui/PillGroup";
+import { Toast } from "@/components/ui/Toast";
 import { Share2, Map, MapPin, Calendar, Check, ArrowLeft, Search } from "lucide-react";
 
 interface Guest {
@@ -73,6 +74,7 @@ export function OrganizerEventView({
 }: OrganizerEventViewProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"guests" | "carpools">("guests");
+  const [showToast, setShowToast] = useState(false);
 
   const { event, stats, guests, carpools } = organizerData;
 
@@ -108,7 +110,10 @@ export function OrganizerEventView({
             <Button
               variant="secondary"
               size="sm"
-              onClick={onCopyLink}
+              onClick={() => {
+                onCopyLink();
+                setShowToast(true);
+              }}
               title={copied ? "Lien copié !" : "Partager le lien"}
               aria-label="Partager le lien"
             >
@@ -355,6 +360,13 @@ export function OrganizerEventView({
           )}
         </Card>
       </main>
+
+      <Toast
+        isOpen={showToast}
+        onClose={() => setShowToast(false)}
+        message="Lien de l'événement copié !"
+        variant="success"
+      />
     </div>
   );
 }
