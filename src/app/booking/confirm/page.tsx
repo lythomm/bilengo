@@ -23,6 +23,8 @@ function ConfirmBookingContent() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    let ignore = false;
+
     if (!token) {
       setStatus("error");
       setErrorMessage("Token de validation manquant dans l'URL.");
@@ -33,18 +35,26 @@ function ConfirmBookingContent() {
       setStatus("loading");
       try {
         const res = await confirmBooking({ validationToken: token });
-        setResultData(res);
-        setStatus("success");
+        if (!ignore) {
+          setResultData(res);
+          setStatus("success");
+        }
       } catch (err: any) {
-        console.error(err);
-        setStatus("error");
-        setErrorMessage(
-          err.message || "Impossible de valider cette réservation."
-        );
+        if (!ignore) {
+          console.error(err);
+          setStatus("error");
+          setErrorMessage(
+            err.message || "Impossible de valider cette réservation."
+          );
+        }
       }
     };
 
     runConfirm();
+
+    return () => {
+      ignore = true;
+    };
   }, [token]);
 
   return (
