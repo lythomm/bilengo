@@ -11,6 +11,7 @@ export const createCarpool = mutation({
     departureLng: v.optional(v.number()),
     departureTime: v.string(),
     totalSeats: v.number(),
+    description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const event = await ctx.db.get(args.eventId);
@@ -26,6 +27,46 @@ export const createCarpool = mutation({
       throw new Error("Toutes les informations du conducteur sont obligatoires.");
     }
 
+    // Enforce single carpool or booking per user per event
+    const existingCarpool = await ctx.db
+      .query("carpools")
+      .withIndex("by_event", (q) => q.eq("eventId", args.eventId))
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("driverPhone"), driverPhone),
+          q.neq(q.field("status"), "cancelled")
+        )
+      )
+      .first();
+
+    if (existingCarpool) {
+      throw new Error("Vous avez déjà proposé un covoiturage pour cet événement.");
+    }
+
+    const eventCarpools = await ctx.db
+      .query("carpools")
+      .withIndex("by_event", (q) => q.eq("eventId", args.eventId))
+      .collect();
+
+    for (const c of eventCarpools) {
+      const existingBooking = await ctx.db
+        .query("bookings")
+        .withIndex("by_carpool", (q) => q.eq("carpoolId", c._id))
+        .filter((q) =>
+          q.and(
+            q.eq(q.field("passengerPhone"), driverPhone),
+            q.neq(q.field("status"), "cancelled")
+          )
+        )
+        .first();
+
+      if (existingBooking) {
+        throw new Error(
+          "Vous participez déjà à cet événement en tant que passager."
+        );
+      }
+    }
+
     const totalSeats = Math.max(1, args.totalSeats);
 
     const carpoolId = await ctx.db.insert("carpools", {
@@ -39,6 +80,7 @@ export const createCarpool = mutation({
       totalSeats,
       availableSeats: totalSeats,
       status: "active",
+      description: args.description?.trim(),
     });
 
     return carpoolId;
@@ -69,6 +111,85 @@ export const cancelCarpool = mutation({
   },
 });
 
+export const getUserEventRole = query({
+  args: { eventId: v.id("events"), userPhone: v.string() },
+  handler: async (ctx, args) => {
+    const cleanP = args.userPhone.trim();
+    if (!cleanP) return null;
+
+    // Check if driver
+    const driverCarpool = await ctx.db
+      .query("carpools")
+      .withIndex("by_event", (q) => q.eq("eventId", args.eventId))
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("driverPhone"), cleanP),
+          q.neq(q.field("status"), "cancelled")
+        )
+      )
+      .first();
+
+    if (driverCarpool) {
+      return {
+        role: "driver" as const,
+        carpool: {
+          _id: driverCarpool._id,
+          driverName: driverCarpool.driverName,
+          driverPhone: driverCarpool.driverPhone,
+          departureAddress: driverCarpool.departureAddress,
+          departureTime: driverCarpool.departureTime,
+          totalSeats: driverCarpool.totalSeats,
+          availableSeats: driverCarpool.availableSeats,
+          description: driverCarpool.description,
+        },
+      };
+    }
+
+    // Check if passenger
+    const eventCarpools = await ctx.db
+      .query("carpools")
+      .withIndex("by_event", (q) => q.eq("eventId", args.eventId))
+      .collect();
+
+    for (const c of eventCarpools) {
+      const booking = await ctx.db
+        .query("bookings")
+        .withIndex("by_carpool", (q) => q.eq("carpoolId", c._id))
+        .filter((q) =>
+          q.and(
+            q.eq(q.field("passengerPhone"), cleanP),
+            q.neq(q.field("status"), "cancelled")
+          )
+        )
+        .first();
+
+      if (booking) {
+        return {
+          role: "passenger" as const,
+          booking: {
+            _id: booking._id,
+            passengerName: booking.passengerName,
+            passengerPhone: booking.passengerPhone,
+            status: booking.status,
+          },
+          carpool: {
+            _id: c._id,
+            driverName: c.driverName,
+            driverPhone: c.driverPhone,
+            departureAddress: c.departureAddress,
+            departureTime: c.departureTime,
+            totalSeats: c.totalSeats,
+            availableSeats: c.availableSeats,
+            description: c.description,
+          },
+        };
+      }
+    }
+
+    return null;
+  },
+});
+
 export const getCarpoolsByEvent = query({
   args: { eventId: v.id("events") },
   handler: async (ctx, args) => {
@@ -89,6 +210,7 @@ export const getCarpoolsByEvent = query({
       totalSeats: c.totalSeats,
       availableSeats: c.availableSeats,
       status: c.status,
+      description: c.description,
     }));
   },
 });

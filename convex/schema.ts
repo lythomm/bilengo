@@ -29,6 +29,7 @@ export default defineSchema({
     totalSeats: v.number(),
     availableSeats: v.number(),
     status: v.union(v.literal("active"), v.literal("cancelled"), v.literal("full")),
+    description: v.optional(v.string()),
   }).index("by_event", ["eventId"]),
 
   bookings: defineTable({

@@ -20,6 +20,7 @@ interface CarpoolItem {
   availableSeats: number;
   departureLat?: number;
   departureLng?: number;
+  description?: string;
 }
 
 interface EventMapContainerProps {
@@ -29,6 +30,9 @@ interface EventMapContainerProps {
   carpools: CarpoolItem[];
   selectedCarpool: CarpoolItem | null;
   onSelectCarpool: (carpool: CarpoolItem) => void;
+  isPickingLocation?: boolean;
+  onCenterChange?: (center: { lat: number; lng: number }) => void;
+  pickedLocation?: { lat: number; lng: number } | null;
 }
 
 export function EventMapContainer(props: EventMapContainerProps) {

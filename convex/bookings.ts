@@ -36,6 +36,48 @@ export const requestBooking = mutation({
       throw new Error("Le prénom et le numéro de téléphone sont obligatoires.");
     }
 
+    // Enforce 1 carpool/booking per user per event
+    const existingDriverCarpool = await ctx.db
+      .query("carpools")
+      .withIndex("by_event", (q) => q.eq("eventId", carpool.eventId))
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("driverPhone"), passengerPhone),
+          q.neq(q.field("status"), "cancelled")
+        )
+      )
+      .first();
+
+    if (existingDriverCarpool) {
+      throw new Error(
+        "Vous proposez déjà un covoiturage pour cet événement. Vous ne pouvez pas réserver un autre trajet."
+      );
+    }
+
+    const eventCarpools = await ctx.db
+      .query("carpools")
+      .withIndex("by_event", (q) => q.eq("eventId", carpool.eventId))
+      .collect();
+
+    for (const c of eventCarpools) {
+      const existingBooking = await ctx.db
+        .query("bookings")
+        .withIndex("by_carpool", (q) => q.eq("carpoolId", c._id))
+        .filter((q) =>
+          q.and(
+            q.eq(q.field("passengerPhone"), passengerPhone),
+            q.neq(q.field("status"), "cancelled")
+          )
+        )
+        .first();
+
+      if (existingBooking) {
+        throw new Error(
+          "Vous avez déjà réservé un trajet de covoiturage pour cet événement."
+        );
+      }
+    }
+
     const validationToken = generateToken();
 
     const bookingId = await ctx.db.insert("bookings", {

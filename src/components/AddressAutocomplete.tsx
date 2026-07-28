@@ -14,6 +14,7 @@ interface AddressAutocompleteProps {
   onSelect?: (address: AddressSuggestion) => void;
   placeholder?: string;
   required?: boolean;
+  inputClassName?: string;
 }
 
 export function AddressAutocomplete({
@@ -22,6 +23,7 @@ export function AddressAutocomplete({
   onSelect,
   placeholder = "Ex: 10 Rue de la Paix, Paris...",
   required = false,
+  inputClassName,
 }: AddressAutocompleteProps) {
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -93,7 +95,10 @@ export function AddressAutocomplete({
         onFocus={() => suggestions.length > 0 && setIsOpen(true)}
         placeholder={placeholder}
         required={required}
-        className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors"
+        className={
+          inputClassName ||
+          "w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors"
+        }
       />
       {isLoading && (
         <div className="absolute right-3 top-3 text-xs text-amber-400 animate-pulse">

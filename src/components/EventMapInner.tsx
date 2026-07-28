@@ -8,6 +8,7 @@ import {
   Popup,
   Polyline,
   useMap,
+  useMapEvents,
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -43,6 +44,7 @@ interface CarpoolItem {
   availableSeats: number;
   departureLat?: number;
   departureLng?: number;
+  description?: string;
 }
 
 interface EventMapInnerProps {
@@ -52,6 +54,42 @@ interface EventMapInnerProps {
   carpools: CarpoolItem[];
   selectedCarpool: CarpoolItem | null;
   onSelectCarpool: (carpool: CarpoolItem) => void;
+  isPickingLocation?: boolean;
+  onCenterChange?: (center: { lat: number; lng: number }) => void;
+  pickedLocation?: { lat: number; lng: number } | null;
+}
+
+function MapPickerEvents({
+  isPicking,
+  onCenterChange,
+  pickedLocation,
+}: {
+  isPicking?: boolean;
+  onCenterChange?: (center: { lat: number; lng: number }) => void;
+  pickedLocation?: { lat: number; lng: number } | null;
+}) {
+  const map = useMapEvents({
+    move: () => {
+      if (isPicking && onCenterChange) {
+        const c = map.getCenter();
+        onCenterChange({ lat: c.lat, lng: c.lng });
+      }
+    },
+    moveend: () => {
+      if (isPicking && onCenterChange) {
+        const c = map.getCenter();
+        onCenterChange({ lat: c.lat, lng: c.lng });
+      }
+    },
+  });
+
+  useEffect(() => {
+    if (pickedLocation) {
+      map.flyTo([pickedLocation.lat, pickedLocation.lng], 15, { duration: 0.8 });
+    }
+  }, [pickedLocation, map]);
+
+  return null;
 }
 
 // Map Controller for Leaflet container size invalidation & smooth camera transitions
@@ -59,12 +97,17 @@ function MapController({
   destinationLat,
   destinationLng,
   selectedCarpool,
+  isPickingLocation,
+  pickedLocation,
 }: {
   destinationLat: number;
   destinationLng: number;
   selectedCarpool: CarpoolItem | null;
+  isPickingLocation?: boolean;
+  pickedLocation?: { lat: number; lng: number } | null;
 }) {
   const map = useMap();
+  const [hasInitialCentered, setHasInitialCentered] = useState(false);
 
   useEffect(() => {
     map.invalidateSize();
@@ -82,6 +125,8 @@ function MapController({
   }, [map]);
 
   useEffect(() => {
+    if (isPickingLocation) return;
+
     if (
       selectedCarpool &&
       selectedCarpool.departureLat &&
@@ -91,11 +136,19 @@ function MapController({
         [selectedCarpool.departureLat, selectedCarpool.departureLng],
         [destinationLat, destinationLng],
       ]);
-      map.flyToBounds(bounds, { padding: [80, 80], maxZoom: 14, duration: 1.2 });
-    } else {
+      map.flyToBounds(bounds, {
+        paddingTopLeft: [40, 100],
+        paddingBottomRight: [40, 380],
+        maxZoom: 14,
+        duration: 1.2,
+      });
+    } else if (pickedLocation) {
+      map.flyTo([pickedLocation.lat, pickedLocation.lng], map.getZoom(), { duration: 0.5 });
+    } else if (!hasInitialCentered) {
+      setHasInitialCentered(true);
       map.flyTo([destinationLat, destinationLng], 13, { duration: 1 });
     }
-  }, [selectedCarpool, destinationLat, destinationLng, map]);
+  }, [selectedCarpool, destinationLat, destinationLng, map, isPickingLocation, pickedLocation, hasInitialCentered]);
 
   return null;
 }
@@ -107,6 +160,9 @@ export default function EventMapInner({
   carpools,
   selectedCarpool,
   onSelectCarpool,
+  isPickingLocation,
+  onCenterChange,
+  pickedLocation,
 }: EventMapInnerProps) {
   const [routePolyline, setRoutePolyline] = useState<[number, number][]>([]);
 
@@ -167,10 +223,18 @@ export default function EventMapInner({
           maxZoom={19}
         />
 
+        <MapPickerEvents
+          isPicking={isPickingLocation}
+          onCenterChange={onCenterChange}
+          pickedLocation={pickedLocation}
+        />
+
         <MapController
           destinationLat={destinationLat}
           destinationLng={destinationLng}
           selectedCarpool={selectedCarpool}
+          isPickingLocation={isPickingLocation}
+          pickedLocation={pickedLocation}
         />
 
         {/* Destination Event Marker */}
@@ -203,19 +267,7 @@ export default function EventMapInner({
               eventHandlers={{
                 click: () => onSelectCarpool(c),
               }}
-            >
-              <Popup>
-                <div className="font-sans text-slate-900 p-1 space-y-1">
-                  <div className="font-bold text-sm">{c.driverName}</div>
-                  <div className="text-xs text-slate-600">
-                    Départ: {c.departureAddress}
-                  </div>
-                  <div className="text-xs font-semibold text-emerald-600">
-                    {c.availableSeats} place(s) libre(s)
-                  </div>
-                </div>
-              </Popup>
-            </Marker>
+            />
           );
         })}
 
@@ -227,7 +279,6 @@ export default function EventMapInner({
               color: "#3b82f6",
               weight: 5,
               opacity: 0.85,
-              dashArray: "10, 10",
             }}
           />
         )}
