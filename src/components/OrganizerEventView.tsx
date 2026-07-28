@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { PillGroup } from "@/components/ui/PillGroup";
-import { Share2, Map, Check, ArrowLeft } from "lucide-react";
+import { Share2, Map, MapPin, Calendar, Check, ArrowLeft, Search } from "lucide-react";
 
 interface Guest {
   name: string;
@@ -145,18 +145,23 @@ export function OrganizerEventView({
             </Button>
           </Link>
         </div>
-        {/* Event Header Banner */}
-        <Card variant="gray" className="p-6 sm:p-8 space-y-3">
-          <span className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+        <div className="mb-2">
+          <span className="text-xs font-semibold uppercase tracking-wider">
             Tableau de bord de l'événement
           </span>
-          <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900 font-heading">
+        </div>
+        {/* Event Header Banner */}
+        <Card variant="dark" className="p-6 sm:p-8 space-y-3 text-white!">
+          <h2 className="text-2xl sm:text-3xl font-boldfont-heading">
             {event.title}
           </h2>
-          <p className="text-neutral-600 text-xs sm:text-sm flex flex-wrap items-center gap-x-4 gap-y-1">
-            <span>Destination : {event.destinationAddress}</span>
-            <span>
-              Date :{" "}
+          <p className="text-white/80 text-xs sm:text-sm flex flex-wrap items-center gap-x-4 gap-y-1">
+            <span className="flex items-center gap-2">
+              <MapPin className="w-4 h-4" />
+              {event.destinationAddress}
+            </span>
+            <span className="flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
               {new Date(event.eventDate).toLocaleDateString("fr-FR", {
                 day: "numeric",
                 month: "long",
@@ -205,23 +210,28 @@ export function OrganizerEventView({
         {/* Directory Section */}
         <Card variant="white" className="p-6 space-y-6">
           {/* Tabs & Search */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-100 pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <PillGroup
               value={activeTab}
               onChange={(val) => setActiveTab(val as "guests" | "carpools")}
+              className="w-full flex sm:w-auto sm:inline-flex sm:flex-shrink-0"
+              itemClassName="flex-1 sm:flex-none text-center"
               options={[
                 { id: "guests", label: `Invités (${guests.length})` },
                 { id: "carpools", label: `Covoiturages (${carpools.length})` },
               ]}
             />
 
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Rechercher prénom, tél..."
-              className="cal-input sm:w-64"
-            />
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Rechercher prénom, tél..."
+                className="cal-input w-full !pl-9"
+              />
+            </div>
           </div>
 
           {/* Tab Content: Guests */}

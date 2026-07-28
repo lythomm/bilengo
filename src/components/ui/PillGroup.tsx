@@ -14,6 +14,7 @@ export interface PillGroupProps<T extends string = string> {
   onChange: (value: T) => void;
   className?: string;
   fullWidth?: boolean;
+  itemClassName?: string;
 }
 
 export function PillGroup<T extends string = string>({
@@ -22,6 +23,7 @@ export function PillGroup<T extends string = string>({
   onChange,
   className = "",
   fullWidth = false,
+  itemClassName = "",
 }: PillGroupProps<T>) {
   return (
     <div className={`cal-pill-group ${fullWidth ? "w-full flex" : ""} ${className}`}>
@@ -32,7 +34,7 @@ export function PillGroup<T extends string = string>({
             key={option.id}
             type="button"
             onClick={() => onChange(option.id)}
-            className={`cal-pill-item ${isActive ? "cal-pill-item-active" : ""} flex items-center justify-center gap-1.5 ${fullWidth ? "flex-1 text-center" : ""}`}
+            className={`cal-pill-item ${isActive ? "cal-pill-item-active" : ""} flex items-center justify-center gap-1.5 ${fullWidth ? "flex-1 text-center" : ""} ${itemClassName}`}
           >
             {option.icon}
             <span>{option.label}</span>
