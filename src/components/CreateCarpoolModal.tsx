@@ -86,6 +86,7 @@ export function CreateCarpoolModal({
             </p>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors text-2xl font-bold"
           >

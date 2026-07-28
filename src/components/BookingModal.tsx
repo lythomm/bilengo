@@ -123,6 +123,7 @@ export function BookingModal({ carpool, isOpen, onClose }: BookingModalProps) {
             </p>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors text-2xl font-bold"
           >
@@ -177,6 +178,7 @@ export function BookingModal({ carpool, isOpen, onClose }: BookingModalProps) {
                 </a>
 
                 <button
+                  type="button"
                   onClick={handleWebShare}
                   className="py-2.5 px-3 rounded-xl border border-slate-700 hover:bg-slate-800 text-slate-300 font-medium text-xs flex items-center justify-center gap-1.5 transition-colors"
                 >
@@ -187,6 +189,7 @@ export function BookingModal({ carpool, isOpen, onClose }: BookingModalProps) {
             </div>
 
             <button
+              type="button"
               onClick={onClose}
               className="mt-4 text-xs text-slate-500 hover:text-slate-300 underline"
             >

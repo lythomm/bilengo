@@ -63,6 +63,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               : "Créer un compte Organisateur"}
           </h2>
           <button
+            type="button"
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors text-2xl font-bold"
           >
@@ -154,6 +155,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             <p>
               Pas encore de compte ?{" "}
               <button
+                type="button"
                 onClick={() => {
                   setStep("signUp");
                   setError(null);
@@ -167,6 +169,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             <p>
               Déjà un compte ?{" "}
               <button
+                type="button"
                 onClick={() => {
                   setStep("signIn");
                   setError(null);

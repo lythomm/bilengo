@@ -64,6 +64,7 @@ export function CreateEventModal({
             Créer un nouvel événement
           </h2>
           <button
+            type="button"
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors text-2xl font-bold"
           >

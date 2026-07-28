@@ -77,6 +77,7 @@ export default function EventPage({ params }: EventPageProps) {
           </Link>
 
           <button
+            type="button"
             onClick={handleCopyLink}
             className="px-3.5 py-1.5 rounded-xl border border-slate-700 hover:bg-slate-800 text-slate-300 text-xs font-medium transition-colors"
           >
@@ -122,6 +123,7 @@ export default function EventPage({ params }: EventPageProps) {
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <button
+                type="button"
                 onClick={() => setIsCarpoolModalOpen(true)}
                 className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-sm shadow-xl shadow-amber-500/20 transition-colors text-center"
               >
@@ -173,6 +175,7 @@ export default function EventPage({ params }: EventPageProps) {
                   : "Vous avez une voiture et vous vous rendez à cet événement ? Soyez le premier à proposer des places à bord !"}
               </p>
               <button
+                type="button"
                 onClick={() => setIsCarpoolModalOpen(true)}
                 className="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-sm hover:bg-amber-400 transition-colors"
               >
@@ -229,6 +232,7 @@ export default function EventPage({ params }: EventPageProps) {
                       Capacité : {c.totalSeats} places au total
                     </span>
                     <button
+                      type="button"
                       disabled={c.availableSeats <= 0}
                       onClick={() => setSelectedCarpool(c)}
                       className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-bold transition-colors shadow-md shadow-amber-500/10 disabled:opacity-40 disabled:pointer-events-none"

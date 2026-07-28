@@ -46,12 +46,14 @@ export default function Home() {
             {myEvents !== undefined && myEvents.length > 0 ? (
               <div className="flex items-center gap-3">
                 <button
+                  type="button"
                   onClick={() => setIsCreateOpen(true)}
                   className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-sm transition-colors shadow-md"
                 >
                   + Créer un événement
                 </button>
                 <button
+                  type="button"
                   onClick={() => signOut()}
                   className="px-4 py-2 rounded-xl border border-slate-800 hover:bg-slate-900 text-slate-300 text-sm transition-colors"
                 >
@@ -60,6 +62,7 @@ export default function Home() {
               </div>
             ) : (
               <button
+                type="button"
                 onClick={() => setIsAuthOpen(true)}
                 className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-sm transition-colors shadow-lg shadow-amber-500/15"
               >
@@ -85,6 +88,7 @@ export default function Home() {
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => setIsCreateOpen(true)}
                 className="self-start sm:self-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-semibold text-sm transition-colors shadow-lg shadow-amber-500/20"
               >
@@ -132,6 +136,7 @@ export default function Home() {
                       Voir la page
                     </Link>
                     <button
+                      type="button"
                       onClick={() => handleCopyLink(evt.slug)}
                       className="px-3.5 py-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-xs font-medium transition-colors"
                     >
@@ -163,6 +168,7 @@ export default function Home() {
 
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
               <button
+                type="button"
                 onClick={() => setIsAuthOpen(true)}
                 className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-lg transition-colors shadow-xl shadow-amber-500/25"
               >
