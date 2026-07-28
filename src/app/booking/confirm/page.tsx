@@ -55,7 +55,7 @@ function ConfirmBookingContent() {
     return () => {
       ignore = true;
     };
-  }, [token]);
+  }, [token, confirmBooking]);
 
   return (
     <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-6">
