@@ -45,6 +45,30 @@ export const createCarpool = mutation({
   },
 });
 
+export const cancelCarpool = mutation({
+  args: {
+    carpoolId: v.id("carpools"),
+    driverPhone: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const carpool = await ctx.db.get(args.carpoolId);
+    if (!carpool) {
+      throw new Error("Trajet introuvable.");
+    }
+
+    if (carpool.driverPhone !== args.driverPhone.trim()) {
+      throw new Error("Non autorisé à annuler ce trajet.");
+    }
+
+    await ctx.db.patch(args.carpoolId, {
+      status: "cancelled",
+      availableSeats: 0,
+    });
+
+    return true;
+  },
+});
+
 export const getCarpoolsByEvent = query({
   args: { eventId: v.id("events") },
   handler: async (ctx, args) => {

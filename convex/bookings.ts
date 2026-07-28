@@ -57,6 +57,105 @@ export const requestBooking = mutation({
   },
 });
 
+export const confirmBooking = mutation({
+  args: { validationToken: v.string() },
+  handler: async (ctx, args) => {
+    const token = args.validationToken.trim();
+    if (!token) {
+      throw new Error("Token de validation manquant.");
+    }
+
+    const booking = await ctx.db
+      .query("bookings")
+      .withIndex("by_validation_token", (q) => q.eq("validationToken", token))
+      .first();
+
+    if (!booking) {
+      throw new Error("Réservation introuvable ou lien invalide.");
+    }
+
+    if (booking.status === "confirmed") {
+      return {
+        alreadyConfirmed: true,
+        passengerName: booking.passengerName,
+        passengerPhone: booking.passengerPhone,
+      };
+    }
+
+    if (booking.status === "cancelled") {
+      throw new Error("Cette demande de réservation a été annulée.");
+    }
+
+    const carpool = await ctx.db.get(booking.carpoolId);
+    if (!carpool) {
+      throw new Error("Le trajet associé n'existe plus.");
+    }
+
+    if (carpool.availableSeats <= 0) {
+      throw new Error("Impossible de valider : le trajet est désormais complet.");
+    }
+
+    // Atomic transaction
+    const newAvailableSeats = carpool.availableSeats - 1;
+    const newStatus = newAvailableSeats === 0 ? "full" : "active";
+
+    await ctx.db.patch(carpool._id, {
+      availableSeats: newAvailableSeats,
+      status: newStatus,
+    });
+
+    await ctx.db.patch(booking._id, {
+      status: "confirmed",
+    });
+
+    const event = await ctx.db.get(carpool.eventId);
+
+    return {
+      alreadyConfirmed: false,
+      success: true,
+      passengerName: booking.passengerName,
+      passengerPhone: booking.passengerPhone,
+      departureAddress: carpool.departureAddress,
+      eventTitle: event?.title || "l'événement",
+      eventSlug: event?.slug,
+      availableSeatsRemaining: newAvailableSeats,
+    };
+  },
+});
+
+export const cancelBooking = mutation({
+  args: {
+    bookingId: v.id("bookings"),
+    passengerPhone: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const booking = await ctx.db.get(args.bookingId);
+    if (!booking) {
+      throw new Error("Réservation introuvable.");
+    }
+
+    if (booking.passengerPhone !== args.passengerPhone.trim()) {
+      throw new Error("Non autorisé à annuler cette réservation.");
+    }
+
+    if (booking.status === "confirmed") {
+      const carpool = await ctx.db.get(booking.carpoolId);
+      if (carpool) {
+        await ctx.db.patch(carpool._id, {
+          availableSeats: carpool.availableSeats + 1,
+          status: "active",
+        });
+      }
+    }
+
+    await ctx.db.patch(booking._id, {
+      status: "cancelled",
+    });
+
+    return true;
+  },
+});
+
 export const getBookingByToken = query({
   args: { validationToken: v.string() },
   handler: async (ctx, args) => {
