@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import Link from "next/link";
-import { Plus, Copy, Check, LogOut, MapPin, Calendar, ExternalLink, CalendarPlus } from "lucide-react";
+import { Plus, Copy, Check, LogOut, MapPin, Calendar, ExternalLink, CalendarPlus, Menu, X } from "lucide-react";
 
 export function DashboardClient() {
   const { isAuthenticated, isLoading: isAuthLoading } = useConvexAuth();
@@ -17,6 +17,7 @@ export function DashboardClient() {
   const router = useRouter();
 
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
@@ -33,7 +34,7 @@ export function DashboardClient() {
     const url = `${window.location.origin}/e/${slug}`;
     navigator.clipboard.writeText(url);
     setCopiedSlug(slug);
-    setTimeout(() => setCopiedSlug(null), 2500);
+    setTimeout(() => setCopiedSlug(null), 2000);
   };
 
   const handleSignOut = async () => {
@@ -45,7 +46,7 @@ export function DashboardClient() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white text-neutral-500">
         <div className="animate-pulse text-sm font-medium">
-          Vérification de votre session...
+          Chargement du tableau de bord...
         </div>
       </div>
     );
@@ -54,24 +55,20 @@ export function DashboardClient() {
   return (
     <div className="min-h-screen flex flex-col bg-white text-neutral-900">
       {/* Top Navigation */}
-      <header className="border-b border-neutral-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center text-white font-bold text-base tracking-tighter">
-              B
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-bold tracking-tight text-neutral-900 font-heading">
-                bilengo
-              </span>
-              <Badge variant="default" className="hidden sm:inline-flex">
-                Espace Organisateur
-              </Badge>
-            </div>
+      <header className="sticky top-0 z-50 w-full border-b border-neutral-200/80 bg-white/90 backdrop-blur-md relative">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+          <Link href="/" className="flex items-center gap-2.5 shrink-0">
+            <span className="text-xl font-bold tracking-tight text-neutral-900 font-heading whitespace-nowrap">
+              BilenGo
+            </span>
+            <Badge variant="default" className="hidden sm:inline-flex">
+              Espace Organisateur
+            </Badge>
           </Link>
 
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Link href="/events/create">
+          {/* Desktop Navigation */}
+          <div className="hidden sm:flex items-center gap-3 shrink-0">
+            <Link href="/events/create" className="shrink-0">
               <Button
                 variant="primary"
                 size="sm"
@@ -85,11 +82,53 @@ export function DashboardClient() {
               size="sm"
               onClick={handleSignOut}
               leftIcon={<LogOut className="w-3.5 h-3.5" />}
+              title="Déconnexion"
+              aria-label="Déconnexion"
             >
               Déconnexion
             </Button>
           </div>
+
+          {/* Mobile Hamburger Button */}
+          <div className="sm:hidden flex items-center">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 rounded-lg text-neutral-700 hover:bg-neutral-100 transition-colors border-none bg-transparent cursor-pointer"
+              aria-label="Menu principal"
+              aria-expanded={isMobileMenuOpen}
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-6 h-6 text-neutral-900" />
+              ) : (
+                <Menu className="w-6 h-6 text-neutral-900" />
+              )}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Dropdown Menu (Overlay - shadcn style) */}
+        {isMobileMenuOpen && (
+          <div className="absolute top-full left-0 right-0 z-50 sm:hidden border-b border-neutral-200/90 bg-white/95 backdrop-blur-md px-4 py-3 space-y-2 shadow-xl">
+            <Link
+              href="/events/create"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center gap-2.5 w-full p-2.5 rounded-lg text-sm font-semibold bg-neutral-900 text-white hover:bg-neutral-800 transition-colors justify-center"
+            >
+              <Plus className="w-4 h-4" />
+              Créer un événement
+            </Link>
+            <button
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                handleSignOut();
+              }}
+              className="flex items-center gap-2.5 w-full p-2.5 rounded-lg text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors border-none bg-transparent cursor-pointer text-left"
+            >
+              <LogOut className="w-4 h-4 text-red-600" />
+              Déconnexion
+            </button>
+          </div>
+        )}
       </header>
 
       {/* Main Dashboard Content */}

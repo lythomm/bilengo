@@ -8,40 +8,34 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import Link from "next/link";
-import { Smartphone, MessageSquare, MapPin, Plus, LogOut, ArrowRight, Car } from "lucide-react";
+import { Smartphone, MessageSquare, MapPin, Plus, LogOut, ArrowRight, Car, Menu, X, LayoutDashboard } from "lucide-react";
 
 export function HomeClient() {
   const { isAuthenticated, isLoading: isAuthLoading } = useConvexAuth();
   const { signOut } = useAuthActions();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-neutral-900">
       {/* Top Navigation */}
-      <header className="border-b border-neutral-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center text-white font-bold text-base tracking-tighter">
-              B
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-bold tracking-tight text-neutral-900 font-heading">
-                bilengo
-              </span>
-              <Badge variant="default" className="hidden sm:inline-flex">
-                covoiturage événementiel
-              </Badge>
-            </div>
+      <header className="sticky top-0 z-50 w-full border-b border-neutral-200/80 bg-white/90 backdrop-blur-md relative">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+          <Link href="/" className="flex items-center shrink-0">
+            <span className="text-xl font-bold tracking-tight text-neutral-900 font-heading whitespace-nowrap">
+              BilenGo
+            </span>
           </Link>
 
-          <div className="flex items-center gap-3">
+          {/* Desktop Navigation */}
+          <div className="hidden sm:flex items-center gap-3 shrink-0">
             {isAuthLoading ? (
-              <div className="text-xs text-neutral-400 animate-pulse">
+              <div className="text-xs text-neutral-400 animate-pulse whitespace-nowrap">
                 Chargement...
               </div>
             ) : isAuthenticated ? (
-              <div className="flex items-center gap-2 sm:gap-3">
-                <Link href="/dashboard">
+              <div className="flex items-center gap-3 shrink-0">
+                <Link href="/dashboard" className="shrink-0">
                   <Button variant="primary" size="sm">
                     Mon Tableau de bord
                   </Button>
@@ -51,6 +45,8 @@ export function HomeClient() {
                   size="sm"
                   onClick={() => signOut()}
                   leftIcon={<LogOut className="w-3.5 h-3.5" />}
+                  title="Déconnexion"
+                  aria-label="Déconnexion"
                 >
                   Déconnexion
                 </Button>
@@ -65,11 +61,71 @@ export function HomeClient() {
               </Button>
             )}
           </div>
+
+          {/* Mobile Hamburger Button */}
+          <div className="sm:hidden flex items-center">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 rounded-lg text-neutral-700 hover:bg-neutral-100 transition-colors border-none bg-transparent cursor-pointer"
+              aria-label="Menu principal"
+              aria-expanded={isMobileMenuOpen}
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-6 h-6 text-neutral-900" />
+              ) : (
+                <Menu className="w-6 h-6 text-neutral-900" />
+              )}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Dropdown Menu (Overlay - shadcn style) */}
+        {isMobileMenuOpen && (
+          <div className="absolute top-full left-0 right-0 z-50 sm:hidden border-b border-neutral-200/90 bg-white/95 backdrop-blur-md px-4 py-3 space-y-2 shadow-xl">
+            {isAuthLoading ? (
+              <div className="text-xs text-neutral-400 p-2 animate-pulse">
+                Chargement...
+              </div>
+            ) : isAuthenticated ? (
+              <div className="space-y-1">
+                <Link
+                  href="/dashboard"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-2.5 w-full p-2.5 rounded-lg text-sm font-semibold text-neutral-900 hover:bg-neutral-100 transition-colors"
+                >
+                  <LayoutDashboard className="w-4 h-4 text-neutral-600" />
+                  Mon Tableau de bord
+                </Link>
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    signOut();
+                  }}
+                  className="flex items-center gap-2.5 w-full p-2.5 rounded-lg text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors border-none bg-transparent cursor-pointer text-left"
+                >
+                  <LogOut className="w-4 h-4 text-red-600" />
+                  Déconnexion
+                </button>
+              </div>
+            ) : (
+              <Button
+                variant="primary"
+                size="md"
+                className="w-full justify-center"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsAuthOpen(true);
+                }}
+              >
+                Espace Organisateur
+              </Button>
+            )}
+          </div>
+        )}
       </header>
 
       {/* Hero Section */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-16 sm:py-24">
+      <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-16 sm:py-24">
         <div className="flex flex-col items-center text-center space-y-8">
           <Badge variant="default" className="px-3 py-1 text-xs font-medium">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />

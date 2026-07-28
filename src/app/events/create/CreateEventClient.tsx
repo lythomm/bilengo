@@ -127,14 +127,11 @@ export function CreateEventClient() {
   return (
     <div className="min-h-screen flex flex-col bg-white text-neutral-900">
       {/* Top Header */}
-      <header className="border-b border-neutral-200 bg-white/90 backdrop-blur-md sticky top-0 z-40">
+      <header className="sticky top-0 z-50 w-full border-b border-neutral-200 bg-white/90 backdrop-blur-md">
         <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center text-white font-bold text-base tracking-tighter">
-              B
-            </div>
-            <span className="text-lg font-bold tracking-tight text-neutral-900 font-heading">
-              bilengo
+          <Link href="/dashboard" className="flex items-center">
+            <span className="text-xl font-bold tracking-tight text-neutral-900 font-heading">
+              BilenGo
             </span>
           </Link>
 

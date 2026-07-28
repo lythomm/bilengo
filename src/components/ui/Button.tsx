@@ -39,14 +39,14 @@ export function Button({
   return (
     <button
       disabled={disabled || isLoading}
-      className={`${baseClass} ${sizeClass} ${disabled || isLoading ? "opacity-50 cursor-not-allowed pointer-events-none" : ""} ${className}`}
+      className={`whitespace-nowrap shrink-0 ${baseClass} ${sizeClass} ${disabled || isLoading ? "opacity-50 cursor-not-allowed pointer-events-none" : ""} ${className}`}
       {...props}
     >
       {isLoading && (
         <Loader2 className="w-4 h-4 animate-spin shrink-0" />
       )}
       {!isLoading && leftIcon}
-      <span>{children}</span>
+      <span className="whitespace-nowrap">{children}</span>
       {!isLoading && rightIcon}
     </button>
   );

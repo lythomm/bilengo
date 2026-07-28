@@ -94,10 +94,11 @@ export function OrganizerEventView({
           <div className="flex items-center gap-3">
             <Link
               href="/dashboard"
-              className="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center text-white font-bold text-sm tracking-tighter"
+              className="text-lg font-bold text-neutral-900 tracking-tight font-heading whitespace-nowrap"
             >
-              B
+              BilenGo
             </Link>
+            <span className="text-neutral-300">|</span>
             <h1 className="text-base font-bold text-neutral-900 tracking-tight truncate max-w-xs sm:max-w-md font-heading">
               {event.title}
             </h1>

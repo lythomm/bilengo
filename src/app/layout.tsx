@@ -32,9 +32,9 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${inter.variable} ${plusJakartaSans.variable} h-full antialiased`}
+      className={`${inter.variable} ${plusJakartaSans.variable} antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-white text-neutral-900 font-sans antialiased selection:bg-neutral-900 selection:text-white">
+      <body className="bg-white text-neutral-900 font-sans antialiased selection:bg-neutral-900 selection:text-white">
         <ConvexClientProvider>{children}</ConvexClientProvider>
       </body>
     </html>

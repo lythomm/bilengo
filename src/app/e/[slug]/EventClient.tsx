@@ -255,11 +255,8 @@ export function EventClient({ params }: EventClientProps) {
         </>
       ) : (
         <header className="fixed top-4 left-4 right-4 z-30 max-w-4xl mx-auto bg-white/90 backdrop-blur-md border border-neutral-200 rounded-xl p-3 shadow-lg flex items-center justify-between gap-3">
-          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-8 h-8 rounded-lg bg-neutral-900 text-white font-bold flex items-center justify-center text-sm">
-              B
-            </div>
-            <span className="text-base font-bold text-neutral-900 tracking-tight font-heading">
+          <Link href="/" className="flex items-center flex-shrink-0">
+            <span className="text-lg font-bold text-neutral-900 tracking-tight font-heading">
               BilenGo
             </span>
           </Link>

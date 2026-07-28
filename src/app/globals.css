@@ -47,6 +47,11 @@
   --font-heading: var(--font-heading);
 }
 
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
 body {
   background-color: var(--cal-canvas);
   color: var(--cal-body);
@@ -82,6 +87,7 @@ body {
   gap: 0.5rem;
   cursor: pointer;
   border: none;
+  white-space: nowrap;
 }
 .cal-button-primary:hover {
   background-color: var(--cal-primary-hover);
@@ -105,6 +111,7 @@ body {
   justify-content: center;
   gap: 0.5rem;
   cursor: pointer;
+  white-space: nowrap;
 }
 .cal-button-secondary:hover {
   background-color: var(--cal-surface-soft);
@@ -125,6 +132,7 @@ body {
   gap: 0.5rem;
   cursor: pointer;
   border: none;
+  white-space: nowrap;
 }
 .cal-button-ghost:hover {
   color: var(--cal-ink);
