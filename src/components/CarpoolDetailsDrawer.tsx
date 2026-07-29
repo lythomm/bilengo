@@ -204,7 +204,7 @@ export function CarpoolDetailsDrawer({
             disabled={isDeleting}
             onClick={handleCancel}
           >
-            {isDeleting ? "Suppression..." : "Confirmer la suppression"}
+            {isDeleting ? "Suppression..." : "Supprimer"}
           </Button>
         </div>
       </Modal>

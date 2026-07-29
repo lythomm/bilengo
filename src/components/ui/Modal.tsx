@@ -2,6 +2,7 @@
 
 import { ReactNode, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { X } from "lucide-react";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -60,7 +61,7 @@ export function Modal({
           >
             {/* Header */}
             {(title || showCloseButton) && (
-              <div className="px-6 pt-6 pb-4 flex items-start justify-between border-b border-neutral-100">
+              <div className="px-6 pt-6 flex items-start justify-between">
                 <div>
                   {title && (
                     <h3 className="text-lg font-semibold tracking-tight text-neutral-900 font-heading">
@@ -68,7 +69,7 @@ export function Modal({
                     </h3>
                   )}
                   {description && (
-                    <p className="text-sm text-neutral-500 mt-1">{description}</p>
+                    <p className="text-sm text-neutral-500 mt-4">{description}</p>
                   )}
                 </div>
                 {showCloseButton && (
@@ -80,19 +81,7 @@ export function Modal({
                     className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer border-none bg-transparent"
                     aria-label="Fermer"
                   >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
+                    <X className="w-5 h-5" />
                   </motion.button>
                 )}
               </div>

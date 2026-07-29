@@ -420,7 +420,7 @@ export function MainEventDrawer({
         description="Êtes-vous sûr de vouloir supprimer votre trajet ? Cette action est définitive et annulera toutes les réservations associées."
         maxWidthClass="max-w-md"
       >
-        <div className="flex justify-end gap-2.5 pt-2">
+        <div className="flex justify-end gap-2.5">
           <Button
             variant="secondary"
             size="md"
@@ -436,7 +436,7 @@ export function MainEventDrawer({
               if (confirmDeleteId) handleCancelCarpool(confirmDeleteId as any);
             }}
           >
-            {isDeleting ? "Suppression..." : "Confirmer la suppression"}
+            {isDeleting ? "Suppression..." : "Supprimer"}
           </Button>
         </div>
       </Modal>
