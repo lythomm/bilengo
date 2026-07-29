@@ -35,12 +35,6 @@ export const createEvent = mutation({
       throw new Error("Le titre et l'adresse sont obligatoires.");
     }
 
-    // Enforce freemium limit server-side (< 50 max participants for free tier)
-    if (args.maxParticipants > 50) {
-      throw new Error(
-        "Le compte gratuit est limité à un maximum de 50 participants."
-      );
-    }
     const maxParticipants = Math.max(1, args.maxParticipants);
 
     const slug = slugify(title);

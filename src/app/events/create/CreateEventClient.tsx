@@ -9,6 +9,14 @@ import { EventLocationPickerMap } from "@/components/EventLocationPickerMap";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 
+const PARTICIPANT_OPTIONS = [
+  { label: "50", value: 50 },
+  { label: "100", value: 100 },
+  { label: "250", value: 250 },
+  { label: "500", value: 500 },
+  { label: "1000+", value: 1000 },
+];
+
 export function CreateEventClient() {
   const { isAuthenticated, isLoading: isAuthLoading } = useConvexAuth();
   const createEvent = useMutation(api.events.createEvent);
@@ -25,6 +33,8 @@ export function CreateEventClient() {
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isGeocoding, setIsGeocoding] = useState(false);
+  const [mapPinMoved, setMapPinMoved] = useState(false);
 
   useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
@@ -49,8 +59,88 @@ export function CreateEventClient() {
       }
       setStep(3);
     } else if (step === 3) {
-      if (!destinationAddress.trim()) {
-        setDestinationAddress(`Point sur la carte (${destinationLat.toFixed(4)}, ${destinationLng.toFixed(4)})`);
+      if (mapPinMoved || !destinationAddress.trim()) {
+        setIsGeocoding(true);
+        try {
+          const lat = destinationLat;
+          const lng = destinationLng;
+          let reverseAddress = "";
+
+          // 1. Try BAN with type=housenumber for exact house number & street address
+          try {
+            const res = await fetch(
+              `https://api-adresse.data.gouv.fr/reverse/?lon=${lng}&lat=${lat}&type=housenumber`
+            );
+            if (res.ok) {
+              const data = await res.json();
+              if (data.features && data.features.length > 0) {
+                const prop = data.features[0].properties;
+                reverseAddress = prop.label || prop.name || "";
+              }
+            }
+          } catch (e) {
+            console.warn("api-adresse type=housenumber failed", e);
+          }
+
+          // 2. Try standard BAN if type=housenumber didn't yield a result
+          if (!reverseAddress) {
+            try {
+              const res = await fetch(
+                `https://api-adresse.data.gouv.fr/reverse/?lon=${lng}&lat=${lat}`
+              );
+              if (res.ok) {
+                const data = await res.json();
+                if (data.features && data.features.length > 0) {
+                  const houseFeat = data.features.find(
+                    (f: any) => f.properties?.type === "housenumber" || f.properties?.housenumber
+                  );
+                  const prop = houseFeat ? houseFeat.properties : data.features[0].properties;
+                  reverseAddress = prop.label || prop.name || (prop.street ? `${prop.street}, ${prop.city}` : "");
+                }
+              }
+            } catch (e) {
+              console.warn("api-adresse standard reverse failed", e);
+            }
+          }
+
+          // 3. Fallback to OpenStreetMap Nominatim
+          if (!reverseAddress) {
+            try {
+              const res = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=fr`
+              );
+              if (res.ok) {
+                const data = await res.json();
+                if (data.address) {
+                  const a = data.address;
+                  const num = a.house_number ? `${a.house_number} ` : "";
+                  const street = a.road || a.pedestrian || "";
+                  const city = a.city || a.town || a.village || "";
+                  const postcode = a.postcode || "";
+                  if (street && city) {
+                    reverseAddress = `${num}${street}, ${postcode} ${city}`.trim();
+                  }
+                }
+                if (!reverseAddress) {
+                  reverseAddress = data.display_name || "";
+                }
+              }
+            } catch (e) {
+              console.warn("nominatim reverse geocoding failed", e);
+            }
+          }
+
+          if (reverseAddress) {
+            setDestinationAddress(reverseAddress);
+          } else if (!destinationAddress.trim()) {
+            setDestinationAddress(`Point sur la carte (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
+          }
+          setPickedLocation({ lat, lng });
+        } catch (err) {
+          console.error("Erreur lors de la géolocalisation de l'adresse", err);
+        } finally {
+          setIsGeocoding(false);
+        }
       }
       setStep(4);
     }
@@ -166,20 +256,25 @@ export function CreateEventClient() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
                   Participants Max
                 </label>
-                <input
-                  type="number"
-                  min={1}
-                  max={50}
-                  value={maxParticipants}
-                  onChange={(e) => setMaxParticipants(Number(e.target.value))}
-                  className="cal-input"
-                />
-                <p className="text-[11px] text-neutral-400 mt-1">
-                  Tier gratuit limité à 50 participants.
-                </p>
+                <div className="grid grid-cols-5 gap-2">
+                  {PARTICIPANT_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setMaxParticipants(opt.value)}
+                      className={`py-2 px-3 text-xs font-semibold rounded-lg border transition-all ${
+                        maxParticipants === opt.value
+                          ? "bg-neutral-900 text-white border-neutral-900 shadow-sm"
+                          : "bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-50 hover:border-neutral-300"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="pt-2 flex justify-end">
@@ -248,9 +343,13 @@ export function CreateEventClient() {
                 </label>
                 <AddressAutocomplete
                   value={destinationAddress}
-                  onChange={(val) => setDestinationAddress(val)}
+                  onChange={(val) => {
+                    setDestinationAddress(val);
+                    setMapPinMoved(false);
+                  }}
                   onSelect={(item) => {
                     setDestinationAddress(item.label);
+                    setMapPinMoved(false);
                     if (item.lat && item.lng) {
                       setDestinationLat(item.lat);
                       setDestinationLng(item.lng);
@@ -272,6 +371,8 @@ export function CreateEventClient() {
                   onCenterChange={(center) => {
                     setDestinationLat(center.lat);
                     setDestinationLng(center.lng);
+                    setPickedLocation({ lat: center.lat, lng: center.lng });
+                    setMapPinMoved(true);
                   }}
                 />
                 <p className="text-[11px] text-neutral-500 text-right font-mono">
@@ -289,7 +390,7 @@ export function CreateEventClient() {
                   ← Précédent
                 </Button>
 
-                <Button type="submit" variant="primary" size="md">
+                <Button type="submit" variant="primary" size="md" isLoading={isGeocoding}>
                   Récapitulatif →
                 </Button>
               </div>
@@ -329,7 +430,9 @@ export function CreateEventClient() {
 
                   <div>
                     <span className="text-neutral-400 font-medium">Participants max</span>
-                    <p className="font-semibold text-neutral-800">{maxParticipants} max</p>
+                    <p className="font-semibold text-neutral-800">
+                      {maxParticipants === 1000 ? "1000+" : maxParticipants} max
+                    </p>
                   </div>
                 </div>
 

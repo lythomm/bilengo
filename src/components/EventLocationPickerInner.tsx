@@ -27,7 +27,11 @@ function MapEventsListener({
 
   useEffect(() => {
     if (pickedLocation) {
-      map.flyTo([pickedLocation.lat, pickedLocation.lng], 15, { duration: 0.8 });
+      const current = map.getCenter();
+      const dist = Math.hypot(current.lat - pickedLocation.lat, current.lng - pickedLocation.lng);
+      if (dist > 0.0001) {
+        map.flyTo([pickedLocation.lat, pickedLocation.lng], 16, { duration: 0.8 });
+      }
     }
   }, [pickedLocation, map]);
 

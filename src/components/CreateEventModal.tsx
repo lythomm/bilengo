@@ -115,22 +115,32 @@ export function CreateEventModal({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
               Participants Max
             </label>
-            <input
-              type="number"
-              min={1}
-              max={50}
-              value={maxParticipants}
-              onChange={(e) => setMaxParticipants(parseInt(e.target.value) || 1)}
-              className="cal-input"
-            />
+            <div className="grid grid-cols-5 gap-2">
+              {[
+                { label: "50", value: 50 },
+                { label: "100", value: 100 },
+                { label: "250", value: 250 },
+                { label: "500", value: 500 },
+                { label: "1000+", value: 1000 },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setMaxParticipants(opt.value)}
+                  className={`py-2 px-3 text-xs font-semibold rounded-lg border transition-all ${
+                    maxParticipants === opt.value
+                      ? "bg-neutral-900 text-white border-neutral-900 shadow-sm"
+                      : "bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-50 hover:border-neutral-300"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-
-        <div className="p-3 bg-neutral-50 border border-neutral-200 rounded-lg text-xs text-neutral-600 flex items-center gap-2">
-          <span>Offre gratuite : Jusqu'à 50 participants autorisés.</span>
         </div>
 
         <Button
