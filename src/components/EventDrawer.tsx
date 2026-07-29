@@ -87,8 +87,13 @@ export function EventDrawer({
           isOpen={!!selectedCarpool}
           onClose={() => onSelectCarpool(null)}
           onOpenBooking={onOpenBooking}
-          isDriver={isDriver}
-          isPassenger={isPassenger}
+          isDriver={
+            (userRole?.role === "driver" && userRole?.carpool?._id === selectedCarpool._id) ||
+            !!(userPhone && selectedCarpool.driverPhone && cleanPhone(selectedCarpool.driverPhone) === userPhone)
+          }
+          isPassenger={
+            userRole?.role === "passenger" && userRole?.carpool?._id === selectedCarpool._id
+          }
         />
       )}
 
