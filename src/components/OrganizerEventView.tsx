@@ -208,7 +208,10 @@ export function OrganizerEventView({
           <Card variant="white" className="p-4 space-y-1">
             <div className="text-neutral-500 text-xs font-semibold">Total Invités</div>
             <div className="text-2xl font-bold text-neutral-900 font-heading">
-              {stats.totalGuests}
+              {stats.totalGuests}{" "}
+              <span className="text-sm font-normal text-neutral-400">
+                / {event.maxParticipants === 1000 ? "1000+" : event.maxParticipants}
+              </span>
             </div>
           </Card>
 
