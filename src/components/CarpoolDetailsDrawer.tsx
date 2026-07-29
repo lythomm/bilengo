@@ -44,11 +44,11 @@ export function CarpoolDetailsDrawer({
   const session = getParticipantSession();
   const userPhone = cleanPhone(
     session?.phone ||
-      (typeof window !== "undefined"
-        ? localStorage.getItem("bilengo_driver_phone") ||
-          localStorage.getItem("bilengo_phone") ||
-          ""
-        : "")
+    (typeof window !== "undefined"
+      ? localStorage.getItem("bilengo_driver_phone") ||
+      localStorage.getItem("bilengo_phone") ||
+      ""
+      : "")
   );
 
   const isOwnCarpool = !!(
@@ -105,29 +105,40 @@ export function CarpoolDetailsDrawer({
 
           {/* Details Card */}
           <Card variant="gray" className="space-y-3 p-4">
-            <div className="flex items-start gap-2 text-sm text-neutral-800">
-              <span className="font-bold text-neutral-900">Départ :</span>
-              <span>{carpool.departureAddress.replace(/\s*\([^)]*km\)/gi, "")}</span>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="flex flex-col items-center text-center">
+                <div className="min-h-7 flex items-center justify-center">
+                  <span className="font-semibold text-neutral-900 text-sm line-clamp-2">
+                    {carpool.departureAddress.replace(/\s*\([^)]*km\)/gi, "")}
+                  </span>
+                </div>
+                <span className="text-xs text-neutral-500 font-medium mt-1">Départ</span>
+              </div>
+
+              <div className="flex flex-col items-center text-center">
+                <div className="min-h-7 flex items-center justify-center">
+                  <span className="font-semibold text-neutral-900 text-sm">
+                    {new Date(carpool.departureTime).toLocaleDateString("fr-FR", {
+                      day: "numeric",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+                <span className="text-xs text-neutral-500 font-medium mt-1">Heure</span>
+              </div>
+
+              <div className="flex flex-col items-center text-center">
+                <div className="min-h-7 flex items-center justify-center">
+                  <Badge variant={carpool.availableSeats > 0 ? "emerald" : "default"}>
+                    {carpool.availableSeats} / {carpool.totalSeats}
+                  </Badge>
+                </div>
+                <span className="text-xs text-neutral-500 font-medium mt-1">Places libres</span>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2 text-sm text-neutral-800">
-              <span className="font-bold text-neutral-900">Heure :</span>
-              <span>
-                {new Date(carpool.departureTime).toLocaleDateString("fr-FR", {
-                  day: "numeric",
-                  month: "short",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 text-sm text-neutral-800">
-              <span className="font-bold text-neutral-900">Places libres :</span>
-              <Badge variant={carpool.availableSeats > 0 ? "emerald" : "default"}>
-                {carpool.availableSeats} / {carpool.totalSeats}
-              </Badge>
-            </div>
 
             {carpool.description && (
               <div className="text-sm text-neutral-700 bg-white p-3.5 rounded-lg border border-neutral-200/60 italic">

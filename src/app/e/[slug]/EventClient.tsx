@@ -257,25 +257,12 @@ export function EventClient({ params }: EventClientProps) {
           </div>
         </>
       ) : (
-        <header className="fixed top-4 left-4 right-4 z-30 max-w-4xl mx-auto bg-white/90 backdrop-blur-md border border-neutral-200 rounded-xl p-3 shadow-lg flex items-center justify-between gap-3">
+        <header className="fixed w-full z-30 bg-white p-4 h-16 flex items-center justify-between gap-3 border-b border-neutral-200">
           <span className="text-lg font-bold text-neutral-900 tracking-tight font-heading">
             BilenGo
           </span>
 
           <div className="flex items-center gap-2">
-            {organizerData?.isOrganizer && (
-              <Button
-                type="button"
-                variant="primary"
-                size="sm"
-                onClick={() => setViewMode("organizer")}
-                title="Vue Organisateur"
-                aria-label="Vue Organisateur"
-              >
-                <LayoutDashboard className="w-4 h-4" />
-              </Button>
-            )}
-
             <Button
               type="button"
               variant="secondary"
@@ -290,6 +277,19 @@ export function EventClient({ params }: EventClientProps) {
                 <Share2 className="w-4 h-4" />
               )}
             </Button>
+
+            {organizerData?.isOrganizer && (
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                onClick={() => setViewMode("organizer")}
+                title="Vue Organisateur"
+                aria-label="Vue Organisateur"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         </header>
       )}
