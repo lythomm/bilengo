@@ -11,7 +11,25 @@ import { Card } from "@/components/ui/Card";
 import { PillGroup } from "@/components/ui/PillGroup";
 import { Toast } from "@/components/ui/Toast";
 import { Modal } from "@/components/ui/Modal";
-import { Share2, Map, MapPin, Calendar, Check, ArrowLeft, Search, Trash2 } from "lucide-react";
+import {
+  Share2,
+  Map,
+  MapPin,
+  Flag,
+  Calendar,
+  Check,
+  ArrowLeft,
+  Search,
+  Trash2,
+  Clock,
+  Phone,
+  Users,
+  Car,
+  UserCheck,
+  CheckCircle2,
+  User,
+  Info,
+} from "lucide-react";
 
 interface Guest {
   name: string;
@@ -206,7 +224,10 @@ export function OrganizerEventView({
         {/* Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <Card variant="white" className="p-4 space-y-1">
-            <div className="text-neutral-500 text-xs font-semibold">Total Invités</div>
+            <div className="text-neutral-500 text-xs font-semibold flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+              Invités
+            </div>
             <div className="text-2xl font-bold text-neutral-900 font-heading">
               {stats.totalGuests}{" "}
               <span className="text-sm font-normal text-neutral-400">
@@ -216,14 +237,20 @@ export function OrganizerEventView({
           </Card>
 
           <Card variant="white" className="p-4 space-y-1">
-            <div className="text-neutral-500 text-xs font-semibold">Conducteurs</div>
+            <div className="text-neutral-500 text-xs font-semibold flex items-center gap-1.5">
+              <Car className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+              Conducteurs
+            </div>
             <div className="text-2xl font-bold text-neutral-900 font-heading">
               {stats.totalDrivers}
             </div>
           </Card>
 
           <Card variant="white" className="p-4 space-y-1">
-            <div className="text-neutral-500 text-xs font-semibold">Places Réservées</div>
+            <div className="text-neutral-500 text-xs font-semibold flex items-center gap-1.5">
+              <UserCheck className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+              Réservées
+            </div>
             <div className="text-2xl font-bold text-neutral-900 font-heading">
               {stats.totalSeatsBooked}{" "}
               <span className="text-sm font-normal text-neutral-400">
@@ -233,7 +260,10 @@ export function OrganizerEventView({
           </Card>
 
           <Card variant="white" className="p-4 space-y-1">
-            <div className="text-neutral-500 text-xs font-semibold">Places Libres</div>
+            <div className="text-neutral-500 text-xs font-semibold flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              Places Libres
+            </div>
             <div className="text-2xl font-bold text-emerald-700 font-heading">
               {stats.totalSeatsAvailable}
             </div>
@@ -278,10 +308,26 @@ export function OrganizerEventView({
                 <table className="w-full text-left border-collapse text-xs whitespace-nowrap">
                   <thead>
                     <tr className="border-b border-neutral-200 text-neutral-500 font-semibold uppercase tracking-wider whitespace-nowrap">
-                      <th className="py-2.5 px-3 whitespace-nowrap">Invité</th>
-                      <th className="py-2.5 px-3 whitespace-nowrap">Téléphone</th>
-                      <th className="py-2.5 px-3 whitespace-nowrap">Statut Covoiturage</th>
-                      <th className="py-2.5 px-3 whitespace-nowrap">Détails</th>
+                      <th className="py-2.5 px-3 whitespace-nowrap">
+                        <span className="flex items-center gap-1">
+                          <User className="w-3.5 h-3.5 text-neutral-400" /> Invité
+                        </span>
+                      </th>
+                      <th className="py-2.5 px-3 whitespace-nowrap">
+                        <span className="flex items-center gap-1">
+                          <Phone className="w-3.5 h-3.5 text-neutral-400" /> Téléphone
+                        </span>
+                      </th>
+                      <th className="py-2.5 px-3 whitespace-nowrap">
+                        <span className="flex items-center gap-1">
+                          <Car className="w-3.5 h-3.5 text-neutral-400" /> Statut Covoiturage
+                        </span>
+                      </th>
+                      <th className="py-2.5 px-3 whitespace-nowrap">
+                        <span className="flex items-center gap-1">
+                          <Info className="w-3.5 h-3.5 text-neutral-400" /> Détails
+                        </span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-100">
@@ -291,7 +337,16 @@ export function OrganizerEventView({
                           {guest.name}
                         </td>
                         <td className="py-3 px-3 font-mono text-neutral-500 whitespace-nowrap">
-                          {guest.phone || "—"}
+                          {guest.phone ? (
+                            <a
+                              href={`tel:${guest.phone}`}
+                              className="hover:text-neutral-900 transition-colors"
+                            >
+                              {guest.phone}
+                            </a>
+                          ) : (
+                            "—"
+                          )}
                         </td>
                         <td className="py-3 px-3 whitespace-nowrap">
                           <div className="flex items-center gap-1.5 flex-nowrap">
@@ -337,9 +392,19 @@ export function OrganizerEventView({
                   <Card key={c._id} variant="gray" className="p-4 space-y-3">
                     <div className="flex justify-between items-start">
                       <div>
-                        <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Conducteur</span>
+                        <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1">
+                          <Car className="w-3 h-3 text-neutral-400 shrink-0" />
+                          Conducteur
+                        </span>
                         <h4 className="text-base font-bold text-neutral-900 font-heading">{c.driverName}</h4>
-                        <p className="text-xs font-mono text-neutral-500">{c.driverPhone}</p>
+                        {c.driverPhone && (
+                          <a
+                            href={`tel:${c.driverPhone}`}
+                            className="text-xs font-mono text-neutral-500 hover:text-neutral-900 transition-colors"
+                          >
+                            {c.driverPhone}
+                          </a>
+                        )}
                       </div>
                       <Badge variant={c.availableSeats > 0 ? "emerald" : "default"}>
                         {c.availableSeats > 0
@@ -348,15 +413,26 @@ export function OrganizerEventView({
                       </Badge>
                     </div>
 
-                    <div className="text-xs text-neutral-600 space-y-1 bg-white p-3 rounded-lg border border-neutral-200/60">
-                      <div>Départ : <span className="font-semibold text-neutral-900">{c.departureAddress}</span></div>
-                      <div>Heure : {new Date(c.departureTime).toLocaleDateString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</div>
+                    <div className="text-xs text-neutral-600 space-y-1.5 bg-white p-3 rounded-lg border border-neutral-200/60">
+                      <div className="flex items-center gap-1.5">
+                        <Flag className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
+                        <span className="font-semibold text-neutral-900 truncate">{c.departureAddress}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
+                        <span className="font-semibold text-neutral-900">
+                          {/^\d{2}:\d{2}$/.test(c.departureTime)
+                            ? c.departureTime
+                            : new Date(c.departureTime).toLocaleDateString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      </div>
                     </div>
 
                     {/* Passengers List */}
                     <div className="space-y-1.5 pt-2 border-t border-neutral-200">
-                      <div className="text-xs font-bold text-neutral-700">
-                        Passagers inscrits ({c.bookings.length}) :
+                      <div className="text-xs font-bold text-neutral-700 flex items-center gap-1.5">
+                        <Users className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
+                        Passagers ({c.bookings.length})
                       </div>
                       {c.bookings.length === 0 ? (
                         <div className="text-xs text-neutral-400 italic">Aucune réservation.</div>
@@ -367,12 +443,19 @@ export function OrganizerEventView({
                               key={b._id}
                               className="flex items-center justify-between text-xs bg-white p-2 rounded border border-neutral-200/60"
                             >
-                              <div>
-                                <span className="font-semibold text-neutral-900">{b.passengerName}</span>
-                                <span className="text-neutral-500 font-mono ml-2">({b.passengerPhone})</span>
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="font-semibold text-neutral-900 truncate">{b.passengerName}</span>
+                                {b.passengerPhone && (
+                                  <a
+                                    href={`tel:${b.passengerPhone}`}
+                                    className="text-neutral-500 font-mono text-[11px] shrink-0"
+                                  >
+                                    ({b.passengerPhone})
+                                  </a>
+                                )}
                               </div>
-                              <Badge variant={b.status === "confirmed" ? "emerald" : "default"}>
-                                {b.status}
+                              <Badge variant={b.status === "confirmed" ? "emerald" : b.status === "pending" ? "orange" : "default"}>
+                                {b.status === "confirmed" ? "Confirmé" : b.status === "pending" ? "En attente" : "Annulé"}
                               </Badge>
                             </div>
                           ))}
