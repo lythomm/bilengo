@@ -70,6 +70,13 @@ export const getMyEvents = query({
   },
 });
 
+export const getAllEvents = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("events").collect();
+  },
+});
+
 export const getEventBySlug = query({
   args: { slug: v.string() },
   handler: async (ctx, args) => {

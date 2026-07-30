@@ -11,7 +11,7 @@ import { PillGroup } from "@/components/ui/PillGroup";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
-import { Trash2, MapPin } from "lucide-react";
+import { Trash2, MapPin, Clock, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import googleMapsIcon from "@/assets/icons/google-maps.svg";
 import wazeIcon from "@/assets/icons/waze.webp";
@@ -45,6 +45,20 @@ interface MainEventDrawerProps {
 function cleanPhone(p?: string) {
   if (!p) return "";
   return p.replace(/[^0-9]/g, "");
+}
+
+function formatDepartureTime(timeStr: string): string {
+  if (!timeStr) return "";
+  if (/^\d{2}:\d{2}$/.test(timeStr)) return timeStr;
+  try {
+    const d = new Date(timeStr);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    }
+  } catch {
+    // fallback
+  }
+  return timeStr;
 }
 
 function getDistanceKm(lat1?: number, lng1?: number, lat2?: number, lng2?: number): number {
@@ -209,46 +223,57 @@ export function MainEventDrawer({
                 <div className="space-y-2.5">
                   {sortedCarpools.map((c) => {
                     const distKm = getDistanceKm(destinationLat, destinationLng, c.departureLat, c.departureLng);
+                    const formattedTime = formatDepartureTime(c.departureTime);
+                    const initial = c.driverName ? c.driverName.charAt(0).toUpperCase() : "?";
+
                     return (
                       <div
                         key={c._id}
                         onClick={() => onSelectCarpool(c)}
-                        className="p-4 bg-neutral-50 border border-neutral-200/80 hover:border-neutral-300 rounded-xl cursor-pointer transition-colors flex items-center justify-between gap-3"
+                        className="relative p-3.5 bg-white border border-neutral-200/90 rounded-2xl cursor-pointer active:bg-neutral-100/70 active:scale-[0.98] transition-all flex flex-col gap-2.5 min-h-[44px]"
                       >
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-neutral-900 text-base font-heading">
+                        {/* Top Row: Driver Avatar & Name + Distance (Left) | Time & Arrow (Right) */}
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="w-8 h-8 rounded-full bg-emerald-100/80 border border-emerald-200/60 text-emerald-800 font-extrabold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                              {initial}
+                            </div>
+                            <span className="font-bold text-neutral-900 text-sm sm:text-base font-heading truncate">
                               {c.driverName}
                             </span>
-                            <Badge
-                              variant={c.availableSeats > 0 ? "emerald" : "default"}
-                            >
-                              {c.availableSeats > 0
-                                ? `${c.availableSeats} place(s)`
-                                : "Complet"}
-                            </Badge>
                             {distKm < 9999 && (
-                              <span className="text-[11px] font-semibold text-neutral-500 bg-neutral-200/60 px-1.5 py-0.5 rounded">
+                              <span className="text-[11px] font-semibold text-neutral-600 bg-neutral-100 border border-neutral-200/80 px-2 py-0.5 rounded-full shrink-0">
                                 {distKm < 1 ? "< 1 km" : `${Math.round(distKm)} km`}
                               </span>
                             )}
                           </div>
-                          <p className="text-sm text-neutral-600 font-medium line-clamp-1 flex items-center gap-1.5">
-                            <MapPin className="w-4 h-4 text-neutral-400 shrink-0" />
-                            {c.departureAddress.replace(/\s*\([^)]*km\)/gi, "")}
-                          </p>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {formattedTime && (
+                              <div className="flex items-center gap-1 text-xs font-bold text-neutral-800 bg-neutral-100/90 border border-neutral-200/60 px-2 py-1 rounded-lg">
+                                <Clock className="w-3.5 h-3.5 text-neutral-500" />
+                                <span>{formattedTime}</span>
+                              </div>
+                            )}
+                            <ChevronRight className="w-4 h-4 text-neutral-400" />
+                          </div>
                         </div>
 
-                        <div className="text-right flex flex-col items-end shrink-0">
-                          <span className="text-sm font-bold text-neutral-900">
-                            {new Date(c.departureTime).toLocaleTimeString("fr-FR", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </span>
-                          <span className="text-xs font-semibold text-neutral-500 mt-1">
-                            Itinéraire →
-                          </span>
+                        {/* Bottom Row: Departure Address (Left) | Available Seats Badge (Right) */}
+                        <div className="flex items-center justify-between gap-3 pt-2 border-t border-neutral-100/90 text-xs">
+                          <div className="flex items-center gap-1.5 text-neutral-600 font-medium truncate min-w-0">
+                            <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            <span className="truncate">{c.departureAddress.replace(/\s*\([^)]*km\)/gi, "")}</span>
+                          </div>
+
+                          <Badge
+                            variant={c.availableSeats > 0 ? "emerald" : "default"}
+                            className="shrink-0 font-semibold"
+                          >
+                            {c.availableSeats > 0
+                              ? `${c.availableSeats} place${c.availableSeats > 1 ? "s" : ""}`
+                              : "Complet"}
+                          </Badge>
                         </div>
                       </div>
                     );
@@ -307,13 +332,7 @@ export function MainEventDrawer({
                       <span className="font-bold text-neutral-900">{c.departureAddress}</span>
                     </div>
                     <div>
-                      Heure :{" "}
-                      {new Date(c.departureTime).toLocaleDateString("fr-FR", {
-                        day: "numeric",
-                        month: "short",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      Heure : {formatDepartureTime(c.departureTime)}
                     </div>
                   </div>
 
@@ -389,7 +408,7 @@ export function MainEventDrawer({
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Ouvrir dans Google Maps"
-                className="bg-neutral-800 hover:bg-neutral-700 border border-neutral-700/80 p-2.5 rounded-xl transition-all flex items-center justify-center hover:scale-105 active:scale-95"
+                className="bg-neutral-800 border border-neutral-700/80 p-2.5 rounded-xl transition-all flex items-center justify-center active:bg-neutral-700 active:scale-95"
               >
                 <Image src={googleMapsIcon} alt="Google Maps" className="w-5 h-5 object-contain" />
               </a>
@@ -403,7 +422,7 @@ export function MainEventDrawer({
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Ouvrir dans Waze"
-                className="bg-neutral-800 hover:bg-neutral-700 border border-neutral-700/80 p-2.5 rounded-xl transition-all flex items-center justify-center hover:scale-105 active:scale-95"
+                className="bg-neutral-800 border border-neutral-700/80 p-2.5 rounded-xl transition-all flex items-center justify-center active:bg-neutral-700 active:scale-95"
               >
                 <Image src={wazeIcon} alt="Waze" className="w-5 h-5 object-contain" />
               </a>

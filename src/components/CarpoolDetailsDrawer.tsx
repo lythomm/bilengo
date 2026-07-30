@@ -27,6 +27,20 @@ function cleanPhone(p?: string) {
   return p.replace(/[^0-9]/g, "");
 }
 
+function formatDepartureTime(timeStr: string): string {
+  if (!timeStr) return "";
+  if (/^\d{2}:\d{2}$/.test(timeStr)) return timeStr;
+  try {
+    const d = new Date(timeStr);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    }
+  } catch {
+    // fallback
+  }
+  return timeStr;
+}
+
 export function CarpoolDetailsDrawer({
   carpool,
   isOpen,
@@ -118,12 +132,7 @@ export function CarpoolDetailsDrawer({
               <div className="flex flex-col items-center text-center">
                 <div className="min-h-7 flex items-center justify-center">
                   <span className="font-semibold text-neutral-900 text-sm">
-                    {new Date(carpool.departureTime).toLocaleDateString("fr-FR", {
-                      day: "numeric",
-                      month: "short",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {formatDepartureTime(carpool.departureTime)}
                   </span>
                 </div>
                 <span className="text-xs text-neutral-500 font-medium mt-1">Heure</span>
