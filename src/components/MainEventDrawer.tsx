@@ -11,7 +11,9 @@ import { PillGroup } from "@/components/ui/PillGroup";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
-import { Trash2, MapPin, Clock, ChevronRight, CarFront, CheckCircle2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { formatConvexError } from "@/lib/errors";
+import { Trash2, MapPin, Clock, ChevronRight, CarFront, CheckCircle2, Users, Check, X } from "lucide-react";
 import Image from "next/image";
 import googleMapsIcon from "@/assets/icons/google-maps.svg";
 import wazeIcon from "@/assets/icons/waze.webp";
@@ -76,6 +78,175 @@ function getDistanceKm(lat1?: number, lng1?: number, lat2?: number, lng2?: numbe
   return R * c;
 }
 
+function DriverPassengersList({ carpoolId }: { carpoolId: Id<"carpools"> }) {
+  const bookings = useQuery(
+    api.bookings.getAllBookingsForCarpool,
+    { carpoolId }
+  );
+  const respondToBooking = useMutation(api.bookings.respondToBookingByDriver);
+  const [respondingId, setRespondingId] = useState<string | null>(null);
+  const [confirmTarget, setConfirmTarget] = useState<{
+    bookingId: Id<"bookings">;
+    passengerName: string;
+    action: "accept" | "reject";
+  } | null>(null);
+
+  if (!bookings || bookings.length === 0) return null;
+
+  const sortedBookings = [...bookings].sort((a, b) => {
+    if (a.status === "pending" && b.status !== "pending") return -1;
+    if (a.status !== "pending" && b.status === "pending") return 1;
+    return 0;
+  });
+
+  const handleRespond = async (bookingId: Id<"bookings">, action: "accept" | "reject") => {
+    const driverPhone = cleanPhone(
+      getParticipantSession()?.phone ||
+      (typeof window !== "undefined"
+        ? localStorage.getItem("bilengo_driver_phone") ||
+        localStorage.getItem("bilengo_phone") ||
+        ""
+        : "")
+    );
+
+    if (!driverPhone) {
+      alert("Veuillez vous connecter avec votre numéro de conducteur pour répondre à cette demande.");
+      return;
+    }
+
+    try {
+      setRespondingId(bookingId);
+      await respondToBooking({
+        bookingId,
+        driverPhone,
+        action,
+      });
+    } catch (err: unknown) {
+      alert(formatConvexError(err, "Erreur lors du traitement de la demande."));
+    } finally {
+      setRespondingId(null);
+      setConfirmTarget(null);
+    }
+  };
+
+  return (
+    <>
+      <div className="space-y-2 pt-2 border-t border-neutral-200/80">
+        <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-1.5">
+          <Users className="w-3.5 h-3.5 text-neutral-400" />
+          Passagers ({sortedBookings.length})
+        </span>
+
+        <div className="space-y-1.5">
+          {sortedBookings.map((b) => (
+            <div
+              key={b._id}
+              className={`p-2.5 rounded-xl border flex items-center justify-between text-xs shadow-2xs gap-2 ${b.status === "confirmed"
+                  ? "bg-white border-neutral-200/80"
+                  : "bg-amber-50/90 border-amber-200/80"
+                }`}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <div
+                  className={`w-7 h-7 rounded-full font-extrabold text-xs flex items-center justify-center shrink-0 border ${b.status === "confirmed"
+                      ? "bg-emerald-100/80 text-emerald-800 border-emerald-200/60"
+                      : "bg-amber-200/80 text-amber-900 border-amber-300/60"
+                    }`}
+                >
+                  {b.passengerName.charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-bold text-neutral-900 truncate">{b.passengerName}</p>
+                  <p className="text-neutral-500 font-mono text-[11px]">{b.passengerPhone}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5 shrink-0">
+                {b.status === "pending" ? (
+                  <>
+                    <button
+                      type="button"
+                      disabled={respondingId === b._id}
+                      onClick={() =>
+                        setConfirmTarget({
+                          bookingId: b._id as Id<"bookings">,
+                          passengerName: b.passengerName,
+                          action: "accept",
+                        })
+                      }
+                      title="Accepter la demande"
+                      aria-label="Accepter la demande"
+                      className="w-7 h-7 rounded-lg bg-neutral-900 hover:bg-neutral-800 active:scale-95 text-white transition-all cursor-pointer border-none flex items-center justify-center shadow-2xs"
+                    >
+                      <Check className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={respondingId === b._id}
+                      onClick={() =>
+                        setConfirmTarget({
+                          bookingId: b._id as Id<"bookings">,
+                          passengerName: b.passengerName,
+                          action: "reject",
+                        })
+                      }
+                      title="Refuser la demande"
+                      aria-label="Refuser la demande"
+                      className="w-7 h-7 rounded-lg bg-neutral-200 hover:bg-red-100 hover:text-red-600 active:scale-95 text-neutral-600 transition-all cursor-pointer border-none flex items-center justify-center shadow-2xs"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </>
+                ) : (
+                  <Badge variant="emerald">Confirmé</Badge>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <Modal
+        isOpen={confirmTarget !== null}
+        onClose={() => setConfirmTarget(null)}
+        title={confirmTarget?.action === "accept" ? "Accepter la réservation" : "Refuser la demande"}
+      >
+        {confirmTarget && (
+          <div className="space-y-4 pt-1">
+            <p className="text-sm text-neutral-600 leading-relaxed">
+              Es-tu sûr(e) de vouloir{" "}
+              <strong>
+                {confirmTarget.action === "accept" ? "accepter" : "refuser"}
+              </strong>{" "}
+              la demande de réservation de <strong>{confirmTarget.passengerName}</strong> ?
+            </p>
+
+            <div className="flex gap-2 pt-2">
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={() => setConfirmTarget(null)}
+                className="flex-1"
+              >
+                Annuler
+              </Button>
+              <Button
+                variant={confirmTarget.action === "accept" ? "primary" : "danger"}
+                size="md"
+                isLoading={respondingId === confirmTarget.bookingId}
+                onClick={() => handleRespond(confirmTarget.bookingId, confirmTarget.action)}
+                className="flex-1"
+              >
+                {confirmTarget.action === "accept" ? "Accepter" : "Refuser"}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+    </>
+  );
+}
+
 export function MainEventDrawer({
   eventId,
   eventTitle,
@@ -88,12 +259,19 @@ export function MainEventDrawer({
   onOpenBooking,
   onStartPickLocation,
 }: MainEventDrawerProps) {
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<"search" | "propose">("search");
   const [isExpanded, setIsExpanded] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const cancelCarpoolMutation = useMutation(api.carpools.cancelCarpool);
+
+  useEffect(() => {
+    if (searchParams?.get("tab") === "propose") {
+      setActiveTab("propose");
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (selectedCarpool) {
@@ -344,7 +522,6 @@ export function MainEventDrawer({
                         : "Complet"}
                     </Badge>
                   </div>
-
                   <div className="space-y-1.5 text-sm text-neutral-700 bg-white p-3.5 rounded-lg border border-neutral-200/60 font-medium">
                     <div className="flex items-center gap-1.5">
                       <MapPin className="w-4 h-4 text-neutral-500 shrink-0" />
@@ -354,6 +531,8 @@ export function MainEventDrawer({
                       Heure : {formatDepartureTime(c.departureTime)}
                     </div>
                   </div>
+
+                  <DriverPassengersList carpoolId={c._id as Id<"carpools">} />
 
                   <div className="flex items-center gap-2 pt-2 border-t border-neutral-100">
                     <Button

@@ -74,7 +74,7 @@ export function BookingModal({ carpool, isOpen, onClose }: BookingModalProps) {
       setParticipantSession(passengerName, passengerPhone);
 
       const origin = window.location.origin;
-      const confirmUrl = `${origin}/booking/confirm?token=${res.validationToken}`;
+      const confirmUrl = `${origin}/e/${res.eventSlug}?tab=propose`;
       const messageText = `Salut ${res.driverName} ! Je suis ${passengerName}. Je souhaite réserver 1 place de covoiturage pour "${res.eventTitle}" au départ de ${res.departureAddress}. Clique ici pour me valider : ${confirmUrl}`;
       const encodedMsg = encodeURIComponent(messageText);
 
