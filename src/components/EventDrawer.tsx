@@ -84,6 +84,7 @@ export function EventDrawer({
       {selectedCarpool && (
         <CarpoolDetailsDrawer
           carpool={selectedCarpool}
+          carpools={carpools}
           isOpen={!!selectedCarpool}
           onClose={() => onSelectCarpool(null)}
           onOpenBooking={onOpenBooking}

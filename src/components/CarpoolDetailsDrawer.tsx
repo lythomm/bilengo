@@ -17,6 +17,7 @@ import { formatConvexError } from "@/lib/errors";
 
 interface CarpoolDetailsDrawerProps {
   carpool: CarpoolItem | null;
+  carpools?: CarpoolItem[];
   isOpen: boolean;
   onClose: () => void;
   onOpenBooking: (carpool: CarpoolItem) => void;
@@ -46,7 +47,8 @@ function formatDepartureTime(timeStr: string): string {
 }
 
 export function CarpoolDetailsDrawer({
-  carpool,
+  carpool: initialCarpool,
+  carpools,
   isOpen,
   onClose,
   onOpenBooking,
@@ -55,6 +57,8 @@ export function CarpoolDetailsDrawer({
   bookingStatus,
   bookingId,
 }: CarpoolDetailsDrawerProps) {
+  const activeCarpool = carpools?.find((c) => c._id === initialCarpool?._id) || initialCarpool;
+  const carpool = activeCarpool;
   const [isDeleting, setIsDeleting] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isConfirmingCancelBooking, setIsConfirmingCancelBooking] = useState(false);

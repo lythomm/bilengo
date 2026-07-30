@@ -21,7 +21,9 @@ export const requestBooking = mutation({
       throw new Error("Trajet non trouvé.");
     }
 
-    if (carpool.status !== "active" || carpool.availableSeats <= 0) {
+    const { availableSeats, status: currentStatus } = await recalculateCarpoolSeats(ctx, carpool._id);
+
+    if (currentStatus === "cancelled" || availableSeats <= 0) {
       throw new Error("Désolé, ce trajet n'a plus de places disponibles.");
     }
 
@@ -196,8 +198,48 @@ export const confirmBooking = mutation({
       departureAddress: carpool.departureAddress,
       eventTitle: event?.title || "l'événement",
       eventSlug: event?.slug,
-      availableSeatsRemaining: newAvailableSeats,
     };
+  },
+});
+
+export async function recalculateCarpoolSeats(
+  ctx: { db: any },
+  carpoolId: any
+) {
+  const carpool = await ctx.db.get(carpoolId);
+  if (!carpool) return { availableSeats: 0, status: "cancelled" };
+
+  const allBookings = await ctx.db
+    .query("bookings")
+    .withIndex("by_carpool", (q: any) => q.eq("carpoolId", carpoolId))
+    .collect();
+
+  let confirmedCount = 0;
+  for (const b of allBookings) {
+    const latestB = await ctx.db.get(b._id);
+    if (latestB && latestB.status === "confirmed") {
+      confirmedCount++;
+    }
+  }
+
+  const newAvailableSeats = Math.max(
+    0,
+    carpool.totalSeats - confirmedCount
+  );
+  const newStatus = newAvailableSeats === 0 ? "full" : "active";
+
+  await ctx.db.patch(carpoolId, {
+    availableSeats: newAvailableSeats,
+    status: newStatus,
+  });
+
+  return { availableSeats: newAvailableSeats, status: newStatus };
+}
+
+export const syncCarpoolSeats = mutation({
+  args: { carpoolId: v.id("carpools") },
+  handler: async (ctx, args) => {
+    return await recalculateCarpoolSeats(ctx, args.carpoolId);
   },
 });
 
@@ -217,16 +259,16 @@ export const cancelBooking = mutation({
       throw new Error("Non autorisé à annuler cette réservation.");
     }
 
-    if (booking.status === "confirmed") {
-      const carpool = await ctx.db.get(booking.carpoolId);
-      if (carpool) {
-        await ctx.db.patch(carpool._id, {
-          availableSeats: carpool.availableSeats + 1,
-          status: "active",
-        });
+    const carpool = await ctx.db.get(booking.carpoolId);
 
+    await ctx.db.patch(booking._id, {
+      status: "cancelled",
+    });
+
+    if (carpool) {
+      if (booking.status === "confirmed") {
         // Reset participant transportMode back to autonomous
-        const cleanPhoneStr = booking.passengerPhone.replace(/[^0-9]/g, "");
+        const cleanPhoneStr = cleanP(booking.passengerPhone);
         const participant = await ctx.db
           .query("event_participants")
           .withIndex("by_event_and_phone", (q) =>
@@ -240,11 +282,9 @@ export const cancelBooking = mutation({
           });
         }
       }
-    }
 
-    await ctx.db.patch(booking._id, {
-      status: "cancelled",
-    });
+      await recalculateCarpoolSeats(ctx, carpool._id);
+    }
 
     return true;
   },
@@ -371,17 +411,11 @@ export const respondToBookingByDriver = mutation({
     }
 
     if (args.action === "accept") {
-      if (carpool.availableSeats <= 0) {
+      const { availableSeats: currentAvailable } = await recalculateCarpoolSeats(ctx, carpool._id);
+
+      if (currentAvailable <= 0) {
         throw new ConvexError("Impossible d'accepter : le trajet est complet.");
       }
-
-      const newAvailableSeats = carpool.availableSeats - 1;
-      const newStatus = newAvailableSeats === 0 ? "full" : "active";
-
-      await ctx.db.patch(carpool._id, {
-        availableSeats: newAvailableSeats,
-        status: newStatus,
-      });
 
       await ctx.db.patch(booking._id, {
         status: "confirmed",
@@ -407,6 +441,9 @@ export const respondToBookingByDriver = mutation({
         status: "cancelled",
       });
     }
+
+    // Always recalculate availableSeats and status from confirmed bookings
+    await recalculateCarpoolSeats(ctx, carpool._id);
 
     return true;
   },

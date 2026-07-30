@@ -180,6 +180,14 @@ export const getUserEventRole = query({
       .first();
 
     if (driverCarpool) {
+      const confirmedCount = (
+        await ctx.db
+          .query("bookings")
+          .withIndex("by_carpool", (q) => q.eq("carpoolId", driverCarpool._id))
+          .filter((q) => q.eq(q.field("status"), "confirmed"))
+          .collect()
+      ).length;
+
       return {
         role: "driver" as const,
         carpool: {
@@ -189,7 +197,7 @@ export const getUserEventRole = query({
           departureAddress: driverCarpool.departureAddress,
           departureTime: driverCarpool.departureTime,
           totalSeats: driverCarpool.totalSeats,
-          availableSeats: driverCarpool.availableSeats,
+          availableSeats: Math.max(0, driverCarpool.totalSeats - confirmedCount),
           description: driverCarpool.description,
         },
       };
@@ -205,6 +213,14 @@ export const getUserEventRole = query({
     for (const booking of userBookings) {
       const c = await ctx.db.get(booking.carpoolId);
       if (c && c.eventId === args.eventId) {
+        const confirmedCount = (
+          await ctx.db
+            .query("bookings")
+            .withIndex("by_carpool", (q) => q.eq("carpoolId", c._id))
+            .filter((q) => q.eq(q.field("status"), "confirmed"))
+            .collect()
+        ).length;
+
         return {
           role: "passenger" as const,
           booking: {
@@ -220,7 +236,7 @@ export const getUserEventRole = query({
             departureAddress: c.departureAddress,
             departureTime: c.departureTime,
             totalSeats: c.totalSeats,
-            availableSeats: c.availableSeats,
+            availableSeats: Math.max(0, c.totalSeats - confirmedCount),
             description: c.description,
           },
         };
@@ -241,18 +257,40 @@ export const getCarpoolsByEvent = query({
       .order("desc")
       .collect();
 
-    return carpools.map((c) => ({
-      _id: c._id,
-      driverName: c.driverName,
-      driverPhone: c.driverPhone,
-      departureAddress: c.departureAddress,
-      departureLat: c.departureLat,
-      departureLng: c.departureLng,
-      departureTime: c.departureTime,
-      totalSeats: c.totalSeats,
-      availableSeats: c.availableSeats,
-      status: c.status,
-      description: c.description,
-    }));
+    const result = [];
+    for (const c of carpools) {
+      const confirmedBookings = await ctx.db
+        .query("bookings")
+        .withIndex("by_carpool", (q) => q.eq("carpoolId", c._id))
+        .filter((q) => q.eq(q.field("status"), "confirmed"))
+        .collect();
+
+      const realAvailableSeats = Math.max(
+        0,
+        c.totalSeats - confirmedBookings.length
+      );
+      const realStatus =
+        realAvailableSeats === 0
+          ? "full"
+          : c.status === "cancelled"
+          ? "cancelled"
+          : "active";
+
+      result.push({
+        _id: c._id,
+        driverName: c.driverName,
+        driverPhone: c.driverPhone,
+        departureAddress: c.departureAddress,
+        departureLat: c.departureLat,
+        departureLng: c.departureLng,
+        departureTime: c.departureTime,
+        totalSeats: c.totalSeats,
+        availableSeats: realAvailableSeats,
+        status: realStatus,
+        description: c.description,
+      });
+    }
+
+    return result;
   },
 });
