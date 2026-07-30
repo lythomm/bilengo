@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -31,6 +31,8 @@ import {
   User,
   Info,
   Filter,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 interface Guest {
@@ -123,6 +125,14 @@ export function OrganizerEventView({
     }
   };
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 50;
+
+  // Reset pagination to page 1 on filter/search/tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, activeTab]);
+
   const filteredGuests = guests.filter((g) => {
     if (statusFilter === "driver" && !g.proposesCarpool) return false;
     if (statusFilter === "passenger" && !g.isInCarpool) return false;
@@ -136,6 +146,12 @@ export function OrganizerEventView({
       g.details.some((d) => d.toLowerCase().includes(q))
     );
   });
+
+  const totalPages = Math.ceil(filteredGuests.length / ITEMS_PER_PAGE) || 1;
+  const paginatedGuests = filteredGuests.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   const filteredCarpools = carpools.filter((c) => {
     if (statusFilter === "active" && c.availableSeats <= 0) return false;
@@ -391,7 +407,7 @@ export function OrganizerEventView({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-100">
-                    {filteredGuests.map((guest, idx) => (
+                    {paginatedGuests.map((guest, idx) => (
                       <tr key={idx} className="hover:bg-neutral-50 whitespace-nowrap">
                         <td className="py-3 px-3 font-semibold text-neutral-900 whitespace-nowrap">
                           {guest.name}
@@ -434,6 +450,55 @@ export function OrganizerEventView({
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+
+            {/* Pagination controls for guests */}
+            {totalPages > 1 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-neutral-200/80 text-xs text-neutral-500 font-medium">
+                <div>
+                  Affichage de{" "}
+                  <span className="font-semibold text-neutral-900">
+                    {(currentPage - 1) * ITEMS_PER_PAGE + 1}
+                  </span>{" "}
+                  à{" "}
+                  <span className="font-semibold text-neutral-900">
+                    {Math.min(currentPage * ITEMS_PER_PAGE, filteredGuests.length)}
+                  </span>{" "}
+                  sur{" "}
+                  <span className="font-semibold text-neutral-900">
+                    {filteredGuests.length}
+                  </span>{" "}
+                  invités
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    leftIcon={<ChevronLeft className="w-4 h-4" />}
+                    aria-label="Page précédente"
+                  >
+                    Précédent
+                  </Button>
+
+                  <span className="px-3 py-1 bg-neutral-100 rounded text-neutral-700 font-semibold">
+                    {currentPage} / {totalPages}
+                  </span>
+
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    rightIcon={<ChevronRight className="w-4 h-4" />}
+                    aria-label="Page suivante"
+                  >
+                    Suivant
+                  </Button>
+                </div>
               </div>
             )}
           </div>
