@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
 function cleanPhone(p: string) {
@@ -19,12 +19,12 @@ export const registerParticipant = mutation({
     const phoneClean = cleanPhone(args.phone);
 
     if (!cleanName || !phoneClean) {
-      throw new Error("Nom et téléphone obligatoires.");
+      throw new ConvexError("Nom et téléphone obligatoires.");
     }
 
     const event = await ctx.db.get(args.eventId);
     if (!event) {
-      throw new Error("Événement introuvable.");
+      throw new ConvexError("Événement introuvable.");
     }
 
     // Check if participant already registered for this event
@@ -41,6 +41,16 @@ export const registerParticipant = mutation({
         transportMode: args.transportMode || existing.transportMode || "autonomous",
       });
       return existing._id;
+    }
+
+    // Check max participants quota for new registrations
+    const existingParticipants = await ctx.db
+      .query("event_participants")
+      .withIndex("by_event", (q) => q.eq("eventId", args.eventId))
+      .collect();
+
+    if (existingParticipants.length >= event.maxParticipants) {
+      throw new ConvexError("Le nombre maximum d'invités pour cet événement est atteint. Veuillez contacter l'organisateur.");
     }
 
     const participantId = await ctx.db.insert("event_participants", {

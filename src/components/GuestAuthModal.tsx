@@ -5,6 +5,7 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { setParticipantSession } from "@/lib/session";
+import { formatConvexError } from "@/lib/errors";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { User, Phone, ArrowRight, ShieldCheck } from "lucide-react";
@@ -43,8 +44,6 @@ export function GuestAuthModal({
 
     setIsSubmitting(true);
     try {
-      const session = setParticipantSession(cleanName, cleanPhone);
-
       if (eventId) {
         await registerParticipantMutation({
           eventId,
@@ -54,9 +53,10 @@ export function GuestAuthModal({
         });
       }
 
+      const session = setParticipantSession(cleanName, cleanPhone);
       onAuthenticated({ firstName: session.firstName, phone: session.phone });
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de l'enregistrement.");
+    } catch (err: unknown) {
+      setError(formatConvexError(err, "Erreur lors de l'enregistrement."));
     } finally {
       setIsSubmitting(false);
     }

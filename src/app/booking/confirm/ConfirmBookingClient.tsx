@@ -8,6 +8,7 @@ import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { formatConvexError } from "@/lib/errors";
 
 export function ConfirmBookingClient() {
   const searchParams = useSearchParams();
@@ -42,12 +43,12 @@ export function ConfirmBookingClient() {
           setResultData(res);
           setStatus("success");
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (!ignore) {
           console.error(err);
           setStatus("error");
           setErrorMessage(
-            err.message || "Impossible de valider cette réservation."
+            formatConvexError(err, "Impossible de valider cette réservation.")
           );
         }
       }

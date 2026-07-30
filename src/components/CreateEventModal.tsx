@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { AddressAutocomplete } from "./AddressAutocomplete";
+import { formatConvexError } from "@/lib/errors";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 
@@ -46,10 +47,10 @@ export function CreateEventModal({
 
       onClose();
       if (onSuccess) onSuccess(res.slug);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setError(
-        err.message || "Une erreur s'est produite lors de la création de l'événement."
+        formatConvexError(err, "Une erreur s'est produite lors de la création de l'événement.")
       );
     } finally {
       setLoading(false);

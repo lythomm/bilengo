@@ -6,6 +6,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Drawer } from "@/components/ui/Drawer";
 import { getParticipantSession } from "@/lib/session";
+import { formatConvexError } from "@/lib/errors";
 import { Button } from "@/components/ui/Button";
 
 interface PrefilledAddress {
@@ -123,9 +124,9 @@ export function ProposeFinalizeDrawer({
 
       setDescription("");
       onSuccess();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message || "Erreur lors de la création du trajet.");
+      setError(formatConvexError(err, "Erreur lors de la création du trajet."));
     } finally {
       setIsLoading(false);
     }

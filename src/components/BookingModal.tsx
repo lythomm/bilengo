@@ -5,6 +5,7 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { getParticipantSession, setParticipantSession } from "@/lib/session";
+import { formatConvexError } from "@/lib/errors";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 
@@ -63,13 +64,13 @@ export function BookingModal({ carpool, isOpen, onClose }: BookingModalProps) {
     setLoading(true);
 
     try {
-      setParticipantSession(passengerName, passengerPhone);
-
       const res = await requestBooking({
         carpoolId: carpool._id,
         passengerName,
         passengerPhone,
       });
+
+      setParticipantSession(passengerName, passengerPhone);
 
       const origin = window.location.origin;
       const confirmUrl = `${origin}/booking/confirm?token=${res.validationToken}`;
@@ -87,10 +88,10 @@ export function BookingModal({ carpool, isOpen, onClose }: BookingModalProps) {
         driverName: res.driverName,
         messageText,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setError(
-        err.message || "Impossible d'effectuer la demande de réservation."
+        formatConvexError(err, "Impossible d'effectuer la demande de réservation.")
       );
     } finally {
       setLoading(false);

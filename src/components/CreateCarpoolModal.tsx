@@ -6,6 +6,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { AddressAutocomplete } from "./AddressAutocomplete";
 import { getParticipantSession, setParticipantSession } from "@/lib/session";
+import { formatConvexError } from "@/lib/errors";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 
@@ -50,8 +51,6 @@ export function CreateCarpoolModal({
     setLoading(true);
 
     try {
-      setParticipantSession(driverName, driverPhone);
-
       await createCarpool({
         eventId,
         driverName,
@@ -63,11 +62,12 @@ export function CreateCarpoolModal({
         totalSeats,
       });
 
+      setParticipantSession(driverName, driverPhone);
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setError(
-        err.message || "Une erreur s'est produite lors de la publication du trajet."
+        formatConvexError(err, "Une erreur s'est produite lors de la publication du trajet.")
       );
     } finally {
       setLoading(false);
