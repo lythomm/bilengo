@@ -268,3 +268,21 @@ export const getBookingByToken = query({
     };
   },
 });
+
+export const getCarpoolPassengers = query({
+  args: { carpoolId: v.id("carpools") },
+  handler: async (ctx, args) => {
+    const bookings = await ctx.db
+      .query("bookings")
+      .withIndex("by_carpool", (q) => q.eq("carpoolId", args.carpoolId))
+      .filter((q) => q.eq(q.field("status"), "confirmed"))
+      .collect();
+
+    return bookings.map((b) => ({
+      _id: b._id,
+      passengerName: b.passengerName,
+      passengerPhone: b.passengerPhone,
+      status: b.status,
+    }));
+  },
+});

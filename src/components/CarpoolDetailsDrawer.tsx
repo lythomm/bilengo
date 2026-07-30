@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Drawer } from "@/components/ui/Drawer";
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { getParticipantSession } from "@/lib/session";
-import { Trash2, Clock, CheckCircle2 } from "lucide-react";
+import { Trash2, Clock, CheckCircle2, Users } from "lucide-react";
 
 import { formatConvexError } from "@/lib/errors";
 
@@ -61,6 +61,11 @@ export function CarpoolDetailsDrawer({
 
   const cancelCarpoolMutation = useMutation(api.carpools.cancelCarpool);
   const cancelBookingMutation = useMutation(api.bookings.cancelBooking);
+
+  const passengers = useQuery(
+    api.bookings.getCarpoolPassengers,
+    carpool?._id ? { carpoolId: carpool._id as Id<"carpools"> } : "skip"
+  );
 
   if (!isOpen || !carpool) return null;
 
@@ -182,24 +187,8 @@ export function CarpoolDetailsDrawer({
             )}
           </Card>
 
-          {/* Action Button */}
-          {isOwnCarpool ? (
-            <div className="space-y-2">
-              <div className="p-3 bg-neutral-100 border border-neutral-200 rounded-lg text-neutral-800 text-sm text-center font-medium">
-                Vous êtes le conducteur de ce covoiturage.
-              </div>
-
-              <Button
-                variant="danger-outline"
-                size="md"
-                onClick={() => setIsConfirmingDelete(true)}
-                leftIcon={<Trash2 className="w-4 h-4" />}
-                className="w-full py-2.5"
-              >
-                Supprimer mon covoiturage
-              </Button>
-            </div>
-          ) : isPassenger ? (
+          {/* Passenger Status Banner */}
+          {isPassenger && (
             bookingStatus === "confirmed" ? (
               <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-sm font-medium flex items-center justify-between shadow-2xs">
                 <div className="flex items-center gap-2 min-w-0 pr-2">
@@ -237,7 +226,56 @@ export function CarpoolDetailsDrawer({
                 )}
               </div>
             )
-          ) : (
+          )}
+
+          {/* Passengers Section */}
+          <div className="space-y-2 pt-1">
+            <h4 className="text-xs font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-neutral-400" />
+              Passagers ({passengers ? passengers.length : 0})
+            </h4>
+
+            {!passengers || passengers.length === 0 ? (
+              <p className="text-xs text-neutral-400 italic bg-neutral-50 p-3 rounded-xl border border-neutral-200/60 text-center">
+                Aucun passager inscrit pour le moment.
+              </p>
+            ) : (
+              <div className="space-y-1.5">
+                {passengers.map((p) => (
+                  <div
+                    key={p._id}
+                    className="p-3 bg-white border border-neutral-200/80 rounded-xl flex items-center gap-2 text-xs shadow-2xs"
+                  >
+                    <div className="w-7 h-7 rounded-full bg-emerald-100/80 text-emerald-800 font-extrabold text-xs flex items-center justify-center shrink-0 border border-emerald-200/60">
+                      {p.passengerName.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="font-semibold text-neutral-900 truncate">
+                      {p.passengerName}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Action Button */}
+          {isOwnCarpool ? (
+            <div className="space-y-2">
+              <div className="p-3 bg-neutral-100 border border-neutral-200 rounded-lg text-neutral-800 text-sm text-center font-medium">
+                Vous êtes le conducteur de ce covoiturage.
+              </div>
+
+              <Button
+                variant="danger-outline"
+                size="md"
+                onClick={() => setIsConfirmingDelete(true)}
+                leftIcon={<Trash2 className="w-4 h-4" />}
+                className="w-full py-2.5"
+              >
+                Supprimer mon covoiturage
+              </Button>
+            </div>
+          ) : !isPassenger ? (
             <Button
               variant="primary"
               size="md"
@@ -247,7 +285,7 @@ export function CarpoolDetailsDrawer({
             >
               {carpool.availableSeats <= 0 ? "Covoit complet" : "Demander une place"}
             </Button>
-          )}
+          ) : null}
         </div>
       </Drawer>
 
@@ -300,7 +338,7 @@ export function CarpoolDetailsDrawer({
             isLoading={isDeleting}
             onClick={handleCancelBooking}
           >
-            Annuler ma demande
+            {bookingStatus === "confirmed" ? "Annuler ma réservation" : "Annuler ma demande"}
           </Button>
         </div>
       </Modal>
