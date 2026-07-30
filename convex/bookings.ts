@@ -36,16 +36,13 @@ export const requestBooking = mutation({
       throw new Error("Le prénom et le numéro de téléphone sont obligatoires.");
     }
 
-    // Enforce 1 carpool/booking per user per event
+    // Enforce 1 carpool/booking per user per event (indexed O(1) lookups)
     const existingDriverCarpool = await ctx.db
       .query("carpools")
-      .withIndex("by_event", (q) => q.eq("eventId", carpool.eventId))
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("driverPhone"), passengerPhone),
-          q.neq(q.field("status"), "cancelled")
-        )
+      .withIndex("by_event_and_driver", (q) =>
+        q.eq("eventId", carpool.eventId).eq("driverPhone", passengerPhone)
       )
+      .filter((q) => q.neq(q.field("status"), "cancelled"))
       .first();
 
     if (existingDriverCarpool) {
@@ -54,24 +51,15 @@ export const requestBooking = mutation({
       );
     }
 
-    const eventCarpools = await ctx.db
-      .query("carpools")
-      .withIndex("by_event", (q) => q.eq("eventId", carpool.eventId))
+    const passengerBookings = await ctx.db
+      .query("bookings")
+      .withIndex("by_passenger_phone", (q) => q.eq("passengerPhone", passengerPhone))
+      .filter((q) => q.neq(q.field("status"), "cancelled"))
       .collect();
 
-    for (const c of eventCarpools) {
-      const existingBooking = await ctx.db
-        .query("bookings")
-        .withIndex("by_carpool", (q) => q.eq("carpoolId", c._id))
-        .filter((q) =>
-          q.and(
-            q.eq(q.field("passengerPhone"), passengerPhone),
-            q.neq(q.field("status"), "cancelled")
-          )
-        )
-        .first();
-
-      if (existingBooking) {
+    for (const b of passengerBookings) {
+      const c = await ctx.db.get(b.carpoolId);
+      if (c && c.eventId === carpool.eventId) {
         throw new Error(
           "Vous avez déjà réservé un trajet de covoiturage pour cet événement."
         );
@@ -87,6 +75,31 @@ export const requestBooking = mutation({
       status: "pending",
       validationToken,
     });
+
+    // Upsert participant record with passenger transportMode
+    const cleanPhoneStr = passengerPhone.replace(/[^0-9]/g, "");
+    const existingParticipant = await ctx.db
+      .query("event_participants")
+      .withIndex("by_event_and_phone", (q) =>
+        q.eq("eventId", carpool.eventId).eq("phone", cleanPhoneStr)
+      )
+      .first();
+
+    if (existingParticipant) {
+      if (existingParticipant.transportMode !== "driver") {
+        await ctx.db.patch(existingParticipant._id, {
+          name: passengerName,
+          transportMode: "passenger",
+        });
+      }
+    } else {
+      await ctx.db.insert("event_participants", {
+        eventId: carpool.eventId,
+        name: passengerName,
+        phone: cleanPhoneStr,
+        transportMode: "passenger",
+      });
+    }
 
     return {
       bookingId,

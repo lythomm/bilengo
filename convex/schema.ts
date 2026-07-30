@@ -30,7 +30,9 @@ export default defineSchema({
     availableSeats: v.number(),
     status: v.union(v.literal("active"), v.literal("cancelled"), v.literal("full")),
     description: v.optional(v.string()),
-  }).index("by_event", ["eventId"]),
+  })
+    .index("by_event", ["eventId"])
+    .index("by_event_and_driver", ["eventId", "driverPhone"]),
 
   bookings: defineTable({
     carpoolId: v.id("carpools"),
@@ -40,5 +42,17 @@ export default defineSchema({
     validationToken: v.string(),
   })
     .index("by_carpool", ["carpoolId"])
-    .index("by_validation_token", ["validationToken"]),
+    .index("by_validation_token", ["validationToken"])
+    .index("by_passenger_phone", ["passengerPhone"]),
+
+  event_participants: defineTable({
+    eventId: v.id("events"),
+    name: v.string(),
+    phone: v.string(),
+    transportMode: v.optional(
+      v.union(v.literal("driver"), v.literal("passenger"), v.literal("autonomous"))
+    ),
+  })
+    .index("by_event", ["eventId"])
+    .index("by_event_and_phone", ["eventId", "phone"]),
 });

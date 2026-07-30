@@ -13,6 +13,7 @@ import type * as bookings from "../bookings.js";
 import type * as carpools from "../carpools.js";
 import type * as events from "../events.js";
 import type * as http from "../http.js";
+import type * as participants from "../participants.js";
 
 import type {
   ApiFromModules,
@@ -26,6 +27,7 @@ declare const fullApi: ApiFromModules<{
   carpools: typeof carpools;
   events: typeof events;
   http: typeof http;
+  participants: typeof participants;
 }>;
 
 /**

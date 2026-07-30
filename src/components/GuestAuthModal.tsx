@@ -1,26 +1,34 @@
 "use client";
 
 import { useState } from "react";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import { setParticipantSession } from "@/lib/session";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 
 interface GuestAuthModalProps {
   isOpen: boolean;
+  eventId?: Id<"events">;
   eventTitle: string;
   onAuthenticated: (session: { firstName: string; phone: string }) => void;
 }
 
 export function GuestAuthModal({
   isOpen,
+  eventId,
   eventTitle,
   onAuthenticated,
 }: GuestAuthModalProps) {
   const [firstName, setFirstName] = useState("");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const registerParticipantMutation = useMutation(api.participants.registerParticipant);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -32,8 +40,25 @@ export function GuestAuthModal({
       return;
     }
 
-    const session = setParticipantSession(cleanName, cleanPhone);
-    onAuthenticated({ firstName: session.firstName, phone: session.phone });
+    setIsSubmitting(true);
+    try {
+      const session = setParticipantSession(cleanName, cleanPhone);
+
+      if (eventId) {
+        await registerParticipantMutation({
+          eventId,
+          name: cleanName,
+          phone: cleanPhone,
+          transportMode: "autonomous",
+        });
+      }
+
+      onAuthenticated({ firstName: session.firstName, phone: session.phone });
+    } catch (err: any) {
+      setError(err.message || "Erreur lors de l'enregistrement.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -79,7 +104,7 @@ export function GuestAuthModal({
           />
         </div>
 
-        <Button type="submit" variant="primary" size="md" className="w-full mt-2">
+        <Button type="submit" variant="primary" size="md" isLoading={isSubmitting} className="w-full mt-2">
           Accéder à la carte & covoiturages
         </Button>
       </form>

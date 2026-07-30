@@ -338,6 +338,7 @@ export function EventClient({ params }: EventClientProps) {
       {/* Guest Auth Modal */}
       <GuestAuthModal
         isOpen={isGuestAuthOpen}
+        eventId={event._id}
         eventTitle={event.title}
         onAuthenticated={() => setIsGuestAuthOpen(false)}
       />

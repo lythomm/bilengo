@@ -104,6 +104,12 @@ export const getEventBySlug = query({
   },
 });
 
+function normalizeGuestKey(phone?: string, name?: string): string {
+  const p = (phone || "").replace(/[^0-9]/g, "");
+  if (p) return p;
+  return (name || "").trim().toLowerCase();
+}
+
 export const getOrganizerEventData = query({
   args: { eventId: v.id("events") },
   handler: async (ctx, args) => {
@@ -115,10 +121,16 @@ export const getOrganizerEventData = query({
       return null;
     }
 
-    const carpools = await ctx.db
-      .query("carpools")
-      .withIndex("by_event", (q) => q.eq("eventId", args.eventId))
-      .collect();
+    const [carpools, registeredParticipants] = await Promise.all([
+      ctx.db
+        .query("carpools")
+        .withIndex("by_event", (q) => q.eq("eventId", args.eventId))
+        .collect(),
+      ctx.db
+        .query("event_participants")
+        .withIndex("by_event", (q) => q.eq("eventId", args.eventId))
+        .collect(),
+    ]);
 
     const carpoolDetails = [];
     const guestsMap = new Map<
@@ -132,11 +144,30 @@ export const getOrganizerEventData = query({
       }
     >();
 
-    for (const c of carpools) {
-      const bookings = await ctx.db
-        .query("bookings")
-        .withIndex("by_carpool", (q) => q.eq("carpoolId", c._id))
-        .collect();
+    // Seed guestsMap with all registered event participants
+    for (const p of registeredParticipants) {
+      const key = normalizeGuestKey(p.phone, p.name);
+      guestsMap.set(key, {
+        name: p.name,
+        phone: p.phone,
+        proposesCarpool: p.transportMode === "driver",
+        isInCarpool: p.transportMode === "passenger",
+        details: p.transportMode === "autonomous" || !p.transportMode ? ["Autonome / Sans covoiturage"] : [],
+      });
+    }
+
+    const allBookings = await Promise.all(
+      carpools.map((c) =>
+        ctx.db
+          .query("bookings")
+          .withIndex("by_carpool", (q) => q.eq("carpoolId", c._id))
+          .collect()
+      )
+    );
+
+    for (let i = 0; i < carpools.length; i++) {
+      const c = carpools[i];
+      const bookings = allBookings[i];
 
       const confirmedBookings = bookings.filter((b) => b.status === "confirmed");
       const pendingBookings = bookings.filter((b) => b.status === "pending");
@@ -154,7 +185,7 @@ export const getOrganizerEventData = query({
       });
 
       // Add driver to guests list
-      const driverKey = (c.driverPhone || c.driverName).trim().toLowerCase();
+      const driverKey = normalizeGuestKey(c.driverPhone, c.driverName);
       let driverEntry = guestsMap.get(driverKey);
       if (!driverEntry) {
         driverEntry = {
@@ -167,6 +198,9 @@ export const getOrganizerEventData = query({
         guestsMap.set(driverKey, driverEntry);
       } else {
         driverEntry.proposesCarpool = true;
+        if (driverEntry.details.includes("Autonome / Sans covoiturage")) {
+          driverEntry.details = [];
+        }
         driverEntry.details.push(
           `Départ : ${c.departureAddress} (${c.totalSeats} places)`
         );
@@ -175,9 +209,7 @@ export const getOrganizerEventData = query({
       // Add passengers to guests list
       for (const b of bookings) {
         if (b.status === "cancelled") continue;
-        const passengerKey = (b.passengerPhone || b.passengerName)
-          .trim()
-          .toLowerCase();
+        const passengerKey = normalizeGuestKey(b.passengerPhone, b.passengerName);
         let passengerEntry = guestsMap.get(passengerKey);
         if (!passengerEntry) {
           passengerEntry = {
@@ -192,6 +224,9 @@ export const getOrganizerEventData = query({
           guestsMap.set(passengerKey, passengerEntry);
         } else {
           passengerEntry.isInCarpool = true;
+          if (passengerEntry.details.includes("Autonome / Sans covoiturage")) {
+            passengerEntry.details = [];
+          }
           passengerEntry.details.push(
             `Passager avec ${c.driverName} (${b.status === "confirmed" ? "confirmé" : "en attente"})`
           );

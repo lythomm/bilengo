@@ -185,7 +185,7 @@ export function CarpoolDetailsDrawer({
               onClick={() => onOpenBooking(carpool)}
               className="w-full text-base font-semibold py-3"
             >
-              Réserver 1 place
+              {carpool.availableSeats <= 0 ? "Covoit complet" : "Réserver 1 place"}
             </Button>
           )}
         </div>

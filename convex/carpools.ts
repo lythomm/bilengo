@@ -28,40 +28,28 @@ export const createCarpool = mutation({
       throw new Error("Toutes les informations du conducteur sont obligatoires.");
     }
 
-    // Enforce single carpool or booking per user per event
+    // Enforce single carpool or booking per user per event (indexed O(1) lookups)
     const existingCarpool = await ctx.db
       .query("carpools")
-      .withIndex("by_event", (q) => q.eq("eventId", args.eventId))
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("driverPhone"), driverPhone),
-          q.neq(q.field("status"), "cancelled")
-        )
+      .withIndex("by_event_and_driver", (q) =>
+        q.eq("eventId", args.eventId).eq("driverPhone", driverPhone)
       )
+      .filter((q) => q.neq(q.field("status"), "cancelled"))
       .first();
 
     if (existingCarpool) {
       throw new Error("Vous avez déjà proposé un covoiturage pour cet événement.");
     }
 
-    const eventCarpools = await ctx.db
-      .query("carpools")
-      .withIndex("by_event", (q) => q.eq("eventId", args.eventId))
+    const passengerBookings = await ctx.db
+      .query("bookings")
+      .withIndex("by_passenger_phone", (q) => q.eq("passengerPhone", driverPhone))
+      .filter((q) => q.neq(q.field("status"), "cancelled"))
       .collect();
 
-    for (const c of eventCarpools) {
-      const existingBooking = await ctx.db
-        .query("bookings")
-        .withIndex("by_carpool", (q) => q.eq("carpoolId", c._id))
-        .filter((q) =>
-          q.and(
-            q.eq(q.field("passengerPhone"), driverPhone),
-            q.neq(q.field("status"), "cancelled")
-          )
-        )
-        .first();
-
-      if (existingBooking) {
+    for (const b of passengerBookings) {
+      const c = await ctx.db.get(b.carpoolId);
+      if (c && c.eventId === args.eventId) {
         throw new Error(
           "Vous participez déjà à cet événement en tant que passager."
         );
@@ -83,6 +71,29 @@ export const createCarpool = mutation({
       status: "active",
       description: args.description?.trim(),
     });
+
+    // Upsert participant record with driver transportMode
+    const cleanPhoneStr = driverPhone.replace(/[^0-9]/g, "");
+    const existingParticipant = await ctx.db
+      .query("event_participants")
+      .withIndex("by_event_and_phone", (q) =>
+        q.eq("eventId", args.eventId).eq("phone", cleanPhoneStr)
+      )
+      .first();
+
+    if (existingParticipant) {
+      await ctx.db.patch(existingParticipant._id, {
+        name: driverName,
+        transportMode: "driver",
+      });
+    } else {
+      await ctx.db.insert("event_participants", {
+        eventId: args.eventId,
+        name: driverName,
+        phone: cleanPhoneStr,
+        transportMode: "driver",
+      });
+    }
 
     return carpoolId;
   },
@@ -159,16 +170,13 @@ export const getUserEventRole = query({
     const cleanP = args.userPhone.trim();
     if (!cleanP) return null;
 
-    // Check if driver
+    // Check if driver O(1)
     const driverCarpool = await ctx.db
       .query("carpools")
-      .withIndex("by_event", (q) => q.eq("eventId", args.eventId))
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("driverPhone"), cleanP),
-          q.neq(q.field("status"), "cancelled")
-        )
+      .withIndex("by_event_and_driver", (q) =>
+        q.eq("eventId", args.eventId).eq("driverPhone", cleanP)
       )
+      .filter((q) => q.neq(q.field("status"), "cancelled"))
       .first();
 
     if (driverCarpool) {
@@ -187,25 +195,16 @@ export const getUserEventRole = query({
       };
     }
 
-    // Check if passenger
-    const eventCarpools = await ctx.db
-      .query("carpools")
-      .withIndex("by_event", (q) => q.eq("eventId", args.eventId))
+    // Check if passenger O(1)
+    const userBookings = await ctx.db
+      .query("bookings")
+      .withIndex("by_passenger_phone", (q) => q.eq("passengerPhone", cleanP))
+      .filter((q) => q.neq(q.field("status"), "cancelled"))
       .collect();
 
-    for (const c of eventCarpools) {
-      const booking = await ctx.db
-        .query("bookings")
-        .withIndex("by_carpool", (q) => q.eq("carpoolId", c._id))
-        .filter((q) =>
-          q.and(
-            q.eq(q.field("passengerPhone"), cleanP),
-            q.neq(q.field("status"), "cancelled")
-          )
-        )
-        .first();
-
-      if (booking) {
+    for (const booking of userBookings) {
+      const c = await ctx.db.get(booking.carpoolId);
+      if (c && c.eventId === args.eventId) {
         return {
           role: "passenger" as const,
           booking: {
@@ -257,6 +256,3 @@ export const getCarpoolsByEvent = query({
     }));
   },
 });
-
-
-

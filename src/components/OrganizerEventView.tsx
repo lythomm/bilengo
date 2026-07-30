@@ -320,7 +320,7 @@ export function OrganizerEventView({
                       </th>
                       <th className="py-2.5 px-3 whitespace-nowrap">
                         <span className="flex items-center gap-1">
-                          <Car className="w-3.5 h-3.5 text-neutral-400" /> Statut Covoiturage
+                          <Car className="w-3.5 h-3.5 text-neutral-400" /> Statut
                         </span>
                       </th>
                       <th className="py-2.5 px-3 whitespace-nowrap">
