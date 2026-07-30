@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
@@ -253,5 +253,28 @@ export const getOrganizerEventData = query({
         totalSeatsAvailable,
       },
     };
+  },
+});
+
+export const updateEventQuota = mutation({
+  args: {
+    eventId: v.id("events"),
+    maxParticipants: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new ConvexError("Non autorisé. Vous devez être connecté.");
+    }
+
+    const event = await ctx.db.get(args.eventId);
+    if (!event || event.organizerId !== userId) {
+      throw new ConvexError("Action non autorisée.");
+    }
+
+    const maxParticipants = Math.max(1, args.maxParticipants);
+    await ctx.db.patch(args.eventId, { maxParticipants });
+
+    return { success: true, maxParticipants };
   },
 });

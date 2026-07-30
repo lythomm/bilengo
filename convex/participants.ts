@@ -50,7 +50,7 @@ export const registerParticipant = mutation({
       .collect();
 
     if (existingParticipants.length >= event.maxParticipants) {
-      throw new ConvexError("Le nombre maximum d'invités pour cet événement est atteint. Veuillez contacter l'organisateur.");
+      throw new ConvexError("Le nombre maximum d'invités pour cet événement est atteint. Informez en l'organisateur.");
     }
 
     const participantId = await ctx.db.insert("event_participants", {

@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/Card";
 import { PillGroup } from "@/components/ui/PillGroup";
 import { Toast } from "@/components/ui/Toast";
 import { Modal } from "@/components/ui/Modal";
+import { UpdateQuotaModal } from "@/components/UpdateQuotaModal";
 import {
   Share2,
   Map,
@@ -33,6 +34,8 @@ import {
   Filter,
   ChevronLeft,
   ChevronRight,
+  AlertTriangle,
+  AlertOctagon,
 } from "lucide-react";
 
 interface Guest {
@@ -105,6 +108,7 @@ export function OrganizerEventView({
   const [toastMessage, setToastMessage] = useState("Lien de l'événement copié !");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isQuotaModalOpen, setIsQuotaModalOpen] = useState(false);
 
   const deleteCarpoolByOrganizer = useMutation(api.carpools.deleteCarpoolByOrganizer);
 
@@ -263,54 +267,141 @@ export function OrganizerEventView({
           </p>
         </Card>
 
+        {/* Quota Banner & Alert (>= 90% or 100%) */}
+        {(() => {
+          const isQuotaFull = stats.totalGuests >= event.maxParticipants;
+          const isQuotaWarning = !isQuotaFull && stats.totalGuests >= Math.floor(event.maxParticipants * 0.9);
+
+          if (!isQuotaFull && !isQuotaWarning) return null;
+
+          return (
+            <div
+              className={`p-4 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs ${isQuotaFull
+                ? "bg-red-50 border-red-300 text-red-950"
+                : "bg-amber-50 border-amber-300 text-amber-950"
+                }`}
+            >
+              <div className="flex items-start gap-3 flex-1">
+                {isQuotaFull ? (
+                  <AlertOctagon className="w-5 h-5 text-red-600 shrink-0 mt-0.5 animate-pulse" />
+                ) : (
+                  <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                )}
+                <div>
+                  <h4 className="font-bold text-sm tracking-tight font-heading flex items-center gap-2">
+                    {isQuotaFull
+                      ? `Quota maximum d'invités atteint (${stats.totalGuests}/${event.maxParticipants})`
+                      : `Quota d'invités bientôt atteint (${stats.totalGuests}/${event.maxParticipants})`}
+                  </h4>
+                  <p className="text-xs opacity-90 mt-0.5 leading-relaxed">
+                    {isQuotaFull
+                      ? "Les nouveaux invités sont actuellement bloqués et ne peuvent pas s'inscrire. Augmentez la capacité dès maintenant."
+                      : "Votre événement a atteint 90% de sa capacité. Augmentez le quota pour éviter de bloquer de futurs invités."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="w-full sm:w-auto flex justify-end shrink-0">
+                <Button
+                  variant={isQuotaFull ? "danger" : "primary"}
+                  size="sm"
+                  onClick={() => setIsQuotaModalOpen(true)}
+                  className="font-semibold shadow-xs"
+                >
+                  Augmenter la capacité
+                </Button>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card variant="white" className="p-4 space-y-1">
-            <div className="text-neutral-500 text-xs font-semibold flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
-              Invités
-            </div>
-            <div className="text-2xl font-bold text-neutral-900 font-heading">
-              {stats.totalGuests}{" "}
-              <span className="text-sm font-normal text-neutral-400">
-                / {event.maxParticipants === 1000 ? "1000+" : event.maxParticipants}
-              </span>
-            </div>
-          </Card>
+        {(() => {
+          const isQuotaFull = stats.totalGuests >= event.maxParticipants;
+          const isQuotaWarning = !isQuotaFull && stats.totalGuests >= Math.floor(event.maxParticipants * 0.9);
 
-          <Card variant="white" className="p-4 space-y-1">
-            <div className="text-neutral-500 text-xs font-semibold flex items-center gap-1.5">
-              <Car className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
-              Conducteurs
-            </div>
-            <div className="text-2xl font-bold text-neutral-900 font-heading">
-              {stats.totalDrivers}
-            </div>
-          </Card>
+          return (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card
+                variant="white"
+                className={`p-3.5 sm:p-4 space-y-2 relative transition-all cursor-pointer hover:shadow-md ${isQuotaFull
+                  ? "!bg-red-50/90 !border-red-400 ring-2 ring-red-200"
+                  : isQuotaWarning
+                    ? "!bg-amber-50/90 !border-amber-400"
+                    : ""
+                  }`}
+                onClick={() => setIsQuotaModalOpen(true)}
+              >
+                {/* Header Row: ONLY Invités Label */}
+                <div className="text-neutral-500 text-xs font-semibold flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                  <span>Invités</span>
+                </div>
 
-          <Card variant="white" className="p-4 space-y-1">
-            <div className="text-neutral-500 text-xs font-semibold flex items-center gap-1.5">
-              <UserCheck className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
-              Réservées
-            </div>
-            <div className="text-2xl font-bold text-neutral-900 font-heading">
-              {stats.totalSeatsBooked}{" "}
-              <span className="text-sm font-normal text-neutral-400">
-                / {stats.totalSeatsOffered}
-              </span>
-            </div>
-          </Card>
+                {/* Main Number Row */}
+                <div className="text-2xl font-bold text-neutral-900 font-heading tracking-tight leading-none pt-0.5">
+                  {stats.totalGuests}{" "}
+                  <span className="text-sm font-normal text-neutral-400 font-sans">
+                    / {event.maxParticipants === 1000 ? "1000+" : event.maxParticipants}
+                  </span>
+                </div>
 
-          <Card variant="white" className="p-4 space-y-1">
-            <div className="text-neutral-500 text-xs font-semibold flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              Places Libres
+                {/* Footer Status Line */}
+                <div className="pt-1.5 border-t border-neutral-200/50">
+                  {isQuotaFull ? (
+                    <span className="text-[11px] font-bold text-red-600 flex items-center gap-1">
+                      <AlertOctagon className="w-3 h-3 shrink-0" />
+                      Complet
+                    </span>
+                  ) : isQuotaWarning ? (
+                    <span className="text-[11px] font-bold text-amber-700 flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3 shrink-0" />
+                      Attention (90%)
+                    </span>
+                  ) : (
+                    <span className="text-[11px] font-medium text-neutral-500 flex items-center justify-between">
+                      <span>Normal</span>
+                      <span className="text-[10px] text-neutral-400 underline">Modifier</span>
+                    </span>
+                  )}
+                </div>
+              </Card>
+
+              <Card variant="white" className="p-4 space-y-1">
+                <div className="text-neutral-500 text-xs font-semibold flex items-center gap-1.5">
+                  <Car className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                  Conducteurs
+                </div>
+                <div className="text-2xl font-bold text-neutral-900 font-heading">
+                  {stats.totalDrivers}
+                </div>
+              </Card>
+
+              <Card variant="white" className="p-4 space-y-1">
+                <div className="text-neutral-500 text-xs font-semibold flex items-center gap-1.5">
+                  <UserCheck className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                  Réservées
+                </div>
+                <div className="text-2xl font-bold text-neutral-900 font-heading">
+                  {stats.totalSeatsBooked}{" "}
+                  <span className="text-sm font-normal text-neutral-400">
+                    / {stats.totalSeatsOffered}
+                  </span>
+                </div>
+              </Card>
+
+              <Card variant="white" className="p-4 space-y-1">
+                <div className="text-neutral-500 text-xs font-semibold flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  Places Libres
+                </div>
+                <div className="text-2xl font-bold text-emerald-700 font-heading">
+                  {stats.totalSeatsAvailable}
+                </div>
+              </Card>
             </div>
-            <div className="text-2xl font-bold text-emerald-700 font-heading">
-              {stats.totalSeatsAvailable}
-            </div>
-          </Card>
-        </div>
+          );
+        })()}
 
         {/* Directory Section */}
         {/* Tabs & Search */}
@@ -633,6 +724,18 @@ export function OrganizerEventView({
           </Button>
         </div>
       </Modal>
+
+      <UpdateQuotaModal
+        isOpen={isQuotaModalOpen}
+        onClose={() => setIsQuotaModalOpen(false)}
+        eventId={event._id as Id<"events">}
+        currentQuota={event.maxParticipants}
+        currentGuestsCount={stats.totalGuests}
+        onSuccess={(newQuota) => {
+          setToastMessage(`Quota d'invités augmenté à ${newQuota}`);
+          setShowToast(true);
+        }}
+      />
 
       <Toast
         isOpen={showToast}
