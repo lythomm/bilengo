@@ -13,6 +13,8 @@ import { Card } from "@/components/ui/Card";
 import { getParticipantSession } from "@/lib/session";
 import { Trash2, Clock, CheckCircle2 } from "lucide-react";
 
+import { formatConvexError } from "@/lib/errors";
+
 interface CarpoolDetailsDrawerProps {
   carpool: CarpoolItem | null;
   isOpen: boolean;
@@ -21,6 +23,7 @@ interface CarpoolDetailsDrawerProps {
   isDriver?: boolean;
   isPassenger?: boolean;
   bookingStatus?: "pending" | "confirmed" | "cancelled";
+  bookingId?: Id<"bookings">;
 }
 
 function cleanPhone(p?: string) {
@@ -50,10 +53,14 @@ export function CarpoolDetailsDrawer({
   isDriver = false,
   isPassenger = false,
   bookingStatus,
+  bookingId,
 }: CarpoolDetailsDrawerProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isConfirmingCancelBooking, setIsConfirmingCancelBooking] = useState(false);
+
   const cancelCarpoolMutation = useMutation(api.carpools.cancelCarpool);
+  const cancelBookingMutation = useMutation(api.bookings.cancelBooking);
 
   if (!isOpen || !carpool) return null;
 
@@ -86,6 +93,23 @@ export function CarpoolDetailsDrawer({
       onClose();
     } catch (err: any) {
       alert(err.message || "Erreur lors de la suppression du covoiturage.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCancelBooking = async () => {
+    if (!bookingId) return;
+    try {
+      setIsDeleting(true);
+      await cancelBookingMutation({
+        bookingId,
+        passengerPhone: userPhone,
+      });
+      setIsConfirmingCancelBooking(false);
+      onClose();
+    } catch (err: unknown) {
+      alert(formatConvexError(err, "Erreur lors de l'annulation de la réservation."));
     } finally {
       setIsDeleting(false);
     }
@@ -177,14 +201,40 @@ export function CarpoolDetailsDrawer({
             </div>
           ) : isPassenger ? (
             bookingStatus === "confirmed" ? (
-              <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-sm text-center font-medium flex items-center justify-center gap-2 shadow-2xs">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Place confirmée pour ce covoiturage.</span>
+              <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-sm font-medium flex items-center justify-between shadow-2xs">
+                <div className="flex items-center gap-2 min-w-0 pr-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span className="truncate">Place confirmée pour ce covoiturage.</span>
+                </div>
+                {bookingId && (
+                  <button
+                    type="button"
+                    onClick={() => setIsConfirmingCancelBooking(true)}
+                    className="p-1.5 rounded-lg text-emerald-700 hover:text-red-600 hover:bg-emerald-100/60 transition-colors cursor-pointer border-none bg-transparent shrink-0"
+                    title="Annuler ma réservation"
+                    aria-label="Annuler ma réservation"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             ) : (
-              <div className="p-3.5 bg-amber-50 border border-amber-300 rounded-xl text-amber-950 text-sm text-center font-medium flex items-center justify-center gap-2 shadow-2xs">
-                <Clock className="w-4 h-4 text-amber-600 shrink-0 animate-pulse" />
-                <span>Demande en attente de validation</span>
+              <div className="p-3.5 bg-amber-50 border border-amber-300 rounded-xl text-amber-950 text-sm font-medium flex items-center justify-between shadow-2xs">
+                <div className="flex items-center gap-2 min-w-0 pr-2">
+                  <Clock className="w-4 h-4 text-amber-600 shrink-0 animate-pulse" />
+                  <span className="truncate">Demande en attente de validation</span>
+                </div>
+                {bookingId && (
+                  <button
+                    type="button"
+                    onClick={() => setIsConfirmingCancelBooking(true)}
+                    className="p-1.5 rounded-lg text-amber-800 hover:text-red-600 hover:bg-amber-100/60 transition-colors cursor-pointer border-none bg-transparent shrink-0"
+                    title="Annuler ma demande"
+                    aria-label="Annuler ma demande"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             )
           ) : (
@@ -201,7 +251,7 @@ export function CarpoolDetailsDrawer({
         </div>
       </Drawer>
 
-      {/* Confirmation Modal */}
+      {/* Confirmation Modal - Delete Carpool (Driver) */}
       <Modal
         isOpen={isConfirmingDelete}
         onClose={() => setIsConfirmingDelete(false)}
@@ -224,6 +274,33 @@ export function CarpoolDetailsDrawer({
             onClick={handleCancel}
           >
             {isDeleting ? "Suppression..." : "Supprimer"}
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Confirmation Modal - Cancel Booking (Passenger) */}
+      <Modal
+        isOpen={isConfirmingCancelBooking}
+        onClose={() => setIsConfirmingCancelBooking(false)}
+        title={bookingStatus === "confirmed" ? "Annuler ma réservation" : "Annuler ma demande"}
+        description="Êtes-vous sûr de vouloir annuler votre demande de place pour ce covoiturage ?"
+        maxWidthClass="max-w-md"
+      >
+        <div className="flex justify-end gap-2.5 pt-2">
+          <Button
+            variant="secondary"
+            size="md"
+            onClick={() => setIsConfirmingCancelBooking(false)}
+          >
+            Retour
+          </Button>
+          <Button
+            variant="danger"
+            size="md"
+            isLoading={isDeleting}
+            onClick={handleCancelBooking}
+          >
+            Annuler ma demande
           </Button>
         </div>
       </Modal>

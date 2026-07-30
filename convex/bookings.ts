@@ -197,7 +197,8 @@ export const cancelBooking = mutation({
       throw new Error("Réservation introuvable.");
     }
 
-    if (booking.passengerPhone !== args.passengerPhone.trim()) {
+    const cleanP = (p: string) => p.replace(/[^0-9]/g, "");
+    if (cleanP(booking.passengerPhone) !== cleanP(args.passengerPhone)) {
       throw new Error("Non autorisé à annuler cette réservation.");
     }
 

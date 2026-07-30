@@ -187,11 +187,10 @@ export function MainEventDrawer({
             <div className="space-y-3">
               {isPassenger && userRole?.carpool && (
                 <div
-                  className={`p-3 rounded-xl border text-xs sm:text-sm font-medium flex items-center justify-between shadow-2xs ${
-                    userRole.booking?.status === "confirmed"
-                      ? "bg-emerald-50 border-emerald-200 text-emerald-900"
-                      : "bg-amber-50 border-amber-300 text-amber-950"
-                  }`}
+                  className={`p-3 rounded-xl border text-xs sm:text-sm font-medium flex items-center justify-between shadow-2xs ${userRole.booking?.status === "confirmed"
+                    ? "bg-emerald-50 border-emerald-200 text-emerald-900"
+                    : "bg-amber-50 border-amber-300 text-amber-950"
+                    }`}
                 >
                   <span className="flex items-center gap-2 min-w-0 pr-2">
                     {userRole.booking?.status === "confirmed" ? (
@@ -308,7 +307,7 @@ export function MainEventDrawer({
                 Vous êtes déjà passager
               </h3>
               <p className="text-sm text-neutral-600 max-w-xs leading-relaxed">
-                Vous avez réservé 1 place chez{" "}
+                Vous avez réservé une place chez{" "}
                 <strong>{userRole?.carpool?.driverName || "un conducteur"}</strong>.
               </p>
               {userRole?.carpool && (
@@ -317,7 +316,7 @@ export function MainEventDrawer({
                   size="sm"
                   onClick={() => onSelectCarpool(userRole.carpool as any)}
                 >
-                  Voir mon trajet réservé →
+                  Voir mon trajet →
                 </Button>
               )}
             </div>

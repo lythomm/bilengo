@@ -151,10 +151,10 @@ export function BookingModal({ carpool, isOpen, onClose }: BookingModalProps) {
 
           <div className="space-y-1.5">
             <h3 className="text-lg font-bold text-neutral-900 font-heading mb-4">
-              Dernière étape : <br></br>Envoyez votre message
+              Dernière étape : <br></br>Envoie ton message
             </h3>
             <p className="text-neutral-600 text-xs leading-relaxed max-w-sm mx-auto">
-              Votre demande a été préparée. <strong>Envoyer le message suivant</strong> à {bookingSuccess.driverName} via WhatsApp ou SMS pour confirmer votre place.
+              Ta demande a été préparée. <strong>Envoie le message suivant</strong> à {bookingSuccess.driverName} via WhatsApp ou SMS pour confirmer ta place.
             </p>
           </div>
 
@@ -196,7 +196,7 @@ export function BookingModal({ carpool, isOpen, onClose }: BookingModalProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1">
-              Votre Prénom
+              Ton prénom
             </label>
             <input
               type="text"
@@ -210,7 +210,7 @@ export function BookingModal({ carpool, isOpen, onClose }: BookingModalProps) {
 
           <div>
             <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1">
-              Votre N° Téléphone
+              Ton n° de téléphone
             </label>
             <input
               type="tel"
@@ -223,7 +223,7 @@ export function BookingModal({ carpool, isOpen, onClose }: BookingModalProps) {
           </div>
 
           <div className="p-3 bg-neutral-50 border border-neutral-200 rounded-lg text-xs text-neutral-600 leading-relaxed">
-            Vos coordonnées seront uniquement transmises au conducteur pour confirmer le trajet.
+            Tes coordonnées seront uniquement transmises au conducteur pour confirmer le trajet.
           </div>
 
           <Button

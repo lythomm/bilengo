@@ -99,6 +99,11 @@ export function EventDrawer({
               ? userRole.booking?.status
               : undefined
           }
+          bookingId={
+            userRole?.role === "passenger" && userRole?.carpool?._id === selectedCarpool._id
+              ? (userRole.booking?._id as Id<"bookings">)
+              : undefined
+          }
         />
       )}
 

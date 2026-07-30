@@ -68,7 +68,7 @@ export function ConfirmBookingClient() {
           B
         </div>
         <span className="font-bold text-neutral-900 tracking-tight text-lg font-heading">
-          bilengo
+          BilenGo
         </span>
       </Link>
 
@@ -111,7 +111,7 @@ export function ConfirmBookingClient() {
                 : "Place confirmée !"}
             </h2>
             <p className="text-neutral-600 text-xs">
-              Vous avez accepté la réservation de{" "}
+              Tu as accepté la réservation de{" "}
               <span className="font-semibold text-neutral-900">
                 {resultData.passengerName}
               </span>{" "}
