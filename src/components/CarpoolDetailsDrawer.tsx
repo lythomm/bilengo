@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { getParticipantSession } from "@/lib/session";
-import { Trash2 } from "lucide-react";
+import { Trash2, Clock, CheckCircle2 } from "lucide-react";
 
 interface CarpoolDetailsDrawerProps {
   carpool: CarpoolItem | null;
@@ -20,6 +20,7 @@ interface CarpoolDetailsDrawerProps {
   onOpenBooking: (carpool: CarpoolItem) => void;
   isDriver?: boolean;
   isPassenger?: boolean;
+  bookingStatus?: "pending" | "confirmed" | "cancelled";
 }
 
 function cleanPhone(p?: string) {
@@ -48,6 +49,7 @@ export function CarpoolDetailsDrawer({
   onOpenBooking,
   isDriver = false,
   isPassenger = false,
+  bookingStatus,
 }: CarpoolDetailsDrawerProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
@@ -174,9 +176,17 @@ export function CarpoolDetailsDrawer({
               </Button>
             </div>
           ) : isPassenger ? (
-            <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900 text-sm text-center font-medium">
-              ✓ Vous avez réservé 1 place pour cet événement.
-            </div>
+            bookingStatus === "confirmed" ? (
+              <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-sm text-center font-medium flex items-center justify-center gap-2 shadow-2xs">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>Place confirmée pour ce covoiturage.</span>
+              </div>
+            ) : (
+              <div className="p-3.5 bg-amber-50 border border-amber-300 rounded-xl text-amber-950 text-sm text-center font-medium flex items-center justify-center gap-2 shadow-2xs">
+                <Clock className="w-4 h-4 text-amber-600 shrink-0 animate-pulse" />
+                <span>Demande en attente de validation</span>
+              </div>
+            )
           ) : (
             <Button
               variant="primary"
@@ -185,7 +195,7 @@ export function CarpoolDetailsDrawer({
               onClick={() => onOpenBooking(carpool)}
               className="w-full text-base font-semibold py-3"
             >
-              {carpool.availableSeats <= 0 ? "Covoit complet" : "Réserver 1 place"}
+              {carpool.availableSeats <= 0 ? "Covoit complet" : "Demander une place"}
             </Button>
           )}
         </div>

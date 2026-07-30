@@ -11,7 +11,7 @@ import { PillGroup } from "@/components/ui/PillGroup";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
-import { Trash2, MapPin, Clock, ChevronRight, CarFront } from "lucide-react";
+import { Trash2, MapPin, Clock, ChevronRight, CarFront, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import googleMapsIcon from "@/assets/icons/google-maps.svg";
 import wazeIcon from "@/assets/icons/waze.webp";
@@ -186,9 +186,29 @@ export function MainEventDrawer({
             /* Search Rides Tab */
             <div className="space-y-3">
               {isPassenger && userRole?.carpool && (
-                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-sm font-medium flex items-center justify-between">
-                  <span>
-                    ✓ Place réservée chez <strong>{userRole.carpool.driverName}</strong>
+                <div
+                  className={`p-3 rounded-xl border text-xs sm:text-sm font-medium flex items-center justify-between shadow-2xs ${
+                    userRole.booking?.status === "confirmed"
+                      ? "bg-emerald-50 border-emerald-200 text-emerald-900"
+                      : "bg-amber-50 border-amber-300 text-amber-950"
+                  }`}
+                >
+                  <span className="flex items-center gap-2 min-w-0 pr-2">
+                    {userRole.booking?.status === "confirmed" ? (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="truncate">
+                          Place confirmée chez <strong>{userRole.carpool.driverName}</strong>
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Clock className="w-4 h-4 text-amber-600 shrink-0 animate-pulse" />
+                        <span className="truncate">
+                          Demande en attente chez <strong>{userRole.carpool.driverName}</strong>
+                        </span>
+                      </>
+                    )}
                   </span>
                   <Button
                     variant="ghost"

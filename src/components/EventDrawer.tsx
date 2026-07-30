@@ -94,6 +94,11 @@ export function EventDrawer({
           isPassenger={
             userRole?.role === "passenger" && userRole?.carpool?._id === selectedCarpool._id
           }
+          bookingStatus={
+            userRole?.role === "passenger" && userRole?.carpool?._id === selectedCarpool._id
+              ? userRole.booking?.status
+              : undefined
+          }
         />
       )}
 

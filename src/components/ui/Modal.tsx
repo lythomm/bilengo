@@ -12,6 +12,7 @@ export interface ModalProps {
   children: ReactNode;
   maxWidthClass?: string;
   showCloseButton?: boolean;
+  closeOnBackdropClick?: boolean;
 }
 
 export function Modal({
@@ -22,10 +23,11 @@ export function Modal({
   children,
   maxWidthClass = "max-w-lg",
   showCloseButton = true,
+  closeOnBackdropClick = true,
 }: ModalProps) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape" && closeOnBackdropClick) onClose();
     };
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -35,7 +37,7 @@ export function Modal({
       document.body.style.overflow = "unset";
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, closeOnBackdropClick]);
 
   return (
     <AnimatePresence>
@@ -48,7 +50,9 @@ export function Modal({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
             className="fixed inset-0 bg-neutral-900/40 backdrop-blur-xs"
-            onClick={onClose}
+            onClick={() => {
+              if (closeOnBackdropClick) onClose();
+            }}
           />
 
           {/* Modal Dialog */}
@@ -69,7 +73,9 @@ export function Modal({
                     </h3>
                   )}
                   {description && (
-                    <p className="text-sm text-neutral-500 mt-4">{description}</p>
+                    <div className="text-xs sm:text-sm text-neutral-500 mt-1 leading-relaxed">
+                      {description}
+                    </div>
                   )}
                 </div>
                 {showCloseButton && (

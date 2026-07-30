@@ -8,6 +8,7 @@ import { getParticipantSession, setParticipantSession } from "@/lib/session";
 import { formatConvexError } from "@/lib/errors";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
+import { Car, Flag, Send } from "lucide-react";
 
 interface BookingModalProps {
   carpool: {
@@ -74,7 +75,7 @@ export function BookingModal({ carpool, isOpen, onClose }: BookingModalProps) {
 
       const origin = window.location.origin;
       const confirmUrl = `${origin}/booking/confirm?token=${res.validationToken}`;
-      const messageText = `Salut ${res.driverName} ! Je suis ${passengerName} (${passengerPhone}). Je souhaite réserver 1 place de covoiturage pour ${res.eventTitle} au départ de ${res.departureAddress}. Clique ici pour me valider : ${confirmUrl}`;
+      const messageText = `Salut ${res.driverName} ! Je suis ${passengerName}. Je souhaite réserver 1 place de covoiturage pour "${res.eventTitle}" au départ de ${res.departureAddress}. Clique ici pour me valider : ${confirmUrl}`;
       const encodedMsg = encodeURIComponent(messageText);
 
       const cleanPhone = formatInternationalPhone(res.driverPhone);
@@ -119,8 +120,22 @@ export function BookingModal({ carpool, isOpen, onClose }: BookingModalProps) {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
+      closeOnBackdropClick={!bookingSuccess}
       title="Réserver une place"
-      description={`Conducteur : ${carpool.driverName} • Départ : ${carpool.departureAddress}`}
+      description={
+        !bookingSuccess ? (
+          <div className="space-y-1.5 mt-2">
+            <p className="flex items-center gap-2 text-sm sm:text-base font-semibold text-neutral-900">
+              <Car className="w-4 h-4 text-neutral-500 shrink-0" />
+              <span>{carpool.driverName}</span>
+            </p>
+            <p className="flex items-center gap-2 text-xs sm:text-sm text-neutral-600 truncate">
+              <Flag className="w-4 h-4 text-neutral-500 shrink-0" />
+              <span className="truncate">{carpool.departureAddress}</span>
+            </p>
+          </div>
+        ) : undefined
+      }
     >
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs font-medium">
@@ -130,16 +145,16 @@ export function BookingModal({ carpool, isOpen, onClose }: BookingModalProps) {
 
       {bookingSuccess ? (
         <div className="space-y-4 text-center py-2">
-          <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 text-2xl font-bold flex items-center justify-center mx-auto">
-            ✓
+          <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto shadow-xs">
+            <Send className="w-6 h-6 ml-0.5 text-amber-700" />
           </div>
 
-          <div className="space-y-1">
-            <h3 className="text-lg font-semibold text-neutral-900 font-heading">
-              Demande enregistrée !
+          <div className="space-y-1.5">
+            <h3 className="text-lg font-bold text-neutral-900 font-heading mb-4">
+              Dernière étape : <br></br>Envoyez votre message
             </h3>
-            <p className="text-neutral-500 text-xs">
-              Envoyez maintenant la demande à {bookingSuccess.driverName} pour validation direct via WhatsApp ou SMS.
+            <p className="text-neutral-600 text-xs leading-relaxed max-w-sm mx-auto">
+              Votre demande a été préparée. <strong>Envoyer le message suivant</strong> à {bookingSuccess.driverName} via WhatsApp ou SMS pour confirmer votre place.
             </p>
           </div>
 
@@ -153,26 +168,26 @@ export function BookingModal({ carpool, isOpen, onClose }: BookingModalProps) {
               href={bookingSuccess.whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-2.5 px-4 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors border-none"
+              className="w-full py-3 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm flex items-center justify-center gap-2 transition-colors border-none shadow-xs"
             >
-              Envoyer via WhatsApp (Recommandé)
+              Envoyer à {bookingSuccess.driverName} (WhatsApp)
             </a>
 
             <div className="grid grid-cols-2 gap-2">
               <a
                 href={bookingSuccess.smsUrl}
-                className="cal-button-secondary text-xs text-center justify-center"
+                className="cal-button-secondary text-xs text-center justify-center font-semibold"
               >
-                SMS Natif
+                Envoyer par SMS
               </a>
 
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleWebShare}
-                className="w-full"
+                className="w-full text-xs"
               >
-                Partager / Copier
+                Copier le message
               </Button>
             </div>
           </div>

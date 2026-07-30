@@ -76,7 +76,7 @@ export const requestBooking = mutation({
       validationToken,
     });
 
-    // Upsert participant record with passenger transportMode
+    // Insert participant record with autonomous transportMode while booking is pending
     const cleanPhoneStr = passengerPhone.replace(/[^0-9]/g, "");
     const existingParticipant = await ctx.db
       .query("event_participants")
@@ -85,19 +85,12 @@ export const requestBooking = mutation({
       )
       .first();
 
-    if (existingParticipant) {
-      if (existingParticipant.transportMode !== "driver") {
-        await ctx.db.patch(existingParticipant._id, {
-          name: passengerName,
-          transportMode: "passenger",
-        });
-      }
-    } else {
+    if (!existingParticipant) {
       await ctx.db.insert("event_participants", {
         eventId: carpool.eventId,
         name: passengerName,
         phone: cleanPhoneStr,
-        transportMode: "passenger",
+        transportMode: "autonomous",
       });
     }
 
@@ -163,6 +156,21 @@ export const confirmBooking = mutation({
       status: "confirmed",
     });
 
+    // Pass transportMode to passenger upon driver confirmation
+    const cleanPhoneStr = booking.passengerPhone.replace(/[^0-9]/g, "");
+    const participant = await ctx.db
+      .query("event_participants")
+      .withIndex("by_event_and_phone", (q) =>
+        q.eq("eventId", carpool.eventId).eq("phone", cleanPhoneStr)
+      )
+      .first();
+
+    if (participant && participant.transportMode !== "driver") {
+      await ctx.db.patch(participant._id, {
+        transportMode: "passenger",
+      });
+    }
+
     const event = await ctx.db.get(carpool.eventId);
 
     return {
@@ -200,6 +208,21 @@ export const cancelBooking = mutation({
           availableSeats: carpool.availableSeats + 1,
           status: "active",
         });
+
+        // Reset participant transportMode back to autonomous
+        const cleanPhoneStr = booking.passengerPhone.replace(/[^0-9]/g, "");
+        const participant = await ctx.db
+          .query("event_participants")
+          .withIndex("by_event_and_phone", (q) =>
+            q.eq("eventId", carpool.eventId).eq("phone", cleanPhoneStr)
+          )
+          .first();
+
+        if (participant && participant.transportMode === "passenger") {
+          await ctx.db.patch(participant._id, {
+            transportMode: "autonomous",
+          });
+        }
       }
     }
 
