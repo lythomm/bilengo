@@ -198,10 +198,47 @@ export function EventClient({ params }: EventClientProps) {
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-white text-neutral-900 select-none">
-      {/* Map Picker Overlay */}
-      {isPickingLocation ? (
+      {/* Top Header - Always Visible */}
+      <header className="fixed top-0 left-0 right-0 z-30 bg-white p-4 h-16 flex items-center justify-between gap-3 border-b border-neutral-200">
+        <span className="text-lg font-bold text-neutral-900 tracking-tight font-heading">
+          BilenGo
+        </span>
+
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={handleCopyLink}
+            title={copied ? "Lien copié !" : "Partager"}
+            aria-label="Partager"
+          >
+            {copied ? (
+              <Check className="w-4 h-4 text-emerald-600" />
+            ) : (
+              <Share2 className="w-4 h-4" />
+            )}
+          </Button>
+
+          {organizerData?.isOrganizer && (
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              onClick={() => setViewMode("organizer")}
+              title="Vue Organisateur"
+              aria-label="Vue Organisateur"
+            >
+              <LayoutDashboard className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
+      </header>
+
+      {/* Map Picker Overlay when active */}
+      {isPickingLocation && (
         <>
-          <div className="fixed top-4 left-4 right-4 z-40 max-w-md mx-auto">
+          <div className="fixed top-20 left-4 right-4 z-40 max-w-md mx-auto">
             <AddressAutocomplete
               value={searchAddress}
               onChange={(val) => setSearchAddress(val)}
@@ -219,18 +256,18 @@ export function EventClient({ params }: EventClientProps) {
           <div className="fixed inset-0 pointer-events-none z-30 flex items-center justify-center">
             <div className="relative flex items-center justify-center">
               <svg
-                width="48"
-                height="48"
+                width="28"
+                height="28"
                 viewBox="0 0 48 48"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <circle cx="24" cy="24" r="10" stroke="#111111" strokeWidth="3" fill="none" />
-                <circle cx="24" cy="24" r="4" fill="#111111" />
-                <line x1="24" y1="2" x2="24" y2="10" stroke="#111111" strokeWidth="3" strokeLinecap="round" />
-                <line x1="24" y1="38" x2="24" y2="46" stroke="#111111" strokeWidth="3" strokeLinecap="round" />
-                <line x1="2" y1="24" x2="10" y2="24" stroke="#111111" strokeWidth="3" strokeLinecap="round" />
-                <line x1="38" y1="24" x2="46" y2="24" stroke="#111111" strokeWidth="3" strokeLinecap="round" />
+                <circle cx="24" cy="24" r="8" stroke="#111111" strokeWidth="2.5" fill="none" />
+                <circle cx="24" cy="24" r="3" fill="#111111" />
+                <line x1="24" y1="4" x2="24" y2="12" stroke="#111111" strokeWidth="2.5" strokeLinecap="round" />
+                <line x1="24" y1="36" x2="24" y2="44" stroke="#111111" strokeWidth="2.5" strokeLinecap="round" />
+                <line x1="4" y1="24" x2="12" y2="24" stroke="#111111" strokeWidth="2.5" strokeLinecap="round" />
+                <line x1="36" y1="24" x2="44" y2="24" stroke="#111111" strokeWidth="2.5" strokeLinecap="round" />
               </svg>
             </div>
           </div>
@@ -256,42 +293,6 @@ export function EventClient({ params }: EventClientProps) {
             </Button>
           </div>
         </>
-      ) : (
-        <header className="fixed w-full z-30 bg-white p-4 h-16 flex items-center justify-between gap-3 border-b border-neutral-200">
-          <span className="text-lg font-bold text-neutral-900 tracking-tight font-heading">
-            BilenGo
-          </span>
-
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={handleCopyLink}
-              title={copied ? "Lien copié !" : "Partager"}
-              aria-label="Partager"
-            >
-              {copied ? (
-                <Check className="w-4 h-4 text-emerald-600" />
-              ) : (
-                <Share2 className="w-4 h-4" />
-              )}
-            </Button>
-
-            {organizerData?.isOrganizer && (
-              <Button
-                type="button"
-                variant="primary"
-                size="sm"
-                onClick={() => setViewMode("organizer")}
-                title="Vue Organisateur"
-                aria-label="Vue Organisateur"
-              >
-                <LayoutDashboard className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
-        </header>
       )}
 
       {/* Fullscreen OpenStreetMap Layer */}

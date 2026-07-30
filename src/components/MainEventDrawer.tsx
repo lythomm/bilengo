@@ -11,7 +11,7 @@ import { PillGroup } from "@/components/ui/PillGroup";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
-import { Trash2, MapPin, Clock, ChevronRight } from "lucide-react";
+import { Trash2, MapPin, Clock, ChevronRight, CarFront } from "lucide-react";
 import Image from "next/image";
 import googleMapsIcon from "@/assets/icons/google-maps.svg";
 import wazeIcon from "@/assets/icons/waze.webp";
@@ -362,12 +362,12 @@ export function MainEventDrawer({
           ) : (
             /* Propose Ride CTA View */
             <div className="py-6 flex flex-col items-center text-center space-y-4">
-              <h3 className="text-xl font-bold text-neutral-900 tracking-tight font-heading">
-                Proposer un trajet
-              </h3>
+              <div className="size-32 rounded-3xl border-2 border-dashed border-emerald-500/70 bg-emerald-50/60 flex items-center justify-center text-emerald-700 shadow-2xs">
+                <CarFront className="size-8 text-emerald-600" />
+              </div>
 
-              <p className="text-sm text-neutral-600 max-w-xs leading-relaxed">
-                Proposez vos places libres pour cet événement.
+              <p className="text-sm font-medium text-neutral-700 max-w-xs leading-relaxed">
+                Deviens le héro de la soirée en proposant des places dans ton carrosse !
               </p>
 
               <Button
@@ -378,7 +378,7 @@ export function MainEventDrawer({
                     onStartPickLocation();
                   }
                 }}
-                className="w-full max-w-xs"
+                className="w-full max-w-xs active:scale-95 transition-all"
               >
                 Proposer un covoiturage
               </Button>
