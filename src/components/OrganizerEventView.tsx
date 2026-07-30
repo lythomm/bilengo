@@ -303,7 +303,7 @@ export function OrganizerEventView({
 
               <div className="w-full sm:w-auto flex justify-end shrink-0">
                 <Button
-                  variant={isQuotaFull ? "danger" : "primary"}
+                  variant="primary"
                   size="sm"
                   onClick={() => setIsQuotaModalOpen(true)}
                   className="font-semibold shadow-xs"
