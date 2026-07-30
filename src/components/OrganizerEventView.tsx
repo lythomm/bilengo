@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -29,6 +30,7 @@ import {
   CheckCircle2,
   User,
   Info,
+  Filter,
 } from "lucide-react";
 
 interface Guest {
@@ -150,7 +152,12 @@ export function OrganizerEventView({
   });
 
   return (
-    <div className="min-h-screen bg-white text-neutral-900 flex flex-col">
+    <motion.div
+      initial={{ x: "-100%", opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 260, damping: 28 }}
+      className="min-h-screen bg-white text-neutral-900 flex flex-col"
+    >
       {/* Top Navigation */}
       <header className="border-b border-neutral-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
@@ -306,28 +313,8 @@ export function OrganizerEventView({
             ]}
           />
 
-          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="cal-input text-xs font-semibold text-neutral-700 bg-white border border-neutral-200 rounded-lg px-3 py-2 cursor-pointer shrink-0"
-            >
-              <option value="all">Tous les statuts</option>
-              {activeTab === "guests" ? (
-                <>
-                  <option value="driver">Conducteur</option>
-                  <option value="passenger">Passager</option>
-                  <option value="autonomous">Sans covoiturage</option>
-                </>
-              ) : (
-                <>
-                  <option value="active">Places disponibles</option>
-                  <option value="full">Complet</option>
-                </>
-              )}
-            </select>
-
-            <div className="relative w-full sm:w-64">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
               <input
                 type="text"
@@ -336,6 +323,35 @@ export function OrganizerEventView({
                 placeholder="Rechercher..."
                 className="cal-input w-full !pl-9 text-xs"
               />
+            </div>
+
+            <div className="relative shrink-0">
+              <div className="flex items-center justify-center p-2.5 bg-white border border-neutral-200 rounded-lg text-neutral-700 hover:bg-neutral-50 active:scale-95 transition-all cursor-pointer">
+                <Filter className="w-4 h-4 text-neutral-600" />
+                {statusFilter !== "all" && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white" />
+                )}
+              </div>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                aria-label="Filtrer par statut"
+                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+              >
+                <option value="all">Tous les statuts</option>
+                {activeTab === "guests" ? (
+                  <>
+                    <option value="driver">Conducteurs</option>
+                    <option value="passenger">Passagers</option>
+                    <option value="autonomous">Sans covoiturage</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="active">Places disponibles</option>
+                    <option value="full">Complets</option>
+                  </>
+                )}
+              </select>
             </div>
           </div>
         </div>
@@ -559,6 +575,6 @@ export function OrganizerEventView({
         message={toastMessage}
         variant="success"
       />
-    </div>
+    </motion.div>
   );
 }

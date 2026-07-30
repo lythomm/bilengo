@@ -1,12 +1,12 @@
 "use client";
 
 import { use, useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { EventMapContainer } from "@/components/EventMapContainer";
 import { EventDrawer } from "@/components/EventDrawer";
 import { BookingModal } from "@/components/BookingModal";
-import { OrganizerEventView } from "@/components/OrganizerEventView";
 import { AddressAutocomplete } from "@/components/AddressAutocomplete";
 import { GuestAuthModal } from "@/components/GuestAuthModal";
 import { getParticipantSession } from "@/lib/session";
@@ -25,7 +25,6 @@ export function EventClient({ params }: EventClientProps) {
   const [bookingCarpool, setBookingCarpool] = useState<any | null>(null);
   const [copied, setCopied] = useState(false);
   const [showToast, setShowToast] = useState(false);
-  const [viewMode, setViewMode] = useState<"organizer" | "map">("organizer");
   const [isGuestAuthOpen, setIsGuestAuthOpen] = useState(false);
 
   // Map Picker Mode State
@@ -185,19 +184,15 @@ export function EventClient({ params }: EventClientProps) {
     );
   }
 
-  if (organizerData?.isOrganizer && viewMode === "organizer") {
-    return (
-      <OrganizerEventView
-        organizerData={organizerData as any}
-        onSwitchToMap={() => setViewMode("map")}
-        onCopyLink={handleCopyLink}
-        copied={copied}
-      />
-    );
-  }
+
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-white text-neutral-900 select-none">
+    <motion.div
+      initial={{ x: "100%", opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 260, damping: 28 }}
+      className="fixed inset-0 overflow-hidden bg-white text-neutral-900 select-none"
+    >
       {/* Top Header - Always Visible */}
       <header className="fixed top-0 left-0 right-0 z-30 bg-white p-4 h-16 flex items-center justify-between gap-3 border-b border-neutral-200">
         <span className="text-lg font-bold text-neutral-900 tracking-tight font-heading">
@@ -221,16 +216,17 @@ export function EventClient({ params }: EventClientProps) {
           </Button>
 
           {organizerData?.isOrganizer && (
-            <Button
-              type="button"
-              variant="primary"
-              size="sm"
-              onClick={() => setViewMode("organizer")}
-              title="Vue Organisateur"
-              aria-label="Vue Organisateur"
-            >
-              <LayoutDashboard className="w-4 h-4" />
-            </Button>
+            <Link href={`/e/${event.slug}/dashboard`}>
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                title="Tableau de bord organisateur"
+                aria-label="Tableau de bord organisateur"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+              </Button>
+            </Link>
           )}
         </div>
       </header>
@@ -350,6 +346,6 @@ export function EventClient({ params }: EventClientProps) {
         message="Lien de l'événement copié !"
         variant="success"
       />
-    </div>
+    </motion.div>
   );
 }

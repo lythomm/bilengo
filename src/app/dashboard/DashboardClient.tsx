@@ -140,7 +140,7 @@ export function DashboardClient() {
                   </div>
 
                   <div className="pt-4 mt-6 border-t border-neutral-100 flex items-center gap-2">
-                    <Link href={`/e/${evt.slug}`} className="flex-1">
+                    <Link href={`/e/${evt.slug}/dashboard`} className="flex-1">
                       <Button
                         variant="primary"
                         size="sm"
