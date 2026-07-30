@@ -95,6 +95,7 @@ export function OrganizerEventView({
   copied,
 }: OrganizerEventViewProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [activeTab, setActiveTab] = useState<"guests" | "carpools">("guests");
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("Lien de l'événement copié !");
@@ -121,12 +122,30 @@ export function OrganizerEventView({
   };
 
   const filteredGuests = guests.filter((g) => {
+    if (statusFilter === "driver" && !g.proposesCarpool) return false;
+    if (statusFilter === "passenger" && !g.isInCarpool) return false;
+    if (statusFilter === "autonomous" && (g.proposesCarpool || g.isInCarpool)) return false;
+
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
     return (
       g.name.toLowerCase().includes(q) ||
       g.phone.toLowerCase().includes(q) ||
       g.details.some((d) => d.toLowerCase().includes(q))
+    );
+  });
+
+  const filteredCarpools = carpools.filter((c) => {
+    if (statusFilter === "active" && c.availableSeats <= 0) return false;
+    if (statusFilter === "full" && c.availableSeats > 0) return false;
+
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      c.driverName.toLowerCase().includes(q) ||
+      c.driverPhone.toLowerCase().includes(q) ||
+      c.departureAddress.toLowerCase().includes(q) ||
+      c.bookings.some((b) => b.passengerName.toLowerCase().includes(q) || b.passengerPhone.toLowerCase().includes(q))
     );
   });
 
@@ -275,7 +294,10 @@ export function OrganizerEventView({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <PillGroup
             value={activeTab}
-            onChange={(val) => setActiveTab(val as "guests" | "carpools")}
+            onChange={(val) => {
+              setActiveTab(val as "guests" | "carpools");
+              setStatusFilter("all");
+            }}
             className="w-full flex sm:w-auto sm:inline-flex sm:flex-shrink-0 text-nowrap!"
             itemClassName="flex-1 sm:flex-none text-center"
             options={[
@@ -284,15 +306,37 @@ export function OrganizerEventView({
             ]}
           />
 
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Rechercher prénom, tél..."
-              className="cal-input w-full !pl-9"
-            />
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="cal-input text-xs font-semibold text-neutral-700 bg-white border border-neutral-200 rounded-lg px-3 py-2 cursor-pointer shrink-0"
+            >
+              <option value="all">Tous les statuts</option>
+              {activeTab === "guests" ? (
+                <>
+                  <option value="driver">Conducteur</option>
+                  <option value="passenger">Passager</option>
+                  <option value="autonomous">Sans covoiturage</option>
+                </>
+              ) : (
+                <>
+                  <option value="active">Places disponibles</option>
+                  <option value="full">Complet</option>
+                </>
+              )}
+            </select>
+
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Rechercher..."
+                className="cal-input w-full !pl-9 text-xs"
+              />
+            </div>
           </div>
         </div>
 
@@ -382,13 +426,13 @@ export function OrganizerEventView({
         {/* Tab Content: Carpools */}
         {activeTab === "carpools" && (
           <div className="space-y-4">
-            {carpools.length === 0 ? (
+            {filteredCarpools.length === 0 ? (
               <div className="text-center py-8 text-neutral-400 text-xs">
-                Aucun covoiturage pour cet événement.
+                Aucun covoiturage ne correspond à la recherche/filtre.
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {carpools.map((c) => (
+                {filteredCarpools.map((c) => (
                   <Card key={c._id} variant="gray" className="p-4 space-y-3">
                     <div className="flex justify-between items-start">
                       <div>
