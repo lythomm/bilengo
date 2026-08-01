@@ -171,7 +171,7 @@ export function UseCasesStackedSection() {
                     cardsRef.current[index] = el;
                   }}
                   style={{ zIndex: index + 1 }}
-                  className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden border border-neutral-200/90 bg-neutral-900 shadow-xl"
+                  className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden border border-neutral-200/90 bg-neutral-900"
                 >
                   {/* Full-bleed Background Image */}
                   <Image

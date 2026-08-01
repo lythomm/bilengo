@@ -90,7 +90,7 @@ export function HomeClient() {
 
       <main className="flex-1 w-full">
         {/* ================= 1. HERO SECTION ================= */}
-        <section className="relative overflow-hidden pt-12 sm:pt-20 pb-20 border-b border-neutral-100 bg-gradient-to-b from-neutral-50/60 via-white to-white">
+        <section className="relative overflow-hidden pt-12 sm:pt-20 pb-20 bg-gradient-to-b from-neutral-50/60 via-white to-white">
           {/* Cartographic Map Grid Pattern Overlay */}
           <div className="absolute inset-0 pointer-events-none select-none opacity-40 [mask-image:radial-gradient(ellipse_70%_60%_at_50%_40%,#000_60%,transparent_100%)]">
             <svg className="w-full h-full" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -203,49 +203,6 @@ export function HomeClient() {
           </div>
         </section>
 
-        {/* ================= 2. KEY METRICS STRIP ================= */}
-        <section className="py-12 bg-neutral-900 text-white border-b border-neutral-800">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center divide-x-0 md:divide-x divide-neutral-800">
-              <div className="space-y-1.5 p-2">
-                <div className="text-3xl sm:text-4xl font-extrabold text-white font-heading tracking-tight">
-                  50 invités
-                </div>
-                <div className="text-xs sm:text-sm text-neutral-400 font-medium">
-                  Inclus dans la formule gratuite
-                </div>
-              </div>
-
-              <div className="space-y-1.5 p-2">
-                <div className="text-3xl sm:text-4xl font-extrabold text-white font-heading tracking-tight">
-                  &lt; 2 min
-                </div>
-                <div className="text-xs sm:text-sm text-neutral-400 font-medium">
-                  Pour créer un événement
-                </div>
-              </div>
-
-              <div className="space-y-1.5 p-2">
-                <div className="text-3xl sm:text-4xl font-extrabold text-white font-heading tracking-tight">
-                  100%
-                </div>
-                <div className="text-xs sm:text-sm text-neutral-400 font-medium">
-                  Accessible sur le web
-                </div>
-              </div>
-
-              <div className="space-y-1.5 p-2">
-                <div className="text-3xl sm:text-4xl font-extrabold text-emerald-400 font-heading tracking-tight">
-                  -65%
-                </div>
-                <div className="text-xs sm:text-sm text-neutral-400 font-medium">
-                  D'émissions CO2 moyennes
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* ================= 3. HOW IT WORKS (3 STEPS) ================= */}
         <section id="how-it-works" className="py-20 sm:py-28 bg-white border-b border-neutral-100">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -313,103 +270,61 @@ export function HomeClient() {
           </div>
         </section>
 
-        {/* ================= 5. INTERACTIVE SAVINGS & CARBON CALCULATOR ================= */}
-        <section className="py-20 bg-neutral-50 border-b border-neutral-200/80">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="bg-white rounded-2xl border border-neutral-200 p-6 sm:p-10 shadow-sm">
-              <div className="text-center space-y-3 max-w-2xl mx-auto mb-10">
-                <Badge variant="emerald" className="text-xs">
-                  <Leaf className="w-3.5 h-3.5 inline mr-1 text-emerald-600" />
-                  Simulateur d'Impact Eco & Économies
-                </Badge>
-                <h2 className="text-2xl sm:text-4xl font-bold text-neutral-900 font-heading tracking-tight">
-                  Calculez l'impact pour votre événement
-                </h2>
-                <p className="text-neutral-600 text-sm sm:text-base">
-                  Ajustez le nombre d'invités pour estimer les économies collectives et la réduction d'empreinte carbone.
-                </p>
+        {/* ================= 5. INTERACTIVE SAVINGS & CARBON CALCULATOR (FULL-BLEED DARK SECTION) ================= */}
+        <section className="py-20 sm:py-28 bg-neutral-900 text-white border-b border-neutral-800">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-12">
+            {/* Main Hero Counter */}
+            <div className="text-center space-y-4 max-w-3xl mx-auto">
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neutral-800 text-emerald-400 text-xs font-bold border border-neutral-700/80">
+                <Leaf className="w-3.5 h-3.5" />
+                Empreinte Carbone Évitée
+              </span>
+              <div className="text-6xl sm:text-8xl font-black font-heading text-emerald-400 tracking-tight">
+                -{co2SavedKg} <span className="text-3xl sm:text-4xl font-light text-white">kg CO₂</span>
               </div>
+              <p className="text-neutral-300 text-base sm:text-lg max-w-xl mx-auto font-normal">
+                Jusqu'à <strong className="text-emerald-300">{co2SavedKg} kg de CO₂ non émis</strong>, soit <strong className="text-white">{carsSaved} voitures en moins</strong> sur les routes et <strong className="text-white">~{fuelSavedEuros} €</strong> de carburant préservé.
+              </p>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
-                {/* Sliders Control */}
-                <div className="h-full flex flex-col justify-center space-y-6 sm:space-y-8 bg-neutral-50 p-6 sm:p-7 rounded-xl border border-neutral-200/80">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-semibold text-neutral-800">
-                      <span>Nombre de participants :</span>
-                      <span className="text-neutral-900 text-sm font-bold font-heading">{guestCount} invités</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="20"
-                      max="350"
-                      step="10"
-                      value={guestCount}
-                      onChange={(e) => setGuestCount(Number(e.target.value))}
-                      className="w-full h-2 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-neutral-900"
-                    />
-                    <div className="flex justify-between text-[11px] text-neutral-400">
-                      <span>20</span>
-                      <span>180</span>
-                      <span>350+</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-semibold text-neutral-800">
-                      <span>Distance moyenne aller (km) :</span>
-                      <span className="text-neutral-900 text-sm font-bold font-heading">{avgDistance} km</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="15"
-                      max="200"
-                      step="5"
-                      value={avgDistance}
-                      onChange={(e) => setAvgDistance(Number(e.target.value))}
-                      className="w-full h-2 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-neutral-900"
-                    />
-                    <div className="flex justify-between text-[11px] text-neutral-400">
-                      <span>15 km</span>
-                      <span>100 km</span>
-                      <span>200 km</span>
-                    </div>
-                  </div>
+            {/* Interactive Sliders Bar */}
+            <div className="max-w-3xl mx-auto bg-neutral-800/60 p-6 sm:p-8 rounded-2xl border border-neutral-700/80 grid grid-cols-1 md:grid-cols-2 gap-8 shadow-lg">
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm font-semibold text-neutral-300">
+                  <span>Nombre d'invités :</span>
+                  <span className="text-white font-bold">{guestCount} personnes</span>
                 </div>
+                <input
+                  type="range"
+                  min="20"
+                  max="350"
+                  step="10"
+                  value={guestCount}
+                  onChange={(e) => setGuestCount(Number(e.target.value))}
+                  className="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-emerald-400"
+                />
+              </div>
 
-                {/* Results Display */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-neutral-900 text-white p-5 rounded-xl border border-neutral-800 space-y-1">
-                    <div className="flex items-center gap-2 text-neutral-400 text-xs font-medium">
-                      <Car className="w-4 h-4 text-emerald-400" />
-                      Voitures en moins
-                    </div>
-                    <div className="text-5xl font-extrabold font-heading text-white">{carsSaved}</div>
-                  </div>
-
-                  <div className="bg-emerald-950 text-emerald-50 p-5 rounded-xl border border-emerald-900 space-y-1">
-                    <div className="flex items-center gap-2 text-emerald-400 text-xs font-medium">
-                      <Leaf className="w-4 h-4 text-emerald-400" />
-                      CO2 Économisé
-                    </div>
-                    <div className="text-3xl font-extrabold font-heading text-emerald-300">{co2SavedKg} kg</div>
-                    <div className="text-[11px] text-emerald-400/80">d'émissions évités</div>
-                  </div>
-
-                  <div className="bg-neutral-100 p-5 rounded-xl border border-neutral-200 space-y-1 col-span-2">
-                    <div className="flex items-center gap-2 text-neutral-600 text-xs font-medium">
-                      <Fuel className="w-4 h-4 text-neutral-800" />
-                      Budget Carburant Préservé pour les invités
-                    </div>
-                    <div className="text-2xl font-bold font-heading text-neutral-900">~ {fuelSavedEuros} €</div>
-                    <div className="text-xs text-neutral-500">Partagés équitablement entre les conducteurs et passagers</div>
-                  </div>
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm font-semibold text-neutral-300">
+                  <span>Distance aller (km) :</span>
+                  <span className="text-white font-bold">{avgDistance} km</span>
                 </div>
+                <input
+                  type="range"
+                  min="15"
+                  max="200"
+                  step="5"
+                  value={avgDistance}
+                  onChange={(e) => setAvgDistance(Number(e.target.value))}
+                  className="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-emerald-400"
+                />
               </div>
+            </div>
 
-              {/* Sources Footnote */}
-              <div className="mt-6 pt-4 border-t border-neutral-100 text-[11px] text-neutral-400 text-center leading-relaxed">
-                * Estimations basées sur la <strong>Base Empreinte ADEME</strong>, les données carburant du <strong>Ministère de la Transition Écologique</strong> et l'étude d'occupation moyenne en covoiturage événementiel (<strong>Observatoire du Covoiturage</strong>).
-              </div>
+            {/* Sources Footnote */}
+            <div className="text-[11px] text-neutral-400 text-center leading-relaxed max-w-2xl mx-auto border-t border-neutral-800/80 pt-6">
+              * Estimations basées sur la <strong>Base Empreinte ADEME</strong>, les données du <strong>Ministère de la Transition Écologique</strong> et l'étude d'occupation en covoiturage événementiel (<strong>Observatoire du Covoiturage</strong>).
             </div>
           </div>
         </section>
