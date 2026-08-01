@@ -9,72 +9,63 @@ interface PricingSectionProps {
   onAuthClick?: () => void;
 }
 
-function SingleColumn({ val, delay = 0 }: { val: string; delay?: number }) {
-  if (!val) return null;
+function getFixedPriceSlots(priceStr: string): string[] {
+  if (priceStr.trim() === "0 €") {
+    return [" ", " ", "0", " ", "€"];
+  }
+
+  const match = priceStr.match(/^(\d+),(\d{2})\s*€$/);
+  if (!match) return priceStr.split("");
+
+  const intPart = match[1].padStart(3, " ");
+  const decPart = match[2];
+
+  return [
+    intPart[0],
+    intPart[1],
+    intPart[2],
+    ",",
+    decPart[0],
+    decPart[1],
+    " ",
+    "€",
+  ];
+}
+
+function SlotChar({ char, slotIdx }: { char: string; slotIdx: number }) {
+  const isBlank = char === " ";
+
   return (
-    <div className="relative overflow-hidden h-9 inline-flex items-center justify-center">
-      <AnimatePresence mode="popLayout" initial={false}>
-        <motion.span
-          key={val}
-          initial={{ y: "100%", opacity: 0 }}
-          animate={{ y: "0%", opacity: 1 }}
-          exit={{ y: "-100%", opacity: 0 }}
-          transition={{
-            duration: 0.95,
-            ease: [0.16, 1, 0.3, 1],
-            delay,
-          }}
-          className="inline-block"
-        >
-          {val === " " ? "\u00A0" : val}
-        </motion.span>
+    <div className={`relative overflow-hidden h-9 inline-flex items-center justify-center ${isBlank ? "w-0 shrink-0" : ""}`}>
+      <AnimatePresence mode="wait" initial={false}>
+        {!isBlank && (
+          <motion.span
+            key={`${slotIdx}-${char}`}
+            initial={{ y: "100%", opacity: 0 }}
+            animate={{ y: "0%", opacity: 1 }}
+            exit={{ y: "-100%", opacity: 0 }}
+            transition={{
+              duration: 0.22,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="inline-block"
+          >
+            {char}
+          </motion.span>
+        )}
       </AnimatePresence>
     </div>
   );
 }
 
-function PerDigitTicker({ priceStr }: { priceStr: string }) {
-  const isZero = priceStr.trim() === "0 €";
-
-  if (isZero) {
-    return (
-      <div className="flex items-center justify-end font-heading text-2xl sm:text-3xl font-extrabold text-neutral-900 tabular-nums">
-        <SingleColumn val="0" />
-        <SingleColumn val=" " />
-        <SingleColumn val="€" />
-      </div>
-    );
-  }
-
-  const match = priceStr.match(/^(\d+),(\d{2})\s*€$/);
-  if (!match) {
-    return (
-      <div className="flex items-center justify-end font-heading text-2xl sm:text-3xl font-extrabold text-neutral-900 tabular-nums">
-        <SingleColumn val={priceStr} />
-      </div>
-    );
-  }
-
-  const intPart = match[1];
-  const decPart = match[2];
-
-  const units = intPart.slice(-1);
-  const tens = intPart.length >= 2 ? intPart.slice(-2, -1) : "";
-  const hundreds = intPart.length >= 3 ? intPart.slice(-3, -2) : "";
-
-  const cent1 = decPart[0];
-  const cent2 = decPart[1];
+function SeniorOdometer({ priceStr }: { priceStr: string }) {
+  const slots = getFixedPriceSlots(priceStr);
 
   return (
     <div className="flex items-center justify-end font-heading text-2xl sm:text-3xl font-extrabold text-neutral-900 tabular-nums">
-      <SingleColumn val={hundreds} delay={0} />
-      <SingleColumn val={tens} delay={0.04} />
-      <SingleColumn val={units} delay={0.08} />
-      <SingleColumn val="," delay={0} />
-      <SingleColumn val={cent1} delay={0.12} />
-      <SingleColumn val={cent2} delay={0.16} />
-      <SingleColumn val=" " delay={0} />
-      <SingleColumn val="€" delay={0} />
+      {slots.map((char, idx) => (
+        <SlotChar key={idx} char={char} slotIdx={idx} />
+      ))}
     </div>
   );
 }
@@ -209,28 +200,25 @@ export function PricingSection({ onAuthClick }: PricingSectionProps) {
           <div className="lg:col-span-6">
             <div className="bg-white border border-neutral-200/90 rounded-3xl p-6 sm:p-8 relative overflow-hidden">
 
-              {/* Card Header: Guest Count Title & Right-Aligned Per-Digit Ticker */}
+              {/* Card Header: Guest Count Title & Senior Odometer Price */}
               <div className="flex items-start justify-between gap-4 mb-6">
                 <div>
                   <span>Jusqu'à</span>
                   <h3 className="text-2xl sm:text-3xl font-bold font-heading text-neutral-900 flex items-center gap-2">
-                    <AnimatePresence mode="wait">
-                      <motion.span
-                        key={currentTier.id}
-                        initial={{ opacity: 0, y: -4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 4 }}
-                        transition={{ duration: 0.15 }}
-                        className="inline-block"
-                      >
-                        {currentTier.countText}
-                      </motion.span>
-                    </AnimatePresence>
+                    <motion.span
+                      key={currentTier.id}
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="inline-block"
+                    >
+                      {currentTier.countText}
+                    </motion.span>
                   </h3>
                 </div>
 
                 <div className="text-right shrink-0">
-                  <PerDigitTicker priceStr={currentTier.price} />
+                  <SeniorOdometer priceStr={currentTier.price} />
                   <span className="text-[11px] text-neutral-500 font-medium">
                     {currentTier.period}
                   </span>
