@@ -11,6 +11,7 @@ import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { motion, AnimatePresence } from "framer-motion";
 import { UseCasesStackedSection } from "@/components/UseCasesStackedSection";
+import { PricingSection } from "@/components/PricingSection";
 import {
   Smartphone,
   MessageSquare,
@@ -90,36 +91,37 @@ export function HomeClient() {
 
       <main className="flex-1 w-full">
         {/* ================= 1. HERO SECTION ================= */}
-        <section className="relative overflow-hidden pt-12 sm:pt-20 pb-20 bg-gradient-to-b from-neutral-50/60 via-white to-white">
+        <section className="relative overflow-hidden min-h-[calc(100vh-72px)] flex flex-col justify-center py-12 sm:py-20 bg-gradient-to-b from-neutral-50/60 via-white to-white">
+          {/* Real Light Vector Map Layer (Heavily Blurred Google Maps Theme) */}
+          <div className="absolute inset-0 pointer-events-none select-none opacity-50 [mask-image:radial-gradient(ellipse_80%_70%_at_50%_40%,#000_65%,transparent_100%)]">
+            <Image
+              src="/images/home/light_map.jpg"
+              alt="Google Maps Light Vector Background"
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover brightness-105 contrast-105 blur-[14px]"
+            />
+          </div>
+
           {/* Cartographic Map Grid Pattern Overlay */}
-          <div className="absolute inset-0 pointer-events-none select-none opacity-40 [mask-image:radial-gradient(ellipse_70%_60%_at_50%_40%,#000_60%,transparent_100%)]">
+          <div className="absolute inset-0 pointer-events-none select-none opacity-30 [mask-image:radial-gradient(ellipse_70%_60%_at_50%_40%,#000_60%,transparent_100%)]">
             <svg className="w-full h-full" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="hero-map-grid" width="48" height="48" patternUnits="userSpaceOnUse">
-                  <path d="M 48 0 L 0 0 0 48" fill="none" stroke="currentColor" strokeWidth="0.75" className="text-neutral-300/80" />
-                  <circle cx="48" cy="48" r="1.5" className="fill-neutral-400/80" />
+                  <path d="M 48 0 L 0 0 0 48" fill="none" stroke="currentColor" strokeWidth="0.75" className="text-neutral-400/80" />
+                  <circle cx="48" cy="48" r="1.5" className="fill-neutral-500/80" />
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#hero-map-grid)" />
             </svg>
           </div>
 
+          {/* Soft White Gradient Fade at Section Bottom */}
+          <div className="absolute bottom-0 inset-x-0 h-28 sm:h-36 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-10" />
+
           <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
             <div className="flex flex-col items-center text-center space-y-6 sm:space-y-8">
-              {/* Badge */}
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-              >
-                <Badge variant="default" className="px-3.5 py-1.5 text-xs font-medium bg-neutral-100/80 border-neutral-200 backdrop-blur shadow-2xs">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-neutral-900 font-semibold">Covoiturage Événementiel</span>
-                  <span className="text-neutral-400">•</span>
-                  <span className="text-neutral-600">Zéro Application</span>
-                </Badge>
-              </motion.div>
-
               {/* Title */}
               <motion.h1
                 initial={{ opacity: 0, y: 15 }}
@@ -206,7 +208,13 @@ export function HomeClient() {
         {/* ================= 3. HOW IT WORKS (3 STEPS) ================= */}
         <section id="how-it-works" className="py-20 sm:py-28 bg-white border-b border-neutral-100">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="text-center space-y-4 max-w-2xl mx-auto mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.5 }}
+              className="text-center space-y-4 max-w-2xl mx-auto mb-16"
+            >
               <Badge variant="default" className="text-xs">
                 Covoiturage Événementiel Épuré
               </Badge>
@@ -216,72 +224,110 @@ export function HomeClient() {
               <p className="text-neutral-600 text-base sm:text-lg">
                 La plateforme de covoiturage pensée pour vos événements, sans téléchargement d'application.
               </p>
-            </div>
+            </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
               {/* Step 1 */}
-              <Card variant="gray" className="space-y-4 p-6 sm:p-8 relative hover:border-neutral-300 transition-all">
-                <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-xl bg-neutral-900 text-white flex items-center justify-center font-bold text-lg font-heading shadow-xs">
-                    01
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                whileHover={{ y: -6 }}
+              >
+                <Card variant="gray" className="space-y-4 p-6 sm:p-8 relative hover:border-neutral-300 transition-all h-full">
+                  <div className="flex items-center justify-between">
+                    <div className="w-12 h-12 rounded-xl bg-neutral-900 text-white flex items-center justify-center font-bold text-lg font-heading shadow-xs">
+                      01
+                    </div>
+                    <Zap className="w-5 h-5 text-neutral-400" />
                   </div>
-                  <Zap className="w-5 h-5 text-neutral-400" />
-                </div>
-                <h3 className="text-lg font-bold text-neutral-900 font-heading">
-                  Créez votre événement
-                </h3>
-                <p className="text-neutral-600 text-sm leading-relaxed">
-                  Renseignez la date, l'adresse et le lieu de votre rassemblement. Générez votre lien personnalisé en moins de 2 minutes.
-                </p>
-              </Card>
+                  <h3 className="text-lg font-bold text-neutral-900 font-heading">
+                    Créez votre événement
+                  </h3>
+                  <p className="text-neutral-600 text-sm leading-relaxed">
+                    Renseignez la date, l'adresse et le lieu de votre rassemblement. Générez votre lien personnalisé en moins de 2 minutes.
+                  </p>
+                </Card>
+              </motion.div>
 
               {/* Step 2 */}
-              <Card variant="gray" className="space-y-4 p-6 sm:p-8 relative hover:border-neutral-300 transition-all">
-                <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-xl bg-neutral-900 text-white flex items-center justify-center font-bold text-lg font-heading shadow-xs">
-                    02
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                whileHover={{ y: -6 }}
+              >
+                <Card variant="gray" className="space-y-4 p-6 sm:p-8 relative hover:border-neutral-300 transition-all h-full">
+                  <div className="flex items-center justify-between">
+                    <div className="w-12 h-12 rounded-xl bg-neutral-900 text-white flex items-center justify-center font-bold text-lg font-heading shadow-xs">
+                      02
+                    </div>
+                    <Share2 className="w-5 h-5 text-neutral-400" />
                   </div>
-                  <Share2 className="w-5 h-5 text-neutral-400" />
-                </div>
-                <h3 className="text-lg font-bold text-neutral-900 font-heading">
-                  Partagez le lien unique
-                </h3>
-                <p className="text-neutral-600 text-sm leading-relaxed">
-                  Insérez le lien web dans vos faire-part, SMS ou groupes. Vos invités y accèdent instantanément sans aucune inscription.
-                </p>
-              </Card>
+                  <h3 className="text-lg font-bold text-neutral-900 font-heading">
+                    Partagez le lien unique
+                  </h3>
+                  <p className="text-neutral-600 text-sm leading-relaxed">
+                    Insérez le lien web dans vos faire-part, SMS ou groupes. Vos invités y accèdent instantanément sans aucune inscription.
+                  </p>
+                </Card>
+              </motion.div>
 
               {/* Step 3 */}
-              <Card variant="gray" className="space-y-4 p-6 sm:p-8 relative hover:border-neutral-300 transition-all">
-                <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-xl bg-neutral-900 text-white flex items-center justify-center font-bold text-lg font-heading shadow-xs">
-                    03
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                whileHover={{ y: -6 }}
+              >
+                <Card variant="gray" className="space-y-4 p-6 sm:p-8 relative hover:border-neutral-300 transition-all h-full">
+                  <div className="flex items-center justify-between">
+                    <div className="w-12 h-12 rounded-xl bg-neutral-900 text-white flex items-center justify-center font-bold text-lg font-heading shadow-xs">
+                      03
+                    </div>
+                    <HeartHandshake className="w-5 h-5 text-neutral-400" />
                   </div>
-                  <HeartHandshake className="w-5 h-5 text-neutral-400" />
-                </div>
-                <h3 className="text-lg font-bold text-neutral-900 font-heading">
-                  Mise en relation directe
-                </h3>
-                <p className="text-neutral-600 text-sm leading-relaxed">
-                  Les conducteurs proposent leurs véhicules, les passagers réservent leur siège avec confirmation directe via WhatsApp & SMS.
-                </p>
-              </Card>
+                  <h3 className="text-lg font-bold text-neutral-900 font-heading">
+                    Mise en relation directe
+                  </h3>
+                  <p className="text-neutral-600 text-sm leading-relaxed">
+                    Les conducteurs proposent leurs véhicules, les passagers réservent leur siège avec confirmation directe via WhatsApp & SMS.
+                  </p>
+                </Card>
+              </motion.div>
             </div>
           </div>
         </section>
 
         {/* ================= 5. INTERACTIVE SAVINGS & CARBON CALCULATOR (FULL-BLEED DARK SECTION) ================= */}
         <section className="py-20 sm:py-28 bg-neutral-900 text-white border-b border-neutral-800">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-12">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.6 }}
+            className="max-w-6xl mx-auto px-4 sm:px-6 space-y-12"
+          >
             {/* Main Hero Counter */}
             <div className="text-center space-y-4 max-w-3xl mx-auto">
               <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neutral-800 text-emerald-400 text-xs font-bold border border-neutral-700/80">
                 <Leaf className="w-3.5 h-3.5" />
                 Empreinte Carbone Évitée
               </span>
-              <div className="text-6xl sm:text-8xl font-black font-heading text-emerald-400 tracking-tight">
-                -{co2SavedKg} <span className="text-3xl sm:text-4xl font-light text-white">kg CO₂</span>
-              </div>
+
+              <motion.div
+                key={co2SavedKg}
+                initial={{ scale: 0.94 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                className="text-6xl sm:text-8xl font-black font-heading text-emerald-400 tracking-tight"
+              >
+                -{co2SavedKg} <span className="text-3xl sm:text-4xl font-light text-white">kg de CO₂</span>
+              </motion.div>
+
               <p className="text-neutral-300 text-base sm:text-lg max-w-xl mx-auto font-normal">
                 Jusqu'à <strong className="text-emerald-300">{co2SavedKg} kg de CO₂ non émis</strong>, soit <strong className="text-white">{carsSaved} voitures en moins</strong> sur les routes et <strong className="text-white">~{fuelSavedEuros} €</strong> de carburant préservé.
               </p>
@@ -326,11 +372,14 @@ export function HomeClient() {
             <div className="text-[11px] text-neutral-400 text-center leading-relaxed max-w-2xl mx-auto border-t border-neutral-800/80 pt-6">
               * Estimations basées sur la <strong>Base Empreinte ADEME</strong>, les données du <strong>Ministère de la Transition Écologique</strong> et l'étude d'occupation en covoiturage événementiel (<strong>Observatoire du Covoiturage</strong>).
             </div>
-          </div>
+          </motion.div>
         </section>
 
         {/* ================= 6. USE CASES STACKED CARDS (GSAP SCROLLTRIGGER) ================= */}
         <UseCasesStackedSection />
+
+        {/* ================= 6.5 PRICING SECTION ================= */}
+        <PricingSection onAuthClick={() => setIsAuthOpen(true)} />
 
         {/* ================= 7. FAQ ACCORDION ================= */}
         <section className="py-20 bg-neutral-50 border-b border-neutral-200/80">
@@ -353,7 +402,13 @@ export function HomeClient() {
             }}
           />
 
-          <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.5 }}
+            className="max-w-4xl mx-auto px-4 sm:px-6"
+          >
             <div className="text-center space-y-4 max-w-2xl mx-auto mb-14">
               <Badge variant="default" className="text-xs">
                 Questions Fréquentes
@@ -399,13 +454,19 @@ export function HomeClient() {
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </section>
 
         {/* ================= 8. CLOSING CONVERSION CTA ================= */}
         <section className="py-20 sm:py-24 bg-white">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="bg-neutral-900 text-white rounded-3xl p-8 sm:p-14 text-center space-y-8 relative overflow-hidden shadow-2xl">
+            <motion.div
+              initial={{ opacity: 0, y: 30, scale: 0.98 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.6 }}
+              className="bg-neutral-900 text-white rounded-3xl p-8 sm:p-14 text-center space-y-8 relative overflow-hidden shadow-2xl"
+            >
               <div className="relative z-10 max-w-2xl mx-auto space-y-4">
                 <Badge variant="dark" className="bg-neutral-800 text-emerald-400 border-neutral-700 text-xs px-3 py-1">
                   <Sparkles className="w-3.5 h-3.5 inline mr-1 text-emerald-400" />
@@ -445,7 +506,7 @@ export function HomeClient() {
                   )}
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </section>
       </main>

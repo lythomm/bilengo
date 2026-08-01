@@ -115,13 +115,21 @@ export function Navbar({
                   </Button>
                 </>
               ) : (
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={onAuthClick}
-                >
-                  Espace Organisateur
-                </Button>
+                <>
+                  <Link
+                    href="#tarifs"
+                    className="text-xs font-semibold text-neutral-600 hover:text-neutral-900 transition-colors px-2 py-1"
+                  >
+                    Tarifs
+                  </Link>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={onAuthClick}
+                  >
+                    Espace Organisateur
+                  </Button>
+                </>
               )}
             </div>
 
@@ -203,6 +211,14 @@ export function Navbar({
             </div>
           ) : (
             <div className="space-y-0.5">
+              <Link
+                href="#tarifs"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 w-full px-2.5 py-2 rounded-lg text-sm font-medium text-neutral-800 hover:bg-neutral-100 transition-colors"
+              >
+                Tarifs
+              </Link>
+              <div className="h-px bg-neutral-100 my-1" />
               <button
                 onClick={() => {
                   setIsMobileMenuOpen(false);

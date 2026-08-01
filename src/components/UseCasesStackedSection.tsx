@@ -141,7 +141,7 @@ export function UseCasesStackedSection() {
   return (
     <section
       ref={containerRef}
-      className="py-16 sm:py-24 bg-white border-b border-neutral-100 overflow-hidden min-h-screen flex flex-col justify-center"
+      className="py-16 sm:py-24 bg-white overflow-hidden min-h-screen flex flex-col justify-center"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 w-full">
         <div className="text-center space-y-4 max-w-2xl mx-auto mb-6">
