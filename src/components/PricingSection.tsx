@@ -12,19 +12,37 @@ interface PricingSectionProps {
 export function PricingSection({ onAuthClick }: PricingSectionProps) {
   const tiers = [
     {
-      id: "50",
-      label: "50",
-      guestsText: "Jusqu'à 50 invités",
+      id: "25",
+      label: "25",
+      countText: "25 invités",
       price: "0 €",
       period: "Gratuit à vie",
       badge: "Gratuit",
       isFree: true,
     },
     {
+      id: "50",
+      label: "50",
+      countText: "50 invités",
+      price: "9,99 €",
+      period: "Paiement unique / événement",
+      badge: null,
+      isFree: false,
+    },
+    {
       id: "100",
       label: "100",
-      guestsText: "Jusqu'à 100 invités",
+      countText: "100 invités",
       price: "14,99 €",
+      period: "Paiement unique / événement",
+      badge: "Offre conseillée",
+      isFree: false,
+    },
+    {
+      id: "150",
+      label: "150",
+      countText: "150 invités",
+      price: "29,99 €",
       period: "Paiement unique / événement",
       badge: null,
       isFree: false,
@@ -32,8 +50,8 @@ export function PricingSection({ onAuthClick }: PricingSectionProps) {
     {
       id: "250",
       label: "250",
-      guestsText: "Jusqu'à 250 invités",
-      price: "24,99 €",
+      countText: "250 invités",
+      price: "39,99 €",
       period: "Paiement unique / événement",
       badge: "Populaire",
       isFree: false,
@@ -41,8 +59,8 @@ export function PricingSection({ onAuthClick }: PricingSectionProps) {
     {
       id: "500",
       label: "500",
-      guestsText: "Jusqu'à 500 invités",
-      price: "79,99 €",
+      countText: "500 invités",
+      price: "69,99 €",
       period: "Paiement unique / événement",
       badge: null,
       isFree: false,
@@ -50,8 +68,8 @@ export function PricingSection({ onAuthClick }: PricingSectionProps) {
     {
       id: "1000",
       label: "1000+",
-      guestsText: "Jusqu'à 1000+ invités",
-      price: "149,99 €",
+      countText: "1000+ invités",
+      price: "119,99 €",
       period: "Paiement unique / événement",
       badge: "Gros volume",
       isFree: false,
@@ -60,7 +78,7 @@ export function PricingSection({ onAuthClick }: PricingSectionProps) {
 
   const [selectedTierId, setSelectedTierId] = useState<string>("250");
 
-  const currentTier = tiers.find((t) => t.id === selectedTierId) || tiers[2];
+  const currentTier = tiers.find((t) => t.id === selectedTierId) || tiers[4];
 
   const sharedFeatures = [
     "Création de la page d'événement en 2 minutes",
@@ -112,7 +130,7 @@ export function PricingSection({ onAuthClick }: PricingSectionProps) {
               </span>
               <span className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-600" />
-                Jusqu'à 50 invités offerts
+                Jusqu'à 25 invités offerts
               </span>
             </div>
           </div>
@@ -124,18 +142,21 @@ export function PricingSection({ onAuthClick }: PricingSectionProps) {
               {/* Card Header: Guest Count Title & Dynamic Price */}
               <div className="flex items-start justify-between gap-4 mb-6">
                 <div>
-                  <AnimatePresence mode="wait">
-                    <motion.h3
-                      key={currentTier.id}
-                      initial={{ opacity: 0, y: -5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 5 }}
-                      transition={{ duration: 0.15 }}
-                      className="text-2xl sm:text-3xl font-bold font-heading text-neutral-900"
-                    >
-                      {currentTier.guestsText}
-                    </motion.h3>
-                  </AnimatePresence>
+                  <span>Jusqu'à</span>
+                  <h3 className="text-2xl sm:text-3xl font-bold font-heading text-neutral-900 flex items-center gap-2">
+                    <AnimatePresence mode="wait">
+                      <motion.span
+                        key={currentTier.id}
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 4 }}
+                        transition={{ duration: 0.15 }}
+                        className="inline-block"
+                      >
+                        {currentTier.countText}
+                      </motion.span>
+                    </AnimatePresence>
+                  </h3>
                 </div>
 
                 <div className="text-right shrink-0">
@@ -160,14 +181,14 @@ export function PricingSection({ onAuthClick }: PricingSectionProps) {
 
               {/* Pill Selector for Guest Capacities */}
               <div className="mb-8">
-                <div className="grid grid-cols-5 gap-2 p-1.5 bg-neutral-100/90 rounded-2xl">
+                <div className="grid grid-cols-7 gap-1.5 p-1.5 bg-neutral-100/90 rounded-2xl">
                   {tiers.map((tier) => {
                     const isSelected = tier.id === selectedTierId;
                     return (
                       <button
                         key={tier.id}
                         onClick={() => setSelectedTierId(tier.id)}
-                        className={`py-2.5 px-2 rounded-xl text-xs sm:text-sm transition-all relative cursor-pointer border-none ${isSelected
+                        className={`py-2 px-1 rounded-xl text-xs font-semibold transition-all relative cursor-pointer border-none text-center ${isSelected
                           ? "bg-neutral-900 text-white font-bold"
                           : "bg-transparent text-neutral-600 font-medium hover:text-neutral-900 hover:bg-white/80"
                           }`}
@@ -193,7 +214,7 @@ export function PricingSection({ onAuthClick }: PricingSectionProps) {
                         <Check className="w-3.5 h-3.5" />
                       </div>
                       <span className="font-semibold text-neutral-900">
-                        Jusqu'à <strong className="text-emerald-700 font-bold">{currentTier.guestsText.toLowerCase()}</strong> acceptés
+                        Jusqu'à <strong className="text-emerald-700 font-bold">{currentTier.countText}</strong> acceptés
                       </span>
                     </li>
 
@@ -215,7 +236,7 @@ export function PricingSection({ onAuthClick }: PricingSectionProps) {
                     onClick={onAuthClick}
                     className="w-full !bg-neutral-900 hover:!bg-neutral-800 !text-white font-bold text-sm cursor-pointer border-none py-3"
                   >
-                    {currentTier.isFree ? "Démarrer gratuitement (0 €)" : `Choisir la formule ${currentTier.guestsText}`}
+                    {currentTier.isFree ? "Démarrer gratuitement (0 €)" : `Choisir la formule (${currentTier.countText})`}
                   </Button>
                 </div>
               </div>

@@ -65,7 +65,7 @@ export function HomeClient() {
     {
       question: "BilenGo est-il gratuit pour organiser un covoiturage événementiel ?",
       answer:
-        "Oui ! BilenGo propose une formule gratuite jusqu'à 50 invités (idéal pour les anniversaires, réceptions familiales et soirées). La formule gratuite comprend l'accès complet au tableau de bord organisateur, la carte interactive des départs et la mise en relation illimitée sans commission.",
+        "Oui ! BilenGo propose une formule gratuite jusqu'à 25 invités (idéal pour les anniversaires, réceptions familiales et petites soirées). La formule gratuite comprend l'accès complet au tableau de bord organisateur, la carte interactive des départs et la mise en relation illimitée sans commission.",
     },
     {
       question: "Faut-il télécharger une application de covoiturage pour participer ?",
@@ -190,7 +190,7 @@ export function HomeClient() {
               >
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  <span>Gratuit jusqu'à 50 invités</span>
+                  <span>Gratuit jusqu'à 25 invités</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />

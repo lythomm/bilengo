@@ -1,21 +1,23 @@
-# Spécification du Modèle de Pricing (Pay-per-Event)
+# Spécification du Modèle de Pricing (Pay-per-Event - Double Leurre)
 
 ## 1. Résumé du Besoin & Modèle
 - **Modèle :** Pay-per-Event (Paiement unique par événement, sans abonnement récurrent).
 - **Cible :** Organisateurs d'événements B2C (Mariages, anniversaires, galas, événements asso/pro).
-- **Logique :** Tier gratuit permettant de tester et de gérer les petits événements (jusqu'à 50 invités). Déblocage des capacités supérieures par événement via un paiement unique.
+- **Logique :** Tier gratuit permettant de tester et de gérer les petits événements (jusqu'à 25 invités). Déblocage des capacités supérieures par événement via un paiement unique optimisé par l'Effet Leurre (Decoy Effect).
 
 ---
 
-## 2. Grille Tarifaire Validée
+## 2. Grille Tarifaire Validée (Double Leurre)
 
-| Tranche d'invités | Tarif TTC / Événement | Description / Usage type |
-| :--- | :--- | :--- |
-| **0 – 50 invités** | **0 € (Gratuit)** | Découverte, anniversaires intimistes, repas de famille |
-| **51 – 100 invités** | **14,99 €** | Fêtes, soirées d'anniversaire, petits mariages |
-| **101 – 250 invités** | **24,99 €** | Mariages standards, grands anniversaires |
-| **251 – 500 invités** | **79,99 €** | Grands mariages, événements associatifs & galas |
-| **501 – 1000+ invités** | **149,99 €** | Festivals, très grands galas, rassemblements massifs |
+| Bouton (Pill) | Tranche d'invités | Tarif TTC / Événement | Rôle Marketing & Stratégie |
+| :--- | :--- | :--- | :--- |
+| **25** | **0 – 25 invités** | **0 € (Gratuit)** | Découverte, acquisition virale, petits événements |
+| **50** | **26 – 50 invités** | **9,99 €** | Produit d'appel 1 |
+| **100** | **51 – 100 invités** | **14,99 €** | **Leurre 1 (+5 €)** ➔ Pousse le client de 50 à 100 |
+| **150** | **101 – 150 invités** | **29,99 €** | Produit d'appel 2 (Mariages intimes/moyens) |
+| **250** | **151 – 250 invités** | **39,99 €** | **Leurre 2 (+10 €)** ➔ Pousse le client de 150 à 250 |
+| **500** | **251 – 500 invités** | **69,99 €** | Grands mariages, galas associatifs |
+| **1000+** | **501 – 1000+ invités** | **119,99 €** | Festivals, grands rassemblements & mega galas |
 
 ---
 
@@ -23,7 +25,6 @@
 
 | Décision | Option Choisie | Alternatives considérées | Raison du choix |
 | :--- | :--- | :--- | :--- |
-| **Modèle économique** | Pay-per-event | Abonnement SaaS mensuel, Système de crédits | Évite la friction d'abonnement pour des particuliers qui n'organisent des événements qu'une ou deux fois par an. |
-| **Quota Gratuit** | 50 invités | 20 invités, 100 invités | 50 est suffisant pour valider le produit (onboarding) sans cannibaliser les mariages/grandes soirées. |
-| **Positionnement Prix** | Premium sur gros volumes (14,99 € à 149,99 €) | Micro-prix (9,99 € à 69,99 €) | Les événements de >250 et >500 personnes ont des budgets globaux élevés (plusieurs milliers d'euros), ce qui rend le coût de 79,99 € / 149,99 € très marginal et très rentable pour le produit. |
-| **Gestion du dépassement** | Hard-lock / Blocage strict (déjà implémenté) | Soft-limit avec blocage des features d'envoi | Simplicité d'expérience et protection directe contre les abus. |
+| **Modèle économique** | Pay-per-event | Abonnement SaaS mensuel, Crédits | Évite la friction d'abonnement pour des particuliers. |
+| **Quota Gratuit** | 25 invités | 50 invités | 25 offre un test produit réel sans priver l'application de la monétisation des fêtes de 35-50 personnes. |
+| **Mécanique Prix** | Double-Leurre (Decoy Effect) | Prix purement linéaires ou sauts brutaux | Maximise l'ARPU en donnant au client l'impression de faire une opportunité "+5 €" ou "+10 €" pour doubler sa capacité. |
