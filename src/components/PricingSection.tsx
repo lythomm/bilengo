@@ -9,6 +9,76 @@ interface PricingSectionProps {
   onAuthClick?: () => void;
 }
 
+function SingleColumn({ val, delay = 0 }: { val: string; delay?: number }) {
+  if (!val) return null;
+  return (
+    <div className="relative overflow-hidden h-9 inline-flex items-center justify-center">
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.span
+          key={val}
+          initial={{ y: "100%", opacity: 0 }}
+          animate={{ y: "0%", opacity: 1 }}
+          exit={{ y: "-100%", opacity: 0 }}
+          transition={{
+            duration: 0.95,
+            ease: [0.16, 1, 0.3, 1],
+            delay,
+          }}
+          className="inline-block"
+        >
+          {val === " " ? "\u00A0" : val}
+        </motion.span>
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function PerDigitTicker({ priceStr }: { priceStr: string }) {
+  const isZero = priceStr.trim() === "0 €";
+
+  if (isZero) {
+    return (
+      <div className="flex items-center justify-end font-heading text-2xl sm:text-3xl font-extrabold text-neutral-900 tabular-nums">
+        <SingleColumn val="0" />
+        <SingleColumn val=" " />
+        <SingleColumn val="€" />
+      </div>
+    );
+  }
+
+  const match = priceStr.match(/^(\d+),(\d{2})\s*€$/);
+  if (!match) {
+    return (
+      <div className="flex items-center justify-end font-heading text-2xl sm:text-3xl font-extrabold text-neutral-900 tabular-nums">
+        <SingleColumn val={priceStr} />
+      </div>
+    );
+  }
+
+  const intPart = match[1];
+  const decPart = match[2];
+
+  const units = intPart.slice(-1);
+  const tens = intPart.length >= 2 ? intPart.slice(-2, -1) : "";
+  const hundreds = intPart.length >= 3 ? intPart.slice(-3, -2) : "";
+
+  const cent1 = decPart[0];
+  const cent2 = decPart[1];
+
+  return (
+    <div className="flex items-center justify-end font-heading text-2xl sm:text-3xl font-extrabold text-neutral-900 tabular-nums">
+      <SingleColumn val={hundreds} delay={0} />
+      <SingleColumn val={tens} delay={0.04} />
+      <SingleColumn val={units} delay={0.08} />
+      <SingleColumn val="," delay={0} />
+      <SingleColumn val={cent1} delay={0.12} />
+      <SingleColumn val={cent2} delay={0.16} />
+      <SingleColumn val=" " delay={0} />
+      <SingleColumn val="€" delay={0} />
+    </div>
+  );
+}
+
 export function PricingSection({ onAuthClick }: PricingSectionProps) {
   const tiers = [
     {
@@ -139,7 +209,7 @@ export function PricingSection({ onAuthClick }: PricingSectionProps) {
           <div className="lg:col-span-6">
             <div className="bg-white border border-neutral-200/90 rounded-3xl p-6 sm:p-8 relative overflow-hidden">
 
-              {/* Card Header: Guest Count Title & Dynamic Price */}
+              {/* Card Header: Guest Count Title & Right-Aligned Per-Digit Ticker */}
               <div className="flex items-start justify-between gap-4 mb-6">
                 <div>
                   <span>Jusqu'à</span>
@@ -160,22 +230,10 @@ export function PricingSection({ onAuthClick }: PricingSectionProps) {
                 </div>
 
                 <div className="text-right shrink-0">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={currentTier.id}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.15 }}
-                    >
-                      <span className="text-2xl font-extrabold font-heading text-neutral-900 block">
-                        {currentTier.price}
-                      </span>
-                      <span className="text-[11px] text-neutral-500 font-medium">
-                        {currentTier.period}
-                      </span>
-                    </motion.div>
-                  </AnimatePresence>
+                  <PerDigitTicker priceStr={currentTier.price} />
+                  <span className="text-[11px] text-neutral-500 font-medium">
+                    {currentTier.period}
+                  </span>
                 </div>
               </div>
 
