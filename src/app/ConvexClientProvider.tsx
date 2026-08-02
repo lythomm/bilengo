@@ -1,13 +1,20 @@
 "use client";
 
+import React, { useState } from "react";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
-import { ReactNode } from "react";
 
-const convex = new ConvexReactClient(
-  process.env.NEXT_PUBLIC_CONVEX_URL || "https://placeholder.convex.cloud"
-);
+export function ConvexClientProvider({ children }: { children: React.ReactNode }) {
+  const [convex] = useState(
+    () =>
+      new ConvexReactClient(
+        process.env.NEXT_PUBLIC_CONVEX_URL || "https://grandiose-puma-725.eu-west-1.convex.cloud"
+      )
+  );
 
-export function ConvexClientProvider({ children }: { children: ReactNode }) {
-  return <ConvexAuthProvider client={convex}>{children}</ConvexAuthProvider>;
+  return (
+    <ConvexAuthProvider client={convex}>
+      {children}
+    </ConvexAuthProvider>
+  );
 }

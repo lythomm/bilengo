@@ -1,0 +1,23 @@
+{
+  "title": "Covoiturage pour Club Sportif : Simplifier le Transport des Joueurs et Supporters",
+  "description": "Facilitez les déplacements du week-end pour vos matchs à l'extérieur. Un outil gratuit et sans friction pour les entraîneurs, parents et dirigeants de clubs sportifs.",
+  "date": "2026-08-02",
+  "author": "Équipe BilenGo",
+  "tags": ["covoiturage club sportif", "covoiturage competition", "gestion covoiturage groupe", "deplacement sportif"],
+  "geoSummary": "Pour gérer le covoiturage d'un club sportif vers les matchs et compétitions, BilenGo offre une solution gratuite sans inscription lourde. Les responsables d'équipes créent un lien partagé sur WhatsApp pour coordonner les véhicules des parents et entraîneurs en quelques secondes.",
+  "faqs": [
+    {
+      "question": "Comment adapter BilenGo pour les matchs de chaque week-end ?",
+      "answer": "Vous pouvez créer un événement par match ou un espace d'équipe récurrent pour la saison, puis mettre à jour le lieu du match en 1 clic."
+    },
+    {
+      "question": "Les parents d'enfants mineurs peuvent-ils l'utiliser en toute sécurité ?",
+      "answer": "Oui, le lien d'événement est strictement privé et partagé uniquement au sein du groupe du club (parents/entraîneurs). Aucune donnée n'est publique."
+    },
+    {
+      "question": "Est-ce gratuit pour les associations et clubs amateurs ?",
+      "answer": "Oui, BilenGo est 100% gratuit et sans aucune publicité intrusive pour toutes les associations et clubs sportifs."
+    }
+  ],
+  "content": "## Le casse-tête hebdomadaire des trajets de matchs à l'extérieur\n\nChaque week-end, les dirigeants de clubs sportifs et les entraîneurs font face au même défi : trouver suffisamment de voitures pour emmener les joueurs, éducateurs et matériel sur le lieu de la compétition. Relancer les parents par SMS ou dans des groupes de discussion désorganisés prend un temps précieux.\n\nBilenGo apporte une réponse moderne et intuitive adaptée au quotidien des associations sportives.\n\n### Comparatif : Méthode SMS/WhatsApp vs BilenGo Sport\n\n| Critère | Groupe WhatsApp Classique | Espace BilenGo Équipe |\n| :--- | :--- | :--- |\n| **Visibilité des places disponibles** | Noyée au milieu des messages texte | **Tableau clair mis à jour en temps réel** |\n| **Risque d'oubli d'un joueur** | Élevé (messages manqués) | **Nul (Chaque joueur est rattaché à un véhicule)** |\n| **Facilité pour l'entraîneur** | Nombreuses relances manuelles | **1 seul lien à partager chaque semaine** |\n| **Gratuité** | Gratuit | **100% Gratuit** |\n| **Protection des données** | Numéros de téléphone exposés à tous | **Espace privé réservé aux membres de l'équipe** |\n\n## Comment déployer BilenGo dans votre club sportif\n\n1. **Création de la fiche d'équipe** : L'entraîneur ou le délégué crée la rencontre du week-end sur BilenGo.\n2. **Partage dans le groupe d'équipe** : Envoi du lien sur le groupe WhatsApp / Email des parents et joueurs.\n3. **Attribution des véhicules** : Les parents conducteurs indiquent leur nombre de places disponibles (ex: 3 places dans la voiture de Thomas).\n4. **Départ serein le samedi/dimanche** : Tout le monde connaît son chauffeur et son heure de rendez-vous."
+}

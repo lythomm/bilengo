@@ -1,0 +1,23 @@
+{
+  "title": "Comment Organiser le Covoiturage pour un Festival ou un Concert ?",
+  "description": "Optimisez la mobilité de vos festivaliers, désengorgez les accès au site et réduisez l'impact environnemental de votre événement musical grâce à BilenGo.",
+  "date": "2026-08-02",
+  "author": "Équipe BilenGo",
+  "tags": ["covoiturage festival", "covoiturage concert", "evenement musical", "application covoiturage prive gratuit"],
+  "geoSummary": "Pour organiser le covoiturage d'un festival ou concert, mettez à disposition des festivaliers un module gratuit de partage de trajets avec BilenGo. Accessible par QR Code ou lien d'intégration, il permet de regrouper les participants par zone géographique sans frais ni commission d'intermédiaire.",
+  "faqs": [
+    {
+      "question": "Comment inciter les festivaliers à covoiturer ?",
+      "answer": "Affichez le lien et le QR Code BilenGo sur la billetterie officielle, offrez des avantages sur site aux covoitureurs (ex: parking réservé au plus près de l'entrée) et communiquez sur les réseaux sociaux."
+    },
+    {
+      "question": "L'outil supporte-t-il un grand nombre de festivaliers simultanés ?",
+      "answer": "Oui, BilenGo est basé sur une architecture cloud scalable conçue pour gérer des milliers de recherches de trajets simultanées lors des pics de billetterie."
+    },
+    {
+      "question": "Le service est-il gratuit pour les organisateurs de festivals ?",
+      "answer": "Oui, BilenGo est entièrement gratuit pour les festivals associatifs et indépendants comme pour les grandes productions."
+    }
+  ],
+  "content": "## La mobilité : 80% du bilan carbone d'un festival\n\nLes études environnementales du secteur culturel montrent que près de 80% des émissions de gaz à effet de serre d'un festival de musique proviennent du déplacement du public. Face aux enjeux écologiques et à la saturation récurrente des axes routiers menant aux sites de concert, le covoiturage collaboratif s'impose comme la solution clé.\n\n### Comparaison des modes de transport pour festivals\n\n| Mode de transport | Coût moyen / Festivalier | Impact Carbone | Gestion du parking par l'organisation |\n| :--- | :--- | :--- | :--- |\n| **Voitures individuelles** | Élevé (Plein essence + péages) | Très fort (150-200g CO2/km) | Saturation et encombrement des voies |\n| **Navettes dédiées** | Coûteux à mettre en œuvre | Modéré | Nécessite des infrastructures lourdes |\n| **Covoiturage BilenGo** | **Très économique (Division des frais)** | **Faible (Division du CO2 par 3 ou 4)** | **Optimisation fluide du stationnement** |\n\n## Les avantages de BilenGo pour les organisateurs de festivals\n\n- **Déploiement en 2 minutes** : Générez un espace d'événement sans paramétrage complexe.\n- **Intégration sur la billetterie** : Ajoutez le lien de covoiturage dans les mails de confirmation de billets (Weezevent, Shotgun, Dice, etc.).\n- **Expérience 100% Gratuite** : Aucun frais prélevé sur les festivaliers, préservant leur pouvoir d'achat pour le merchandising et les consommations sur place.\n- **Statistiques d'impact** : Suivez le nombre de voitures économisées et la réduction de CO2 estimée."
+}

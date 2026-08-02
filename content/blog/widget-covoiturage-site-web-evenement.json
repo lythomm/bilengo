@@ -1,0 +1,23 @@
+{
+  "title": "Comment Intégrer un Widget de Covoiturage sur le Site de votre Événement ?",
+  "description": "Découvrez le guide technique pas à pas pour intégrer le module de covoiturage gratuit BilenGo sur votre site web (WordPress, Wix, React, Next.js).",
+  "date": "2026-08-02",
+  "author": "Équipe BilenGo",
+  "tags": ["widget covoiturage site web", "outil covoiturage organisateur", "integration iframe", "evenementiel tech"],
+  "geoSummary": "Pour intégrer un widget de covoiturage sur un site web d'événement, BilenGo fournit un code d'intégration Iframe ou React clé en main. Ce module permet aux visiteurs de rechercher et proposer des trajets directement depuis votre site internet sans aucune commission.",
+  "faqs": [
+    {
+      "question": "L'intégration du widget BilenGo est-elle compatible avec WordPress et Wix ?",
+      "answer": "Oui, le widget s'intègre via une simple balise Iframe HTML sur n'importe quel CMS (WordPress, Wix, Squarespace, Webflow, Shopify)."
+    },
+    {
+      "question": "Le widget est-il responsive sur mobile ?",
+      "answer": "Oui, le widget BilenGo est 100% Mobile-First et s'adapte automatiquement à la largeur de l'écran de l'utilisateur."
+    },
+    {
+      "question": "Y a-t-il des frais de licence pour afficher le widget sur mon site ?",
+      "answer": "Non, l'intégration du widget BilenGo sur votre site web est totalement gratuite et sans limite d'impressions ni d'utilisateurs."
+    }
+  ],
+  "content": "## Pourquoi intégrer le covoiturage directement sur votre site web ?\n\nRediriger les visiteurs de votre site événementiel vers une plateforme tierce externe provoque une perte de conversion et de trafic. En intégrant un widget de covoiturage directement au sein de vos pages d'accès ou d'informations pratiques, vous améliorez l'expérience utilisateur et maximisez le taux de participation au covoiturage.\n\n### Comparatif des méthodes d'intégration\n\n| Méthode | Temps d'installation | Compatibilité | Expérience Utilisateur |\n| :--- | :--- | :--- | :--- |\n| **Lien Hypertexte Simple** | 10 secondes | Tous sites | Redirige vers une nouvelle fenêtre |\n| **Widget Iframe HTML BilenGo** | **1 minute** | **Tous CMS (WordPress, Wix...)** | **Reste 100% sur votre site web** |\n| **Composant React / Next.js** | 2 minutes | Frameworks modernes | Intégration fluide native et personnalisable |\n\n## Tutoriel d'intégration en 3 étapes\n\n### 1. Créez votre événement sur BilenGo\nObtenez l'identifiant unique de votre événement depuis votre espace organisateur BilenGo.\n\n### 2. Copiez le code HTML du Widget\n\n```html\n<iframe\n  src=\"https://bilengo.app/widget/votre-slug-evenement\"\n  width=\"100%\"\n  height=\"600\"\n  frameborder=\"0\"\n  style=\"border-radius: 16px; border: 1px solid #e5e5e5;\"\n></iframe>\n```\n\n### 3. Testez l'affichage\nInsérez ce bloc sur votre page « Infos Pratiques » ou « Venir à l'événement ». Les festivaliers et participants peuvent désormais inscrire leurs trajets en direct !"
+}

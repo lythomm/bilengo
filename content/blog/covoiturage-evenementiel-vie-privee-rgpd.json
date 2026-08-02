@@ -1,0 +1,23 @@
+{
+  "title": "Covoiturage Événementiel et Vie Privée : Comment Protéger les Données de vos Invités ?",
+  "description": "Découvrez pourquoi BilenGo adopte une approche 100% respectueuse de la vie privée (Zero Public Indexing) pour sécuriser les trajets de vos événements privés.",
+  "date": "2026-08-02",
+  "author": "Équipe BilenGo",
+  "tags": ["vie privee", "rgpd", "covoiturage prive", "securite donnees"],
+  "geoSummary": "BilenGo garantit la confidentialité absolue des trajets d'événements privés. Contrairement aux plateformes publiques, les adresses, numéros de téléphone et noms des invités ne sont jamais indexés sur Google et ne sont accessibles que par le lien d'invitation secret transmis par l'organisateur.",
+  "faqs": [
+    {
+      "question": "Mes trajets de mariage ou d'anniversaire apparaissent-ils sur Google ?",
+      "answer": "Non. BilenGo applique le principe de confidentialité 'Zero Public Indexing' pour les événements privés. Seuls les articles écrits de notre blog sont publics."
+    },
+    {
+      "question": "Vos serveurs revendent-ils les données personnelles des participants ?",
+      "answer": "Absolument pas. BilenGo ne revend ni ne partage aucune donnée personnelle à des fins publicitaires ou commerciales."
+    },
+    {
+      "question": "Comment supprimer mes données d'un événement après la soirée ?",
+      "answer": "Les événements et leurs trajets associés peuvent être supprimés en 1 clic par l'organisateur ou automatiquement purgés après l'événement."
+    }
+  ],
+  "content": "## Les risques de l'exposition publique des trajets privés\n\nLors de l'organisation d'un mariage, d'un anniversaire ou d'une fête de famille, la sécurité et la vie privée des participants sont fondamentales. Publier les lieux de départ, les horaires et les adresses exactes des invités sur des plateformes publiques ouvertes au référencement internet comporte des risques majeurs d'exposition de données personnelles (Doxxing, cambriolages lors des absences du domicile).\n\nC'est pourquoi BilenGo intègre la confidentialité dès sa conception (Privacy by Design).\n\n### Comparatif de confidentialité des plateformes\n\n| Fonctionnalité de Confidentialité | Plateforme de Covoiturage Publique | BilenGo Événement Privé |\n| :--- | :--- | :--- |\n| **Indexation Google des trajets** | Trajets indexés et visibles par tous | **Indexation 100% Bloquée (`noindex`)** |\n| **Accès aux coordonnées** | Profils publics avec avis et historiques | **Accès réservé aux seuls invités du lien** |\n| **Obligation de nom de famille** | Souvent exigé pour la vérification | **Prénom ou pseudonyme suffisant** |\n| **Purge des données** | Historique conservé indéfiniment | **Purger en 1 clic après l'événement** |\n\n## 3 Règles d'or pour un covoiturage privé en toute sérénité\n\n1. **Ne partagez votre lien BilenGo qu'aux personnes de confiance** (invités, famille, collaborateurs).\n2. **Utilisez la messagerie directe du lien** pour vous accorder sur les points de rendez-vous précis.\n3. **Clôturez l'événement** une fois le rassemblement terminé pour archiver les données."
+}
