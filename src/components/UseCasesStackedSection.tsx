@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import {
   HeartHandshake,
   PartyPopper,
-  Users,
+  Music,
   Building2,
   LucideIcon,
   Sparkles,
@@ -42,20 +42,9 @@ const useCases: UseCase[] = [
     description:
       "Assurez des trajets retour sécurisés et conviviaux pour tous vos invités en fin de soirée. Vos proches rentrent en toute tranquillité.",
     badge: "Soirées",
-    image: "/images/home/party.jpg",
+    image: "/images/home/parties.jpg",
     spanClass: "md:col-span-1",
     aspectHeight: "min-h-[360px] sm:min-h-[400px]",
-  },
-  {
-    id: "student",
-    icon: Users,
-    title: "Événements BDE & Écoles",
-    description:
-      "Organisez les départs en WEI, intégrations ou sorties de promos sans messages perdus sur les groupes WhatsApp.",
-    badge: "Étudiants",
-    image: "/images/home/school.jpg",
-    spanClass: "md:col-span-1",
-    aspectHeight: "min-h-[320px]",
   },
   {
     id: "corporate",
@@ -65,6 +54,17 @@ const useCases: UseCase[] = [
       "Réduisez l'empreinte carbone et optimisez la logistique des déplacements de vos collaborateurs lors des rassemblements professionnels.",
     badge: "Entreprises",
     image: "/images/home/work.jpg",
+    spanClass: "md:col-span-1",
+    aspectHeight: "min-h-[320px]",
+  },
+  {
+    id: "festival",
+    icon: Music,
+    title: "Concerts & Festivals",
+    description:
+      "Facilitez l'accès à votre festival ou soirée Shotgun. Offrez une solution de covoiturage fluide à votre public pour maximiser la billetterie.",
+    badge: "Festivals",
+    image: "/images/home/festival.jpg",
     spanClass: "md:col-span-2",
     aspectHeight: "min-h-[320px]",
   },
@@ -118,14 +118,11 @@ export function UseCasesStackedSection() {
                       ? "(max-width: 768px) 100vw, 66vw"
                       : "(max-width: 768px) 100vw, 33vw"
                   }
-                  className="object-cover group-hover:scale-108 group-hover:rotate-0.5 transition-transform duration-700 ease-out"
+                  className="object-cover group-hover:scale-105 group-hover:rotate-0.5 transition-transform duration-700 ease-out"
                 />
 
                 {/* Soft Lighting Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-opacity duration-300 group-hover:opacity-95" />
-
-                {/* Hover Ambient Radial Glow */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.15),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent transition-opacity duration-300 group-hover:opacity-95" />
 
                 {/* Content Overlay with Compact Titles & Icons */}
                 <div className="absolute bottom-0 inset-x-0 p-5 sm:p-7 space-y-2 z-10 text-white transform group-hover:-translate-y-1 transition-transform duration-300 ease-out">
@@ -137,7 +134,7 @@ export function UseCasesStackedSection() {
                       {uc.title}
                     </h3>
                   </div>
-                  <p className="text-neutral-200 text-xs sm:text-sm leading-relaxed opacity-90 group-hover:opacity-100 transition-opacity">
+                  <p className="text-xs sm:text-sm leading-relaxed opacity-90 group-hover:opacity-100 transition-opacity">
                     {uc.description}
                   </p>
                 </div>

@@ -116,7 +116,7 @@ export function PricingSection({ onAuthClick }: PricingSectionProps) {
                 className="!bg-neutral-900 !text-white hover:!bg-neutral-800 font-semibold cursor-pointer border-none"
                 rightIcon={<ArrowRight className="w-4 h-4 text-white" />}
               >
-                Créer mon événement gratuit
+                Commencer gratuitement
               </Button>
             </div>
 
@@ -212,16 +212,8 @@ export function PricingSection({ onAuthClick }: PricingSectionProps) {
                 </div>
 
                 <div className="pt-4 space-y-2">
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    onClick={onAuthClick}
-                    className="w-full !bg-neutral-900 hover:!bg-neutral-800 !text-white font-bold text-sm cursor-pointer border-none py-3"
-                  >
-                    {currentTier.isFree ? "Démarrer gratuitement (0 €)" : `Choisir la formule (${currentTier.countText})`}
-                  </Button>
                   <p className="text-center text-xs text-neutral-500 font-medium">
-                    Possibilité d'augmenter la capacité à tout moment
+                    * Possibilité d'augmenter la capacité à tout moment
                   </p>
                 </div>
               </div>

@@ -121,7 +121,7 @@ export function Navbar({
                     size="sm"
                     onClick={onAuthClick}
                   >
-                    Espace Organisateur
+                    Créer votre événement gratuitement
                   </Button>
                 </>
               )}
