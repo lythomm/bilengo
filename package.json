@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "concurrently -n \"next,convex\" -c \"magenta,cyan\" \"next dev\" \"convex dev\"",
-    "build": "cmd /C \"set NODE_ENV=production && next build\"",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint"
   },
