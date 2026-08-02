@@ -39,9 +39,16 @@ export const registerParticipant = mutation({
       .first();
 
     if (existing) {
+      // Preserve driver or passenger status if already assigned
+      const currentMode = existing.transportMode;
+      const targetMode = args.transportMode;
+      const keepCurrentMode =
+        (currentMode === "driver" || currentMode === "passenger") &&
+        (!targetMode || targetMode === "autonomous");
+
       await ctx.db.patch(existing._id, {
         name: cleanName,
-        transportMode: args.transportMode || existing.transportMode || "autonomous",
+        transportMode: keepCurrentMode ? currentMode : targetMode || currentMode || "autonomous",
       });
       return existing._id;
     }

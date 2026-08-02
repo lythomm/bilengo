@@ -24,13 +24,12 @@ export async function assertPhoneNotRegistered(
     }
   }
 
-  const allUsers = await ctx.db.query("users").collect();
-  const match = allUsers.find((u) => {
-    if (!u.phone) return false;
-    return cleanPhone(u.phone as string) === cleanStr;
-  });
+  const match = await ctx.db
+    .query("users")
+    .filter((q) => q.eq(q.field("phone"), phone.trim()))
+    .first();
 
-  if (match) {
+  if (match && match._id !== currentUserId) {
     throw new ConvexError(
       "Ce numéro de téléphone appartient déjà à un compte organisateur."
     );

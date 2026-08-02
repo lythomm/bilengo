@@ -2,15 +2,27 @@ import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
-function slugify(text: string): string {
-  const clean = text
+async function generateUniqueSlug(
+  ctx: any,
+  title: string
+): Promise<string> {
+  const clean = title
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)+/g, "");
-  const randomSuffix = Math.random().toString(36).substring(2, 7);
-  return `${clean || "event"}-${randomSuffix}`;
+    .replace(/(^-|-$)+/g, "") || "event";
+
+  for (let i = 0; i < 5; i++) {
+    const randomSuffix = Math.random().toString(36).substring(2, 7);
+    const slug = `${clean}-${randomSuffix}`;
+    const existing = await ctx.db
+      .query("events")
+      .withIndex("by_slug", (q: any) => q.eq("slug", slug))
+      .first();
+    if (!existing) return slug;
+  }
+  return `${clean}-${Date.now().toString(36)}`;
 }
 
 export const createEvent = mutation({
@@ -35,9 +47,7 @@ export const createEvent = mutation({
       throw new Error("Le titre et l'adresse sont obligatoires.");
     }
 
-    const maxParticipants = Math.max(1, args.maxParticipants);
-
-    const slug = slugify(title);
+    const slug = await generateUniqueSlug(ctx, title);
 
     const eventId = await ctx.db.insert("events", {
       organizerId: userId,
