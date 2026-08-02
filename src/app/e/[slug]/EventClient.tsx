@@ -199,9 +199,14 @@ export function EventClient({ params }: EventClientProps) {
     >
       {/* Top Header - Always Visible */}
       <header className="fixed top-0 left-0 right-0 z-30 bg-white p-4 h-16 flex items-center justify-between gap-3 border-b border-neutral-200">
-        <span className="text-lg font-bold text-neutral-900 tracking-tight font-heading">
+        <Link
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-lg font-bold text-neutral-900 tracking-tight font-heading hover:opacity-80 transition-opacity"
+        >
           BilenGo
-        </span>
+        </Link>
 
         <div className="flex items-center gap-2">
           <Button

@@ -1,13 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { formatConvexError } from "@/lib/errors";
-import { Users, Check } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
+
+export interface QuotaTier {
+  quota: number;
+  label: string;
+  countText: string;
+  price: string;
+  isFree?: boolean;
+  badge?: string | null;
+  highlight?: boolean;
+}
+
+export const PRICING_TIERS: QuotaTier[] = [
+  { quota: 50, label: "50", countText: "50 invités", price: "9,99 €" },
+  { quota: 100, label: "100", countText: "100 invités", price: "14,99 €", badge: "Conseillé", highlight: true },
+  { quota: 150, label: "150", countText: "150 invités", price: "29,99 €" },
+  { quota: 250, label: "250", countText: "250 invités", price: "39,99 €", badge: "Populaire", highlight: true },
+  { quota: 500, label: "500", countText: "500 invités", price: "69,99 €" },
+  { quota: 1000, label: "1000+", countText: "1000+ invités", price: "119,99 €", badge: "Gros volume" },
+];
 
 interface UpdateQuotaModalProps {
   isOpen: boolean;
@@ -28,13 +47,27 @@ export function UpdateQuotaModal({
 }: UpdateQuotaModalProps) {
   const updateQuota = useMutation(api.events.updateEventQuota);
 
-  const [selectedQuota, setSelectedQuota] = useState<number>(
-    currentQuota < 500 ? 500 : currentQuota < 1000 ? 1000 : currentQuota + 500
-  );
+  const [selectedQuota, setSelectedQuota] = useState<number>(() => {
+    const recommended =
+      PRICING_TIERS.find((t) => t.quota > currentQuota) ||
+      PRICING_TIERS[PRICING_TIERS.length - 1];
+    return recommended.quota;
+  });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const presets = [500, 1000, 2000];
+  useEffect(() => {
+    if (isOpen) {
+      const recommended =
+        PRICING_TIERS.find((t) => t.quota > currentQuota) ||
+        PRICING_TIERS[PRICING_TIERS.length - 1];
+      setSelectedQuota(recommended.quota);
+      setError(null);
+    }
+  }, [isOpen, currentQuota]);
+
+  const selectedTier = PRICING_TIERS.find((t) => t.quota === selectedQuota) || PRICING_TIERS[0];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,10 +78,8 @@ export function UpdateQuotaModal({
       return;
     }
 
-    if (selectedQuota < currentGuestsCount) {
-      setError(
-        `Le quota ne peut pas être inférieur au nombre d'invités actuels (${currentGuestsCount}).`
-      );
+    if (selectedQuota <= currentQuota) {
+      setError("Veuillez sélectionner une capacité supérieure à votre quota actuel.");
       return;
     }
 
@@ -75,8 +106,8 @@ export function UpdateQuotaModal({
       isOpen={isOpen}
       onClose={onClose}
       title="Augmenter la capacité d'invités"
-      description="Débloquez de nouvelles inscriptions pour votre événement."
-      maxWidthClass="max-w-md"
+      description="Sélectionnez la tranche d'invités adaptée à votre événement."
+      maxWidthClass="max-w-xl"
     >
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs font-medium">
@@ -101,43 +132,60 @@ export function UpdateQuotaModal({
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-2">
+          <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-2.5">
             Choisir la nouvelle capacité :
           </label>
-          <div className="grid grid-cols-3 gap-2">
-            {presets.map((preset) => {
-              const isSelected = selectedQuota === preset;
+          <div className="grid grid-cols-6 gap-1.5 p-1.5 bg-neutral-100/90 rounded-2xl border border-neutral-200/60">
+            {PRICING_TIERS.map((tier) => {
+              const isSelected = selectedQuota === tier.quota;
+              const isDisabled = tier.quota <= currentQuota;
+
               return (
                 <button
-                  key={preset}
+                  key={tier.quota}
                   type="button"
-                  onClick={() => setSelectedQuota(preset)}
-                  className={`py-3 px-2 rounded-xl border font-bold text-sm transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${isSelected
-                    ? "border-neutral-900 bg-neutral-900 text-white shadow-xs"
-                    : "border-neutral-200 bg-white text-neutral-800 hover:border-neutral-300 hover:bg-neutral-50"
+                  disabled={isDisabled}
+                  onClick={() => setSelectedQuota(tier.quota)}
+                  className={`py-3 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all text-center border-none ${isDisabled
+                    ? "opacity-30 cursor-not-allowed text-neutral-400 bg-transparent"
+                    : isSelected
+                      ? "bg-neutral-900 text-white shadow-xs cursor-pointer"
+                      : "bg-transparent text-neutral-700 hover:text-neutral-900 hover:bg-white cursor-pointer"
                     }`}
                 >
-                  <Users className="w-3.5 h-3.5 shrink-0 opacity-80" />
-                  <span>{preset}</span>
-                  {isSelected && <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
+                  {tier.label}
                 </button>
               );
             })}
           </div>
         </div>
 
-        <div className="pt-2">
+        <div className="p-3.5 rounded-xl bg-neutral-900/5 border border-neutral-200 flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span className="text-neutral-700">
+              Paiement unique et sécurisé.
+            </span>
+          </div>
+        </div>
+
+        <div className="pt-1">
           <Button
             type="submit"
             variant="primary"
             size="md"
             isLoading={loading}
-            className="w-full py-3"
+            disabled={selectedQuota <= currentQuota}
+            className="w-full py-3 font-semibold"
           >
-            Augmenter la capacité ({selectedQuota})
+            {selectedQuota <= currentQuota
+              ? "Capacité actuelle (Aucune augmentation)"
+              : `Passer à ${selectedTier.countText} (${selectedTier.price})`}
           </Button>
         </div>
       </form>
     </Modal>
   );
 }
+
+
