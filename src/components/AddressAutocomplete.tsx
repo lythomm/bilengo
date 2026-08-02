@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import { MapPin, Loader2, X } from "lucide-react";
 
-interface AddressSuggestion {
+export interface AddressSuggestion {
   label: string;
+  city?: string;
   lat?: number;
   lng?: number;
 }
@@ -71,6 +72,7 @@ export function AddressAutocomplete({
           const items: AddressSuggestion[] = (data.features || []).map(
             (item: any) => ({
               label: item.properties.label,
+              city: item.properties.city,
               lng: item.geometry?.coordinates?.[0],
               lat: item.geometry?.coordinates?.[1],
             })

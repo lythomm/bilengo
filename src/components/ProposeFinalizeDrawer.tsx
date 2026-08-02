@@ -5,7 +5,7 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Drawer } from "@/components/ui/Drawer";
-import { getParticipantSession } from "@/lib/session";
+import { getParticipantSession, setParticipantSession } from "@/lib/session";
 import { formatConvexError } from "@/lib/errors";
 import { Button } from "@/components/ui/Button";
 
@@ -119,8 +119,11 @@ export function ProposeFinalizeDrawer({
         description,
       });
 
-      localStorage.setItem("bilengo_driver_name", finalName);
-      localStorage.setItem("bilengo_driver_phone", finalPhone);
+      setParticipantSession(finalName, finalPhone);
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("bilengo_driver_name");
+        localStorage.removeItem("bilengo_driver_phone");
+      }
 
       setDescription("");
       onSuccess();

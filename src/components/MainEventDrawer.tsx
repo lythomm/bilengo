@@ -324,12 +324,7 @@ export function MainEventDrawer({
   const isDriver = userRole?.role === "driver";
   const isPassenger = userRole?.role === "passenger";
 
-  const myProposedCarpools = carpools.filter((c) => {
-    if (userPhone && c.driverPhone && cleanPhone(c.driverPhone) === userPhone) {
-      return true;
-    }
-    return false;
-  });
+  const myDriverCarpool = isDriver && userRole?.carpool ? userRole.carpool : null;
 
   const sortedCarpools = [...carpools].sort((a, b) => {
     const distA = getDistanceKm(destinationLat, destinationLng, a.departureLat, a.departureLng);
@@ -507,64 +502,62 @@ export function MainEventDrawer({
                 </Button>
               )}
             </div>
-          ) : myProposedCarpools.length > 0 ? (
+          ) : myDriverCarpool ? (
             /* My Proposed Carpool View */
             <div className="space-y-3">
               <h3 className="text-lg font-bold text-neutral-900 font-heading">
                 Gérer ton covoit
               </h3>
 
-              {myProposedCarpools.slice(0, 1).map((c) => (
-                <Card key={c._id} variant="gray" className="space-y-3 p-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
-                        Conducteur (Vous)
-                      </span>
-                      <h4 className="text-lg font-bold text-neutral-900 font-heading">
-                        {c.driverName}
-                      </h4>
-                    </div>
-                    <Badge variant={c.availableSeats > 0 ? "emerald" : "default"}>
-                      {c.availableSeats > 0
-                        ? `${c.availableSeats} / ${c.totalSeats} libres`
-                        : "Complet"}
-                    </Badge>
+              <Card variant="gray" className="space-y-3 p-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
+                      Conducteur (Vous)
+                    </span>
+                    <h4 className="text-lg font-bold text-neutral-900 font-heading">
+                      {myDriverCarpool.driverName}
+                    </h4>
                   </div>
-                  <div className="space-y-1.5 text-sm text-neutral-700 bg-white p-3.5 rounded-lg border border-neutral-200/60 font-medium">
-                    <div className="flex items-center gap-1.5">
-                      <MapPin className="w-4 h-4 text-neutral-500 shrink-0" />
-                      <span className="font-bold text-neutral-900">{c.departureAddress}</span>
-                    </div>
-                    <div>
-                      Heure : {formatDepartureTime(c.departureTime)}
-                    </div>
+                  <Badge variant={myDriverCarpool.availableSeats > 0 ? "emerald" : "default"}>
+                    {myDriverCarpool.availableSeats > 0
+                      ? `${myDriverCarpool.availableSeats} / ${myDriverCarpool.totalSeats} libres`
+                      : "Complet"}
+                  </Badge>
+                </div>
+                <div className="space-y-1.5 text-sm text-neutral-700 bg-white p-3.5 rounded-lg border border-neutral-200/60 font-medium">
+                  <div className="flex items-center gap-1.5">
+                    <MapPin className="w-4 h-4 text-neutral-500 shrink-0" />
+                    <span className="font-bold text-neutral-900">{myDriverCarpool.departureAddress}</span>
                   </div>
-
-                  <DriverPassengersList carpoolId={c._id as Id<"carpools">} />
-
-                  <div className="flex items-center gap-2 pt-2 border-t border-neutral-100">
-                    <Button
-                      variant="secondary"
-                      size="md"
-                      onClick={() => onSelectCarpool(c)}
-                      className="flex-1 font-semibold"
-                    >
-                      Voir sur la carte →
-                    </Button>
-
-                    <Button
-                      variant="danger-outline"
-                      size="md"
-                      onClick={() => setConfirmDeleteId(c._id)}
-                      leftIcon={<Trash2 className="w-4 h-4" />}
-                      className="shrink-0"
-                    >
-                      Supprimer
-                    </Button>
+                  <div>
+                    Heure : {formatDepartureTime(myDriverCarpool.departureTime)}
                   </div>
-                </Card>
-              ))}
+                </div>
+
+                <DriverPassengersList carpoolId={myDriverCarpool._id as Id<"carpools">} />
+
+                <div className="flex items-center gap-2 pt-2 border-t border-neutral-100">
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    onClick={() => onSelectCarpool(myDriverCarpool as any)}
+                    className="flex-1 font-semibold"
+                  >
+                    Voir sur la carte →
+                  </Button>
+
+                  <Button
+                    variant="danger-outline"
+                    size="md"
+                    onClick={() => setConfirmDeleteId(myDriverCarpool._id)}
+                    leftIcon={<Trash2 className="w-4 h-4" />}
+                    className="shrink-0"
+                  >
+                    Supprimer
+                  </Button>
+                </div>
+              </Card>
             </div>
           ) : (
             /* Propose Ride CTA View */

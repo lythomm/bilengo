@@ -125,23 +125,27 @@ export function EventClient({ params }: EventClientProps) {
     const targetLat = mapCenter?.lat || coords?.lat || 48.8566;
     const targetLng = mapCenter?.lng || coords?.lng || 2.3522;
 
-    let label = searchAddress.trim();
+    let label = "";
 
-    if (!label) {
-      try {
-        const res = await fetch(
-          `https://api-adresse.data.gouv.fr/reverse/?lon=${targetLng}&lat=${targetLat}`
-        );
-        if (res.ok) {
-          const data = await res.json();
-          const first = data.features?.[0];
-          if (first?.properties?.label) {
-            label = first.properties.label;
-          }
+    try {
+      const res = await fetch(
+        `https://api-adresse.data.gouv.fr/reverse/?lon=${targetLng}&lat=${targetLat}`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        const first = data.features?.[0];
+        if (first?.properties?.city) {
+          label = first.properties.city;
+        } else if (first?.properties?.label) {
+          label = first.properties.label;
         }
-      } catch (e) {
-        console.error("Reverse geocoding failed", e);
       }
+    } catch (e) {
+      console.error("Reverse geocoding failed", e);
+    }
+
+    if (!label && searchAddress.trim()) {
+      label = searchAddress.trim();
     }
 
     if (!label) {
@@ -239,7 +243,7 @@ export function EventClient({ params }: EventClientProps) {
               value={searchAddress}
               onChange={(val) => setSearchAddress(val)}
               onSelect={(item) => {
-                setSearchAddress(item.label);
+                setSearchAddress(item.city || item.label);
                 if (item.lat && item.lng) {
                   setPickedLocation({ lat: item.lat, lng: item.lng });
                   setMapCenter({ lat: item.lat, lng: item.lng });
