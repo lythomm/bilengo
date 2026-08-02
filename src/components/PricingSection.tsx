@@ -211,7 +211,7 @@ export function PricingSection({ onAuthClick }: PricingSectionProps) {
                   </ul>
                 </div>
 
-                <div className="pt-4">
+                <div className="pt-4 space-y-2">
                   <Button
                     variant="primary"
                     size="lg"
@@ -220,6 +220,9 @@ export function PricingSection({ onAuthClick }: PricingSectionProps) {
                   >
                     {currentTier.isFree ? "Démarrer gratuitement (0 €)" : `Choisir la formule (${currentTier.countText})`}
                   </Button>
+                  <p className="text-center text-xs text-neutral-500 font-medium">
+                    Possibilité d'augmenter la capacité à tout moment
+                  </p>
                 </div>
               </div>
 

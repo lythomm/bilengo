@@ -338,7 +338,7 @@ export function HomeClient() {
                 <input
                   type="range"
                   min="20"
-                  max="350"
+                  max="500"
                   step="10"
                   value={guestCount}
                   onChange={(e) => setGuestCount(Number(e.target.value))}
