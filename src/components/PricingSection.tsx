@@ -137,9 +137,9 @@ export function PricingSection({ onAuthClick }: PricingSectionProps) {
     },
   ];
 
-  const [selectedTierId, setSelectedTierId] = useState<string>("250");
+  const [selectedTierId, setSelectedTierId] = useState<string>("25");
 
-  const currentTier = tiers.find((t) => t.id === selectedTierId) || tiers[4];
+  const currentTier = tiers.find((t) => t.id === selectedTierId) || tiers[0];
 
   const sharedFeatures = [
     "Création de la page d'événement en 2 minutes",
@@ -158,18 +158,13 @@ export function PricingSection({ onAuthClick }: PricingSectionProps) {
 
           {/* Left Column: Headline & Value Prop */}
           <div className="lg:col-span-6 space-y-6 text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-neutral-200 text-neutral-800 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-              Tarification simple & transparente
-            </div>
-
             <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-neutral-900 font-heading leading-[1.08]">
               Un prix unique <br className="hidden sm:block" />
               par événement.
             </h2>
 
             <p className="text-neutral-600 leading-relaxed max-w-xl font-normal">
-              Vous ne payez qu'une seule fois par événement, sans abonnement ni renouvellement automatique. Le prix dépend uniquement du nombre d'invités que vous souhaitez accueillir.
+              Sans abonnement ni renouvellement automatique. Le prix dépend uniquement du nombre d'invités que vous souhaitez accueillir.
             </p>
 
             <div className="pt-2">

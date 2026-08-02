@@ -1,5 +1,6 @@
 import { v, ConvexError } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { assertPhoneNotRegistered } from "./authUtils";
 
 function generateToken(): string {
   return (
@@ -37,6 +38,8 @@ export const requestBooking = mutation({
     if (!passengerName || !passengerPhone) {
       throw new Error("Le prénom et le numéro de téléphone sont obligatoires.");
     }
+
+    await assertPhoneNotRegistered(ctx, passengerPhone);
 
     // Enforce 1 carpool/booking per user per event (indexed O(1) lookups)
     const existingDriverCarpool = await ctx.db

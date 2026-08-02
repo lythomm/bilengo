@@ -147,7 +147,15 @@ export function GuestAuthModal({
           {/* Footer wording */}
           <div className="text-center pt-1">
             <span className="text-[11px] text-neutral-400 font-medium tracking-wide">
-              En route pour la fête avec <span className="font-bold text-neutral-800 font-heading">BilenGo</span>
+              En route pour la fête avec{" "}
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold text-neutral-800 hover:underline font-heading cursor-pointer"
+              >
+                BilenGo
+              </a>
             </span>
           </div>
         </form>

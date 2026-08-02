@@ -206,7 +206,7 @@ export function HomeClient() {
         </section>
 
         {/* ================= 3. HOW IT WORKS (3 STEPS) ================= */}
-        <section id="how-it-works" className="py-20 sm:py-28 bg-white border-b border-neutral-100">
+        <section id="how-it-works" className="py-20 sm:py-28 bg-white">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <motion.div
               initial={{ opacity: 0, y: 24 }}
@@ -215,9 +215,6 @@ export function HomeClient() {
               transition={{ duration: 0.5 }}
               className="text-center space-y-4 max-w-2xl mx-auto mb-16"
             >
-              <Badge variant="default" className="text-xs">
-                Covoiturage Événementiel Épuré
-              </Badge>
               <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-neutral-900 font-heading">
                 Comment ça marche ?
               </h2>
@@ -302,7 +299,10 @@ export function HomeClient() {
           </div>
         </section>
 
-        {/* ================= 5. INTERACTIVE SAVINGS & CARBON CALCULATOR (FULL-BLEED DARK SECTION) ================= */}
+        {/* ================= 5. USE CASES SECTION ================= */}
+        <UseCasesStackedSection />
+
+        {/* ================= 6. INTERACTIVE SAVINGS & CARBON CALCULATOR (FULL-BLEED DARK SECTION) ================= */}
         <section className="py-20 sm:py-28 bg-neutral-900 text-white border-b border-neutral-800">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -313,11 +313,6 @@ export function HomeClient() {
           >
             {/* Main Hero Counter */}
             <div className="text-center space-y-4 max-w-3xl mx-auto">
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neutral-800 text-emerald-400 text-xs font-bold border border-neutral-700/80">
-                <Leaf className="w-3.5 h-3.5" />
-                Empreinte Carbone Évitée
-              </span>
-
               <motion.div
                 key={co2SavedKg}
                 initial={{ scale: 0.94 }}
@@ -375,9 +370,6 @@ export function HomeClient() {
           </motion.div>
         </section>
 
-        {/* ================= 6. USE CASES STACKED CARDS (GSAP SCROLLTRIGGER) ================= */}
-        <UseCasesStackedSection />
-
         {/* ================= 6.5 PRICING SECTION ================= */}
         <PricingSection onAuthClick={() => setIsAuthOpen(true)} />
 
@@ -410,9 +402,6 @@ export function HomeClient() {
             className="max-w-4xl mx-auto px-4 sm:px-6"
           >
             <div className="text-center space-y-4 max-w-2xl mx-auto mb-14">
-              <Badge variant="default" className="text-xs">
-                Questions Fréquentes
-              </Badge>
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-neutral-900 font-heading">
                 Tout ce que vous devez savoir
               </h2>
@@ -468,11 +457,6 @@ export function HomeClient() {
               className="bg-neutral-900 text-white rounded-3xl p-8 sm:p-14 text-center space-y-8 relative overflow-hidden shadow-2xl"
             >
               <div className="relative z-10 max-w-2xl mx-auto space-y-4">
-                <Badge variant="dark" className="bg-neutral-800 text-emerald-400 border-neutral-700 text-xs px-3 py-1">
-                  <Sparkles className="w-3.5 h-3.5 inline mr-1 text-emerald-400" />
-                  Prêt à simplifier vos déplacements ?
-                </Badge>
-
                 <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white font-heading leading-tight">
                   Créez le covoiturage de votre événement en 2 minutes.
                 </h2>

@@ -1,5 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { assertPhoneNotRegistered } from "./authUtils";
 
 function cleanPhone(p: string) {
   return p.trim().replace(/[^0-9]/g, "");
@@ -21,6 +22,8 @@ export const registerParticipant = mutation({
     if (!cleanName || !phoneClean) {
       throw new ConvexError("Nom et téléphone obligatoires.");
     }
+
+    await assertPhoneNotRegistered(ctx, args.phone);
 
     const event = await ctx.db.get(args.eventId);
     if (!event) {

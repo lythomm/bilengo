@@ -1,206 +1,149 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/Badge";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { motion } from "framer-motion";
 import {
   HeartHandshake,
   PartyPopper,
   Users,
   Building2,
   LucideIcon,
+  Sparkles,
 } from "lucide-react";
 
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
-
 interface UseCase {
+  id: string;
   icon: LucideIcon;
   title: string;
   description: string;
   badge: string;
-  tagColor: string;
   image: string;
+  spanClass: string;
+  aspectHeight: string;
 }
 
 const useCases: UseCase[] = [
   {
+    id: "wedding",
     icon: HeartHandshake,
     title: "Mariages & Réceptions",
     description:
       "Permettez à vos familles et proches venus de loin de se regrouper facilement jusqu'au domaine. Une carte interactive claire sans tableau Excel.",
     badge: "Mariages",
-    tagColor: "orange",
     image: "/images/home/wedding.jpg",
+    spanClass: "md:col-span-2",
+    aspectHeight: "min-h-[360px] sm:min-h-[400px]",
   },
   {
+    id: "party",
     icon: PartyPopper,
     title: "Anniversaires & Soirées",
     description:
       "Assurez des trajets retour sécurisés et conviviaux pour tous vos invités en fin de soirée. Vos proches rentrent en toute tranquillité.",
     badge: "Soirées",
-    tagColor: "emerald",
     image: "/images/home/party.jpg",
+    spanClass: "md:col-span-1",
+    aspectHeight: "min-h-[360px] sm:min-h-[400px]",
   },
   {
+    id: "student",
     icon: Users,
     title: "Événements BDE & Écoles",
     description:
       "Organisez les départs en WEI, intégrations ou sorties de promos sans messages perdus sur les groupes WhatsApp.",
     badge: "Étudiants",
-    tagColor: "blue",
     image: "/images/home/school.jpg",
+    spanClass: "md:col-span-1",
+    aspectHeight: "min-h-[320px]",
   },
   {
+    id: "corporate",
     icon: Building2,
     title: "Séminaires d'Entreprise",
     description:
       "Réduisez l'empreinte carbone et optimisez la logistique des déplacements de vos collaborateurs lors des rassemblements professionnels.",
     badge: "Entreprises",
-    tagColor: "dark",
     image: "/images/home/work.jpg",
+    spanClass: "md:col-span-2",
+    aspectHeight: "min-h-[320px]",
   },
 ];
 
 export function UseCasesStackedSection() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const cardsContainerRef = useRef<HTMLDivElement>(null);
-  const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
-
-  useEffect(() => {
-    if (!cardsContainerRef.current) return;
-    const cards = cardsRef.current.filter(Boolean);
-    if (cards.length === 0) return;
-
-    const ctx = gsap.context(() => {
-      // Positionner initialement les cartes 1..N sous le cadre
-      cards.forEach((card, index) => {
-        gsap.set(card, {
-          transformOrigin: "center top",
-          scale: 1,
-          y: 0,
-        });
-        if (index > 0) {
-          gsap.set(card, { yPercent: 120 });
-        }
-      });
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: cardsContainerRef.current,
-          pin: containerRef.current,
-          start: "center center",
-          end: `+=${cards.length * 110}%`,
-          scrub: 1,
-          anticipatePin: 1,
-        },
-      });
-
-      cards.forEach((card, index) => {
-        if (index === 0) return;
-
-        const stepLabel = `step-${index}`;
-
-        // 1. Déplacer la carte entrante vers le haut
-        tl.to(
-          card,
-          {
-            yPercent: 0,
-            duration: 1,
-            ease: "none",
-          },
-          stepLabel
-        );
-
-        // 2. Empiler et réduire les cartes précédentes (0 à index-1)
-        for (let prevIndex = 0; prevIndex < index; prevIndex++) {
-          const depth = index - prevIndex;
-          const targetScale = Math.max(0.86, 1 - depth * 0.04);
-          const targetY = -depth * 16;
-
-          tl.to(
-            cards[prevIndex],
-            {
-              scale: targetScale,
-              y: targetY,
-              duration: 1,
-              ease: "none",
-            },
-            stepLabel
-          );
-        }
-      });
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, []);
-
   return (
-    <section
-      ref={containerRef}
-      className="py-16 sm:py-24 bg-white overflow-hidden min-h-screen flex flex-col justify-center"
-    >
+    <section className="py-16 sm:py-24 bg-white overflow-hidden">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 w-full">
-        <div className="text-center space-y-4 max-w-2xl mx-auto mb-6">
-          <Badge variant="default" className="text-xs">
-            Polyvalence Événementielle
-          </Badge>
+        {/* Animated Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.5, ease: [0.21, 0.45, 0.27, 0.9] }}
+          className="text-center space-y-4 max-w-2xl mx-auto mb-12 sm:mb-16"
+        >
           <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-neutral-900 font-heading">
             Conçu pour tous vos rassemblements
           </h2>
           <p className="text-neutral-600 text-base sm:text-lg">
-            Défilez pour découvrir la solution sur mesure adaptée à chaque événement.
+            Une solution sur mesure et adaptée à chaque type d'événement.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Stacked Cards Frame Container with Ample Top Padding */}
-        <div className="relative w-full max-w-6xl mx-auto overflow-hidden pt-16 sm:pt-20 pb-4">
-          <div
-            ref={cardsContainerRef}
-            className="relative h-[480px] sm:h-[500px] w-full"
-          >
-            {useCases.map((uc, index) => {
-              const IconComponent = uc.icon;
-              return (
-                <div
-                  key={index}
-                  ref={(el) => {
-                    cardsRef.current[index] = el;
-                  }}
-                  style={{ zIndex: index + 1 }}
-                  className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden border border-neutral-200/90 bg-neutral-900"
-                >
-                  {/* Full-bleed Background Image */}
-                  <Image
-                    src={uc.image}
-                    alt={`Covoiturage pour ${uc.title}`}
-                    fill
-                    sizes="(max-width: 1200px) 100vw, 1200px"
-                    className="object-cover"
-                  />
+        {/* Animated Bento Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {useCases.map((uc, index) => {
+            const Icon = uc.icon;
+            return (
+              <motion.div
+                key={uc.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{
+                  duration: 0.5,
+                  delay: index * 0.12,
+                  ease: [0.21, 0.45, 0.27, 0.9],
+                }}
+                whileHover={{ y: -6 }}
+                className={`group relative ${uc.spanClass} ${uc.aspectHeight} rounded-3xl overflow-hidden bg-neutral-900 shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer border-none`}
+              >
+                {/* Background Image with Dynamic Zoom Effect */}
+                <Image
+                  src={uc.image}
+                  alt={`Covoiturage pour ${uc.title}`}
+                  fill
+                  sizes={
+                    uc.spanClass.includes("col-span-2")
+                      ? "(max-width: 768px) 100vw, 66vw"
+                      : "(max-width: 768px) 100vw, 33vw"
+                  }
+                  className="object-cover group-hover:scale-108 group-hover:rotate-0.5 transition-transform duration-700 ease-out"
+                />
 
-                  {/* Bottom-Left Text Content Overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 md:p-12 space-y-3 text-white z-10">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-black/50 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shrink-0 shadow-md">
-                        <IconComponent className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                      </div>
-                      <h3 className="text-2xl sm:text-4xl font-extrabold text-white font-heading tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
-                        {uc.title}
-                      </h3>
+                {/* Soft Lighting Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-opacity duration-300 group-hover:opacity-95" />
+
+                {/* Hover Ambient Radial Glow */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.15),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                {/* Content Overlay with Compact Titles & Icons */}
+                <div className="absolute bottom-0 inset-x-0 p-5 sm:p-7 space-y-2 z-10 text-white transform group-hover:-translate-y-1 transition-transform duration-300 ease-out">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-white shrink-0 shadow-xs group-hover:scale-105 group-hover:bg-white/25 transition-all duration-300">
+                      <Icon className="w-4 h-4 group-hover:rotate-6 transition-transform duration-300" />
                     </div>
-
-                    <p className="text-white text-sm sm:text-base max-w-2xl leading-relaxed font-semibold drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)]">
-                      {uc.description}
-                    </p>
+                    <h3 className="text-lg sm:text-xl font-bold font-heading tracking-tight text-white">
+                      {uc.title}
+                    </h3>
                   </div>
+                  <p className="text-neutral-200 text-xs sm:text-sm leading-relaxed opacity-90 group-hover:opacity-100 transition-opacity">
+                    {uc.description}
+                  </p>
                 </div>
-              );
-            })}
-          </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>

@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { assertPhoneNotRegistered } from "./authUtils";
 
 export const createCarpool = mutation({
   args: {
@@ -27,6 +28,8 @@ export const createCarpool = mutation({
     if (!driverName || !driverPhone || !departureAddress) {
       throw new Error("Toutes les informations du conducteur sont obligatoires.");
     }
+
+    await assertPhoneNotRegistered(ctx, driverPhone);
 
     // Enforce single carpool or booking per user per event (indexed O(1) lookups)
     const existingCarpool = await ctx.db
