@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
+import { ToastProvider } from "@/components/ui/Toast";
 
 export function ConvexClientProvider({ children }: { children: React.ReactNode }) {
   const [convex] = useState(
@@ -14,7 +15,9 @@ export function ConvexClientProvider({ children }: { children: React.ReactNode }
 
   return (
     <ConvexAuthProvider client={convex}>
-      {children}
+      <ToastProvider>
+        {children}
+      </ToastProvider>
     </ConvexAuthProvider>
   );
 }

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useMutation, useConvexAuth } from "convex/react";
-import { useRouter } from "next/navigation";
+import { useMutation, useAction, useConvexAuth } from "convex/react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { AddressAutocomplete } from "@/components/AddressAutocomplete";
 import { EventLocationPickerMap } from "@/components/EventLocationPickerMap";
@@ -13,7 +13,12 @@ import { PRICING_TIERS, getTierByQuota } from "@/config/pricing";
 export function CreateEventClient() {
   const { isAuthenticated, isLoading: isAuthLoading } = useConvexAuth();
   const createEvent = useMutation(api.events.createEvent);
+  const createCheckoutSession = useAction(api.stripe.createCheckoutSession);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const paymentStatus = searchParams.get("payment_status");
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [title, setTitle] = useState("");
@@ -29,11 +34,68 @@ export function CreateEventClient() {
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [mapPinMoved, setMapPinMoved] = useState(false);
 
+  const selectedTier = getTierByQuota(Number(maxParticipants));
+  const isFree = selectedTier.isFree || selectedTier.quota <= 25;
+
   useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
       router.replace("/");
     }
   }, [isAuthLoading, isAuthenticated, router]);
+
+  // Handle return from Stripe payment
+  useEffect(() => {
+    if (!isAuthenticated || isAuthLoading) return;
+
+    if (paymentStatus === "success") {
+      const savedDraft = sessionStorage.getItem("pending_event_draft");
+      if (savedDraft) {
+        setIsProcessingPayment(true);
+        try {
+          const draft = JSON.parse(savedDraft);
+          createEvent({
+            title: draft.title,
+            eventDate: draft.eventDate,
+            destinationAddress: draft.destinationAddress,
+            destinationLat: draft.destinationLat,
+            destinationLng: draft.destinationLng,
+            maxParticipants: draft.maxParticipants,
+            tierId: draft.tierId,
+          })
+            .then((res) => {
+              sessionStorage.removeItem("pending_event_draft");
+              router.push(`/e/${res.slug}/dashboard`);
+            })
+            .catch((err) => {
+              console.error(err);
+              setError(err.message || "Erreur lors de la création de l'événement après paiement.");
+              setIsProcessingPayment(false);
+            });
+        } catch (e) {
+          console.error(e);
+          setIsProcessingPayment(false);
+        }
+      }
+    } else if (paymentStatus === "cancel") {
+      const savedDraft = sessionStorage.getItem("pending_event_draft");
+      if (savedDraft) {
+        try {
+          const draft = JSON.parse(savedDraft);
+          if (draft.title) setTitle(draft.title);
+          if (draft.eventDate) setEventDate(draft.eventDate);
+          if (draft.destinationAddress) setDestinationAddress(draft.destinationAddress);
+          if (draft.destinationLat) setDestinationLat(draft.destinationLat);
+          if (draft.destinationLng) setDestinationLng(draft.destinationLng);
+          if (draft.maxParticipants) setMaxParticipants(draft.maxParticipants);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      setStep(4);
+      setError("Le paiement a été annulé ou a échoué. Votre événement n'a pas été créé.");
+      window.history.replaceState({}, "", "/events/create");
+    }
+  }, [paymentStatus, isAuthenticated, isAuthLoading, createEvent, router]);
 
   const handleNext = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,14 +106,12 @@ export function CreateEventClient() {
         setError("Veuillez saisir un titre pour votre événement.");
         return;
       }
-      setStep(2);
-    } else if (step === 2) {
       if (!eventDate) {
         setError("Veuillez sélectionner la date et l'heure de l'événement.");
         return;
       }
-      setStep(3);
-    } else if (step === 3) {
+      setStep(2);
+    } else if (step === 2) {
       if (mapPinMoved || !destinationAddress.trim()) {
         setIsGeocoding(true);
         try {
@@ -135,6 +195,8 @@ export function CreateEventClient() {
           setIsGeocoding(false);
         }
       }
+      setStep(3);
+    } else if (step === 3) {
       setStep(4);
     }
   };
@@ -144,21 +206,53 @@ export function CreateEventClient() {
     setLoading(true);
 
     try {
-      const selectedTier = getTierByQuota(Number(maxParticipants));
-      const res = await createEvent({
-        title,
-        eventDate,
-        destinationAddress: destinationAddress || `Destination (${destinationLat.toFixed(4)}, ${destinationLng.toFixed(4)})`,
-        destinationLat,
-        destinationLng,
-        maxParticipants: Number(maxParticipants),
-        tierId: selectedTier.id,
-      });
+      if (isFree) {
+        const res = await createEvent({
+          title,
+          eventDate,
+          destinationAddress: destinationAddress || `Destination (${destinationLat.toFixed(4)}, ${destinationLng.toFixed(4)})`,
+          destinationLat,
+          destinationLng,
+          maxParticipants: Number(maxParticipants),
+          tierId: selectedTier.id,
+        });
 
-      router.push(`/e/${res.slug}`);
+        router.push(`/e/${res.slug}/dashboard`);
+      } else {
+        if (!selectedTier.stripePriceId) {
+          throw new Error("Tarif Stripe non configuré pour ce palier.");
+        }
+
+        // Save event draft in sessionStorage before redirecting to Stripe
+        sessionStorage.setItem(
+          "pending_event_draft",
+          JSON.stringify({
+            title,
+            eventDate,
+            destinationAddress: destinationAddress || `Destination (${destinationLat.toFixed(4)}, ${destinationLng.toFixed(4)})`,
+            destinationLat,
+            destinationLng,
+            maxParticipants: Number(maxParticipants),
+            tierId: selectedTier.id,
+          })
+        );
+
+        const { url } = await createCheckoutSession({
+          priceId: selectedTier.stripePriceId,
+          mode: "payment",
+          successUrl: `${window.location.origin}/events/create?payment_status=success&session_id={CHECKOUT_SESSION_ID}`,
+          cancelUrl: `${window.location.origin}/events/create?payment_status=cancel`,
+        });
+
+        if (url) {
+          window.location.href = url;
+        } else {
+          throw new Error("Impossible d'initialiser la session de paiement Stripe.");
+        }
+      }
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Erreur lors de la création de l'événement.");
+      setError(err.message || "Erreur lors du traitement.");
       setLoading(false);
     }
   };
@@ -167,6 +261,16 @@ export function CreateEventClient() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white text-neutral-500">
         <div className="animate-pulse text-sm font-medium">Vérification de votre session...</div>
+      </div>
+    );
+  }
+
+  if (isProcessingPayment) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white text-neutral-900 px-4 text-center">
+        <div className="w-10 h-10 border-4 border-neutral-900 border-t-transparent rounded-full animate-spin mb-4" />
+        <h2 className="text-xl font-bold font-heading">Paiement validé !</h2>
+        <p className="text-xs text-neutral-500 mt-1">Création de votre événement en cours, veuillez patienter...</p>
       </div>
     );
   }
@@ -194,13 +298,13 @@ export function CreateEventClient() {
         <div className="mb-8 space-y-3">
           <div className="flex items-center justify-between text-xs font-semibold text-neutral-400">
             <span className={step >= 1 ? "text-neutral-900 font-bold" : ""}>
-              1. Informations
+              1. Titre & Date
             </span>
             <span className={step >= 2 ? "text-neutral-900 font-bold" : ""}>
-              2. Date
+              2. Lieu
             </span>
             <span className={step >= 3 ? "text-neutral-900 font-bold" : ""}>
-              3. Lieu
+              3. Capacité
             </span>
             <span className={step >= 4 ? "text-neutral-900 font-bold" : ""}>
               4. Validation
@@ -229,16 +333,16 @@ export function CreateEventClient() {
             <form onSubmit={handleNext} className="space-y-6">
               <div>
                 <h1 className="text-2xl font-bold font-heading text-neutral-900 tracking-tight">
-                  Nom de l'événement
+                  Informations de l'événement
                 </h1>
                 <p className="text-xs text-neutral-500 mt-1">
-                  Donnez un nom clair pour vos invités.
+                  Définissez le nom et la date de votre événement.
                 </p>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
-                  Titre de l'événement
+                  Titre de l'événement *
                 </label>
                 <input
                   type="text"
@@ -252,47 +356,6 @@ export function CreateEventClient() {
 
               <div>
                 <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
-                  Participants Max
-                </label>
-                <div className="grid grid-cols-7 gap-1.5">
-                  {PRICING_TIERS.map((opt) => (
-                    <button
-                      key={opt.quota}
-                      type="button"
-                      onClick={() => setMaxParticipants(opt.quota)}
-                      className={`py-2 px-2 text-xs font-semibold rounded-lg border transition-all ${
-                        maxParticipants === opt.quota
-                          ? "bg-neutral-900 text-white border-neutral-900 shadow-sm"
-                          : "bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-50 hover:border-neutral-300"
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="pt-2 flex justify-end">
-                <Button type="submit" variant="primary" size="md">
-                  Continuer →
-                </Button>
-              </div>
-            </form>
-          )}
-
-          {step === 2 && (
-            <form onSubmit={handleNext} className="space-y-5">
-              <div>
-                <h1 className="text-xl font-bold text-neutral-900 tracking-tight mb-1 font-heading">
-                  Date & Heure de l'événement
-                </h1>
-                <p className="text-neutral-500 text-xs">
-                  Quand aura lieu l'événement ?
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1">
                   Date & Heure de début *
                 </label>
                 <input
@@ -304,24 +367,15 @@ export function CreateEventClient() {
                 />
               </div>
 
-              <div className="pt-2 flex items-center justify-between">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="md"
-                  onClick={() => setStep(1)}
-                >
-                  ← Précédent
-                </Button>
-
+              <div className="pt-2 flex justify-end">
                 <Button type="submit" variant="primary" size="md">
-                  Placer le lieu sur la carte →
+                  Choisir le lieu →
                 </Button>
               </div>
             </form>
           )}
 
-          {step === 3 && (
+          {step === 2 && (
             <form onSubmit={handleNext} className="space-y-5">
               <div>
                 <h1 className="text-xl font-bold text-neutral-900 tracking-tight mb-1 font-heading">
@@ -380,12 +434,82 @@ export function CreateEventClient() {
                   type="button"
                   variant="secondary"
                   size="md"
-                  onClick={() => setStep(2)}
+                  onClick={() => setStep(1)}
                 >
                   ← Précédent
                 </Button>
 
                 <Button type="submit" variant="primary" size="md" isLoading={isGeocoding}>
+                  Définir la capacité →
+                </Button>
+              </div>
+            </form>
+          )}
+
+          {step === 3 && (
+            <form onSubmit={handleNext} className="space-y-6">
+              <div>
+                <h1 className="text-xl font-bold text-neutral-900 tracking-tight mb-1 font-heading">
+                  Nombre d'invités maximum
+                </h1>
+                <p className="text-neutral-500 text-xs">
+                  Choisissez la capacité d'invités autorisée pour cet événement.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-3">
+                  Capacité d'invités
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {PRICING_TIERS.map((opt) => (
+                    <button
+                      key={opt.quota}
+                      type="button"
+                      onClick={() => setMaxParticipants(opt.quota)}
+                      className={`p-3 text-left rounded-xl border transition-all flex flex-col justify-between ${
+                        maxParticipants === opt.quota
+                          ? "bg-neutral-900 text-white border-neutral-900 shadow-md ring-2 ring-neutral-900/20"
+                          : "bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-50 hover:border-neutral-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between w-full mb-1">
+                        <span className="font-bold text-sm">{opt.countText}</span>
+                        {opt.badge && (
+                          <span
+                            className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md ${
+                              maxParticipants === opt.quota
+                                ? "bg-white/20 text-white"
+                                : "bg-neutral-100 text-neutral-600"
+                            }`}
+                          >
+                            {opt.badge}
+                          </span>
+                        )}
+                      </div>
+                      <span
+                        className={`text-xs ${
+                          maxParticipants === opt.quota ? "text-neutral-300" : "text-neutral-500"
+                        }`}
+                      >
+                        {opt.price}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-2 flex items-center justify-between">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="md"
+                  onClick={() => setStep(2)}
+                >
+                  ← Précédent
+                </Button>
+
+                <Button type="submit" variant="primary" size="md">
                   Récapitulatif →
                 </Button>
               </div>
@@ -438,6 +562,13 @@ export function CreateEventClient() {
                     ✓ GPS verrouillé ({destinationLat.toFixed(5)}, {destinationLng.toFixed(5)})
                   </p>
                 </div>
+
+                {!isFree && (
+                  <div className="pt-2 border-t border-neutral-200/60 flex items-center justify-between">
+                    <span className="text-neutral-400 font-medium">Pass Événement ({selectedTier.countText})</span>
+                    <span className="font-bold text-neutral-900 text-sm">{selectedTier.price} TTC</span>
+                  </div>
+                )}
               </div>
 
               <div className="pt-2 flex items-center justify-between">
@@ -457,7 +588,7 @@ export function CreateEventClient() {
                   isLoading={loading}
                   onClick={handleSubmit}
                 >
-                  Publier l'événement
+                  {isFree ? "Publier l'événement" : `Payer ${selectedTier.price} & Publier`}
                 </Button>
               </div>
             </div>

@@ -11,7 +11,7 @@ import { AddressAutocomplete } from "@/components/AddressAutocomplete";
 import { GuestAuthModal } from "@/components/GuestAuthModal";
 import { getParticipantSession } from "@/lib/session";
 import { Button } from "@/components/ui/Button";
-import { Toast } from "@/components/ui/Toast";
+import { useToast } from "@/components/ui/Toast";
 import Link from "next/link";
 import { LayoutDashboard, Share2, Check } from "lucide-react";
 
@@ -21,10 +21,10 @@ interface EventClientProps {
 
 export function EventClient({ params }: EventClientProps) {
   const { slug } = use(params);
+  const { showToast } = useToast();
   const [selectedCarpool, setSelectedCarpool] = useState<any | null>(null);
   const [bookingCarpool, setBookingCarpool] = useState<any | null>(null);
   const [copied, setCopied] = useState(false);
-  const [showToast, setShowToast] = useState(false);
   const [isGuestAuthOpen, setIsGuestAuthOpen] = useState(false);
 
   // Map Picker Mode State
@@ -117,8 +117,8 @@ export function EventClient({ params }: EventClientProps) {
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     setCopied(true);
-    setShowToast(true);
-    setTimeout(() => setCopied(false), 2500);
+    showToast("success", "Lien de l'événement copié !");
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleConfirmLocation = async () => {
@@ -346,14 +346,6 @@ export function EventClient({ params }: EventClientProps) {
         eventId={event._id}
         eventTitle={event.title}
         onAuthenticated={() => setIsGuestAuthOpen(false)}
-      />
-
-      {/* Copy Link Toast */}
-      <Toast
-        isOpen={showToast}
-        onClose={() => setShowToast(false)}
-        message="Lien de l'événement copié !"
-        variant="success"
       />
     </motion.div>
   );

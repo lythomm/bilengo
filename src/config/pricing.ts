@@ -5,6 +5,7 @@ export interface PricingTier {
   countText: string;
   price: string;
   priceCents: number;
+  stripePriceId?: string;
   isFree?: boolean;
   badge?: string | null;
   highlight?: boolean;
@@ -28,6 +29,7 @@ export const PRICING_TIERS: PricingTier[] = [
     countText: "50 invités",
     price: "9,99 €",
     priceCents: 999,
+    stripePriceId: "price_1U06TXGoPoneFN1yWGgBnRIF",
   },
   {
     id: "tier_100",
@@ -36,6 +38,7 @@ export const PRICING_TIERS: PricingTier[] = [
     countText: "100 invités",
     price: "14,99 €",
     priceCents: 1499,
+    stripePriceId: "price_1U06ToGoPoneFN1yJfjSogq6",
     badge: "Conseillé",
     highlight: true,
   },
@@ -46,6 +49,7 @@ export const PRICING_TIERS: PricingTier[] = [
     countText: "150 invités",
     price: "29,99 €",
     priceCents: 2999,
+    stripePriceId: "price_1U06U2GoPoneFN1yd7lPIepT",
   },
   {
     id: "tier_250",
@@ -54,6 +58,7 @@ export const PRICING_TIERS: PricingTier[] = [
     countText: "250 invités",
     price: "39,99 €",
     priceCents: 3999,
+    stripePriceId: "price_1U06UDGoPoneFN1yZ9BigRpL",
     badge: "Populaire",
     highlight: true,
   },
@@ -64,6 +69,7 @@ export const PRICING_TIERS: PricingTier[] = [
     countText: "500 invités",
     price: "69,99 €",
     priceCents: 6999,
+    stripePriceId: "price_1U06UOGoPoneFN1y9pRParCQ",
   },
   {
     id: "tier_1000",
@@ -72,7 +78,7 @@ export const PRICING_TIERS: PricingTier[] = [
     countText: "1000+ invités",
     price: "119,99 €",
     priceCents: 11999,
-    badge: "Gros volume",
+    stripePriceId: "price_1U06UYGoPoneFN1y93jScsOx",
   },
 ];
 

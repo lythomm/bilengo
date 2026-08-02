@@ -1,16 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { PillGroup } from "@/components/ui/PillGroup";
-import { Toast } from "@/components/ui/Toast";
+import { Toast, useToast } from "@/components/ui/Toast";
 import { Modal } from "@/components/ui/Modal";
 import { UpdateQuotaModal } from "@/components/UpdateQuotaModal";
 import {
@@ -101,18 +102,53 @@ export function OrganizerEventView({
   onCopyLink,
   copied,
 }: OrganizerEventViewProps) {
+  const { showToast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [activeTab, setActiveTab] = useState<"guests" | "carpools">("guests");
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("Lien de l'événement copié !");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isQuotaModalOpen, setIsQuotaModalOpen] = useState(false);
 
   const deleteCarpoolByOrganizer = useMutation(api.carpools.deleteCarpoolByOrganizer);
+  const updateEventQuota = useMutation(api.events.updateEventQuota);
+  const searchParams = useSearchParams();
 
   const { event, stats, guests, carpools } = organizerData;
+
+  const quotaUpgrade = searchParams.get("quota_upgrade");
+  const newQuotaParam = searchParams.get("new_quota");
+  const tierIdParam = searchParams.get("tier_id");
+
+  const handledQuotaUpgradeRef = useRef(false);
+
+  useEffect(() => {
+    if (handledQuotaUpgradeRef.current) return;
+
+    if (quotaUpgrade === "success" && newQuotaParam && tierIdParam) {
+      handledQuotaUpgradeRef.current = true;
+      const newQuota = Number(newQuotaParam);
+      updateEventQuota({
+        eventId: event._id as Id<"events">,
+        maxParticipants: newQuota,
+        tierId: tierIdParam,
+      })
+        .then(() => {
+          showToast("success", `Quota d'invités augmenté à ${newQuota} !`);
+        })
+        .catch((err: any) => {
+          console.error(err);
+          showToast("error", "Erreur lors de la mise à jour du quota.");
+        })
+        .finally(() => {
+          window.history.replaceState({}, "", window.location.pathname);
+        });
+    } else if (quotaUpgrade === "cancel") {
+      handledQuotaUpgradeRef.current = true;
+      showToast("error", "Paiement annulé.");
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, [quotaUpgrade, newQuotaParam, tierIdParam, event._id, updateEventQuota, showToast]);
 
   const handleDeleteCarpool = async () => {
     if (!confirmDeleteId) return;
@@ -120,10 +156,9 @@ export function OrganizerEventView({
       setIsDeleting(true);
       await deleteCarpoolByOrganizer({ carpoolId: confirmDeleteId as Id<"carpools"> });
       setConfirmDeleteId(null);
-      setToastMessage("Covoiturage supprimé avec succès.");
-      setShowToast(true);
+      showToast("success", "Covoiturage supprimé avec succès.");
     } catch (err: any) {
-      alert(err.message || "Erreur lors de la suppression du covoiturage.");
+      showToast("error", err.message || "Erreur lors de la suppression du covoiturage.");
     } finally {
       setIsDeleting(false);
     }
@@ -200,8 +235,7 @@ export function OrganizerEventView({
               size="sm"
               onClick={() => {
                 onCopyLink();
-                setToastMessage("Lien de l'événement copié !");
-                setShowToast(true);
+                showToast("success", "Lien de l'événement copié !");
               }}
               title={copied ? "Lien copié !" : "Partager le lien"}
               aria-label="Partager le lien"
@@ -729,19 +763,12 @@ export function OrganizerEventView({
         isOpen={isQuotaModalOpen}
         onClose={() => setIsQuotaModalOpen(false)}
         eventId={event._id as Id<"events">}
+        eventSlug={event.slug}
         currentQuota={event.maxParticipants}
         currentGuestsCount={stats.totalGuests}
         onSuccess={(newQuota) => {
-          setToastMessage(`Quota d'invités augmenté à ${newQuota}`);
-          setShowToast(true);
+          showToast("success", `Quota d'invités augmenté à ${newQuota}`);
         }}
-      />
-
-      <Toast
-        isOpen={showToast}
-        onClose={() => setShowToast(false)}
-        message={toastMessage}
-        variant="success"
       />
     </motion.div>
   );

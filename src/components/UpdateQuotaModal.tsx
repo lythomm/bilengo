@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useMutation } from "convex/react";
+import { useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
-import { formatConvexError } from "@/lib/errors";
 import { ShieldCheck } from "lucide-react";
-import { PRICING_TIERS, PricingTier } from "@/config/pricing";
+import { PRICING_TIERS } from "@/config/pricing";
 
 const UPGRADE_TIERS = PRICING_TIERS.filter((t) => !t.isFree);
 
@@ -16,6 +15,7 @@ interface UpdateQuotaModalProps {
   isOpen: boolean;
   onClose: () => void;
   eventId: Id<"events">;
+  eventSlug: string;
   currentQuota: number;
   currentGuestsCount: number;
   onSuccess?: (newQuota: number) => void;
@@ -24,12 +24,11 @@ interface UpdateQuotaModalProps {
 export function UpdateQuotaModal({
   isOpen,
   onClose,
-  eventId,
+  eventSlug,
   currentQuota,
   currentGuestsCount,
-  onSuccess,
 }: UpdateQuotaModalProps) {
-  const updateQuota = useMutation(api.events.updateEventQuota);
+  const createCheckoutSession = useAction(api.stripe.createCheckoutSession);
 
   const [selectedQuota, setSelectedQuota] = useState<number>(() => {
     const recommended =
@@ -67,21 +66,28 @@ export function UpdateQuotaModal({
       return;
     }
 
+    if (!selectedTier.stripePriceId) {
+      setError("Tarif Stripe non disponible pour ce palier.");
+      return;
+    }
+
     setLoading(true);
     try {
-      await updateQuota({
-        eventId,
-        maxParticipants: selectedQuota,
-        tierId: selectedTier.id,
+      const { url } = await createCheckoutSession({
+        priceId: selectedTier.stripePriceId,
+        mode: "payment",
+        successUrl: `${window.location.origin}/e/${eventSlug}/dashboard?quota_upgrade=success&new_quota=${selectedQuota}&tier_id=${selectedTier.id}&session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${window.location.origin}/e/${eventSlug}/dashboard?quota_upgrade=cancel`,
       });
-      if (onSuccess) onSuccess(selectedQuota);
-      onClose();
-    } catch (err: unknown) {
+
+      if (url) {
+        window.location.href = url;
+      } else {
+        throw new Error("Impossible d'initialiser la session de paiement Stripe.");
+      }
+    } catch (err: any) {
       console.error(err);
-      setError(
-        formatConvexError(err, "Impossible de mettre à jour le quota.")
-      );
-    } finally {
+      setError(err.message || "Erreur lors de l'initialisation du paiement.");
       setLoading(false);
     }
   };
@@ -131,12 +137,13 @@ export function UpdateQuotaModal({
                   type="button"
                   disabled={isDisabled}
                   onClick={() => setSelectedQuota(tier.quota)}
-                  className={`py-3 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all text-center border-none ${isDisabled
-                    ? "opacity-30 cursor-not-allowed text-neutral-400 bg-transparent"
-                    : isSelected
+                  className={`py-3 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all text-center border-none ${
+                    isDisabled
+                      ? "opacity-30 cursor-not-allowed text-neutral-400 bg-transparent"
+                      : isSelected
                       ? "bg-neutral-900 text-white shadow-xs cursor-pointer"
                       : "bg-transparent text-neutral-700 hover:text-neutral-900 hover:bg-white cursor-pointer"
-                    }`}
+                  }`}
                 >
                   {tier.label}
                 </button>
@@ -172,5 +179,3 @@ export function UpdateQuotaModal({
     </Modal>
   );
 }
-
-

@@ -15,6 +15,7 @@ import type * as carpools from "../carpools.js";
 import type * as events from "../events.js";
 import type * as http from "../http.js";
 import type * as participants from "../participants.js";
+import type * as stripe from "../stripe.js";
 
 import type {
   ApiFromModules,
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   events: typeof events;
   http: typeof http;
   participants: typeof participants;
+  stripe: typeof stripe;
 }>;
 
 /**
@@ -58,4 +60,6 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  stripe: import("@convex-dev/stripe/_generated/component.js").ComponentApi<"stripe">;
+};
