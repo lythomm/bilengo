@@ -134,7 +134,7 @@ export function PricingSection({ onAuthClick }: PricingSectionProps) {
 
           {/* Right Column: Light Interactive Pricing Card */}
           <div className="lg:col-span-6">
-            <div className="bg-white border border-neutral-200/90 rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div className="bg-white border border-neutral-300 rounded-3xl p-6 sm:p-8 relative overflow-hidden">
 
               {/* Card Header: Guest Count Title & Senior Odometer Price */}
               <div className="flex items-start justify-between gap-4 mb-6">

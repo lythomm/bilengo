@@ -118,7 +118,7 @@ export function UseCasesStackedSection() {
                       ? "(max-width: 768px) 100vw, 66vw"
                       : "(max-width: 768px) 100vw, 33vw"
                   }
-                  className="object-cover group-hover:scale-105 group-hover:rotate-0.5 transition-transform duration-700 ease-out"
+                  className="object-cover"
                 />
 
                 {/* Soft Lighting Overlay */}
