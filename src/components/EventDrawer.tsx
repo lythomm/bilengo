@@ -64,8 +64,8 @@ export function EventDrawer({
 
   return (
     <>
-      {/* Main Drawer (Hidden when viewing carpool details) */}
-      {!selectedCarpool && (
+      {/* Main Drawer (Hidden when viewing carpool details or finalizing carpool) */}
+      {!selectedCarpool && !prefilledAddress && (
         <MainEventDrawer
           eventId={eventId}
           eventTitle={eventTitle}
