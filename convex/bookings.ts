@@ -1,5 +1,6 @@
 import { v, ConvexError } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { getAuthUserId } from "@convex-dev/auth/server";
 import { assertPhoneNotRegistered } from "./authUtils";
 
 function generateToken(): string {
@@ -41,11 +42,29 @@ export const requestBooking = mutation({
 
     await assertPhoneNotRegistered(ctx, passengerPhone);
 
-    // Enforce 1 carpool/booking per user per event (indexed O(1) lookups)
+    const cleanPhoneStr = passengerPhone.replace(/[^0-9]/g, "");
+    let participant = await ctx.db
+      .query("event_participants")
+      .withIndex("by_event_and_phone", (q) =>
+        q.eq("eventId", carpool.eventId).eq("phone", cleanPhoneStr)
+      )
+      .first();
+
+    if (!participant) {
+      const participantId = await ctx.db.insert("event_participants", {
+        eventId: carpool.eventId,
+        name: passengerName,
+        phone: cleanPhoneStr,
+        transportMode: "autonomous",
+      });
+      participant = (await ctx.db.get(participantId))!;
+    }
+
+    // Enforce 1 carpool/booking per user per event
     const existingDriverCarpool = await ctx.db
       .query("carpools")
       .withIndex("by_event_and_driver", (q) =>
-        q.eq("eventId", carpool.eventId).eq("driverPhone", passengerPhone)
+        q.eq("eventId", carpool.eventId).eq("driverId", participant._id)
       )
       .filter((q) => q.neq(q.field("status"), "cancelled"))
       .first();
@@ -58,7 +77,7 @@ export const requestBooking = mutation({
 
     const passengerBookings = await ctx.db
       .query("bookings")
-      .withIndex("by_passenger_phone", (q) => q.eq("passengerPhone", passengerPhone))
+      .withIndex("by_passenger", (q) => q.eq("passengerId", participant._id))
       .filter((q) => q.neq(q.field("status"), "cancelled"))
       .collect();
 
@@ -75,35 +94,18 @@ export const requestBooking = mutation({
 
     const bookingId = await ctx.db.insert("bookings", {
       carpoolId: args.carpoolId,
-      passengerName,
-      passengerPhone,
+      passengerId: participant._id,
       status: "pending",
       validationToken,
     });
 
-    // Insert participant record with autonomous transportMode while booking is pending
-    const cleanPhoneStr = passengerPhone.replace(/[^0-9]/g, "");
-    const existingParticipant = await ctx.db
-      .query("event_participants")
-      .withIndex("by_event_and_phone", (q) =>
-        q.eq("eventId", carpool.eventId).eq("phone", cleanPhoneStr)
-      )
-      .first();
-
-    if (!existingParticipant) {
-      await ctx.db.insert("event_participants", {
-        eventId: carpool.eventId,
-        name: passengerName,
-        phone: cleanPhoneStr,
-        transportMode: "autonomous",
-      });
-    }
+    const driver = await ctx.db.get(carpool.driverId);
 
     return {
       bookingId,
       validationToken,
-      driverPhone: carpool.driverPhone,
-      driverName: carpool.driverName,
+      driverPhone: driver?.phone || "",
+      driverName: driver?.name || "Conducteur",
       departureAddress: carpool.departureAddress,
       eventTitle: event.title,
       eventSlug: event.slug,
@@ -136,22 +138,24 @@ export const confirmBooking = mutation({
       throw new ConvexError("Le trajet associé n'existe plus.");
     }
 
-    // Clean phones for comparison
+    const driver = await ctx.db.get(carpool.driverId);
+    const passenger = await ctx.db.get(booking.passengerId);
+
     const cleanP = (p: string) => p.replace(/[^0-9]/g, "");
     const providedPhone = cleanP(args.driverPhone);
-    const expectedDriverPhone = cleanP(carpool.driverPhone);
+    const expectedDriverPhone = driver ? cleanP(driver.phone) : "";
 
     if (!providedPhone || providedPhone !== expectedDriverPhone) {
       throw new ConvexError(
-        `Action non autorisée : seul le conducteur de ce trajet (${carpool.driverName}) peut valider la réservation.`
+        `Action non autorisée : seul le conducteur de ce trajet (${driver?.name || "Conducteur"}) peut valider la réservation.`
       );
     }
 
     if (booking.status === "confirmed") {
       return {
         alreadyConfirmed: true,
-        passengerName: booking.passengerName,
-        passengerPhone: booking.passengerPhone,
+        passengerName: passenger?.name || "",
+        passengerPhone: passenger?.phone || "",
       };
     }
 
@@ -163,7 +167,6 @@ export const confirmBooking = mutation({
       throw new ConvexError("Impossible de valider : le trajet est désormais complet.");
     }
 
-    // Atomic transaction
     const newAvailableSeats = carpool.availableSeats - 1;
     const newStatus = newAvailableSeats === 0 ? "full" : "active";
 
@@ -176,17 +179,8 @@ export const confirmBooking = mutation({
       status: "confirmed",
     });
 
-    // Pass transportMode to passenger upon driver confirmation
-    const cleanPhoneStr = cleanP(booking.passengerPhone);
-    const participant = await ctx.db
-      .query("event_participants")
-      .withIndex("by_event_and_phone", (q) =>
-        q.eq("eventId", carpool.eventId).eq("phone", cleanPhoneStr)
-      )
-      .first();
-
-    if (participant && participant.transportMode !== "driver") {
-      await ctx.db.patch(participant._id, {
+    if (passenger && passenger.transportMode !== "driver") {
+      await ctx.db.patch(passenger._id, {
         transportMode: "passenger",
       });
     }
@@ -196,8 +190,8 @@ export const confirmBooking = mutation({
     return {
       alreadyConfirmed: false,
       success: true,
-      passengerName: booking.passengerName,
-      passengerPhone: booking.passengerPhone,
+      passengerName: passenger?.name || "",
+      passengerPhone: passenger?.phone || "",
       departureAddress: carpool.departureAddress,
       eventTitle: event?.title || "l'événement",
       eventSlug: event?.slug,
@@ -257,8 +251,9 @@ export const cancelBooking = mutation({
       throw new Error("Réservation introuvable.");
     }
 
+    const passenger = await ctx.db.get(booking.passengerId);
     const cleanP = (p: string) => p.replace(/[^0-9]/g, "");
-    if (cleanP(booking.passengerPhone) !== cleanP(args.passengerPhone)) {
+    if (!passenger || cleanP(passenger.phone) !== cleanP(args.passengerPhone)) {
       throw new Error("Non autorisé à annuler cette réservation.");
     }
 
@@ -269,21 +264,10 @@ export const cancelBooking = mutation({
     });
 
     if (carpool) {
-      if (booking.status === "confirmed") {
-        // Reset participant transportMode back to autonomous
-        const cleanPhoneStr = cleanP(booking.passengerPhone);
-        const participant = await ctx.db
-          .query("event_participants")
-          .withIndex("by_event_and_phone", (q) =>
-            q.eq("eventId", carpool.eventId).eq("phone", cleanPhoneStr)
-          )
-          .first();
-
-        if (participant && participant.transportMode === "passenger") {
-          await ctx.db.patch(participant._id, {
-            transportMode: "autonomous",
-          });
-        }
+      if (booking.status === "confirmed" && passenger.transportMode === "passenger") {
+        await ctx.db.patch(passenger._id, {
+          transportMode: "autonomous",
+        });
       }
 
       await recalculateCarpoolSeats(ctx, carpool._id);
@@ -309,16 +293,18 @@ export const getBookingByToken = query({
     const carpool = await ctx.db.get(booking.carpoolId);
     if (!carpool) return null;
 
+    const passenger = await ctx.db.get(booking.passengerId);
+    const driver = await ctx.db.get(carpool.driverId);
     const event = await ctx.db.get(carpool.eventId);
 
     return {
       bookingId: booking._id,
-      passengerName: booking.passengerName,
-      passengerPhone: booking.passengerPhone,
+      passengerName: passenger?.name || "",
+      passengerPhone: passenger?.phone || "",
       status: booking.status,
       carpoolId: carpool._id,
-      driverName: carpool.driverName,
-      driverPhone: carpool.driverPhone,
+      driverName: driver?.name || "",
+      driverPhone: driver?.phone || "",
       departureAddress: carpool.departureAddress,
       departureTime: carpool.departureTime,
       availableSeats: carpool.availableSeats,
@@ -337,12 +323,17 @@ export const getCarpoolPassengers = query({
       .filter((q) => q.eq(q.field("status"), "confirmed"))
       .collect();
 
-    return bookings.map((b) => ({
-      _id: b._id,
-      passengerName: b.passengerName,
-      passengerPhone: b.passengerPhone,
-      status: b.status,
-    }));
+    const result = [];
+    for (const b of bookings) {
+      const passenger = await ctx.db.get(b.passengerId);
+      result.push({
+        _id: b._id,
+        passengerName: passenger?.name || "Passager",
+        status: b.status,
+      });
+    }
+
+    return result;
   },
 });
 
@@ -355,30 +346,65 @@ export const getPendingBookingsForCarpool = query({
       .filter((q) => q.eq(q.field("status"), "pending"))
       .collect();
 
-    return bookings.map((b) => ({
-      _id: b._id,
-      passengerName: b.passengerName,
-      passengerPhone: b.passengerPhone,
-      status: b.status,
-    }));
+    const result = [];
+    for (const b of bookings) {
+      const passenger = await ctx.db.get(b.passengerId);
+      result.push({
+        _id: b._id,
+        passengerName: passenger?.name || "Passager",
+        status: b.status,
+      });
+    }
+
+    return result;
   },
 });
 
 export const getAllBookingsForCarpool = query({
-  args: { carpoolId: v.id("carpools") },
+  args: {
+    carpoolId: v.id("carpools"),
+    driverPhone: v.optional(v.string()),
+  },
   handler: async (ctx, args) => {
+    const carpool = await ctx.db.get(args.carpoolId);
+    if (!carpool) return [];
+
+    const driver = await ctx.db.get(carpool.driverId);
+    const userId = await getAuthUserId(ctx);
+    let isAuthorized = false;
+
+    if (userId) {
+      const event = await ctx.db.get(carpool.eventId);
+      if (event && event.organizerId === userId) {
+        isAuthorized = true;
+      }
+    }
+
+    if (!isAuthorized && args.driverPhone && driver) {
+      const cleanP = (p: string) => p.replace(/[^0-9]/g, "");
+      if (cleanP(args.driverPhone) === cleanP(driver.phone)) {
+        isAuthorized = true;
+      }
+    }
+
     const bookings = await ctx.db
       .query("bookings")
       .withIndex("by_carpool", (q) => q.eq("carpoolId", args.carpoolId))
       .filter((q) => q.neq(q.field("status"), "cancelled"))
       .collect();
 
-    return bookings.map((b) => ({
-      _id: b._id,
-      passengerName: b.passengerName,
-      passengerPhone: b.passengerPhone,
-      status: b.status,
-    }));
+    const result = [];
+    for (const b of bookings) {
+      const passenger = await ctx.db.get(b.passengerId);
+      result.push({
+        _id: b._id,
+        passengerName: passenger?.name || "Passager",
+        passengerPhone: isAuthorized ? passenger?.phone : undefined,
+        status: b.status,
+      });
+    }
+
+    return result;
   },
 });
 
@@ -399,19 +425,22 @@ export const respondToBookingByDriver = mutation({
       throw new ConvexError("Le trajet associé n'existe plus.");
     }
 
+    const driver = await ctx.db.get(carpool.driverId);
     const cleanP = (p: string) => p.replace(/[^0-9]/g, "");
     const providedPhone = cleanP(args.driverPhone);
-    const expectedDriverPhone = cleanP(carpool.driverPhone);
+    const expectedDriverPhone = driver ? cleanP(driver.phone) : "";
 
     if (!providedPhone || providedPhone !== expectedDriverPhone) {
       throw new ConvexError(
-        `Action non autorisée : seul le conducteur de ce trajet (${carpool.driverName}) peut répondre à la demande.`
+        `Action non autorisée : seul le conducteur de ce trajet (${driver?.name || "Conducteur"}) peut répondre à la demande.`
       );
     }
 
     if (booking.status !== "pending") {
       throw new ConvexError("Cette demande a déjà été traitée ou annulée.");
     }
+
+    const passenger = await ctx.db.get(booking.passengerId);
 
     if (args.action === "accept") {
       const { availableSeats: currentAvailable } = await recalculateCarpoolSeats(ctx, carpool._id);
@@ -424,28 +453,17 @@ export const respondToBookingByDriver = mutation({
         status: "confirmed",
       });
 
-      // Pass transportMode to passenger
-      const cleanPhoneStr = cleanP(booking.passengerPhone);
-      const participant = await ctx.db
-        .query("event_participants")
-        .withIndex("by_event_and_phone", (q) =>
-          q.eq("eventId", carpool.eventId).eq("phone", cleanPhoneStr)
-        )
-        .first();
-
-      if (participant && participant.transportMode !== "driver") {
-        await ctx.db.patch(participant._id, {
+      if (passenger && passenger.transportMode !== "driver") {
+        await ctx.db.patch(passenger._id, {
           transportMode: "passenger",
         });
       }
     } else {
-      // Reject action
       await ctx.db.patch(booking._id, {
         status: "cancelled",
       });
     }
 
-    // Always recalculate availableSeats and status from confirmed bookings
     await recalculateCarpoolSeats(ctx, carpool._id);
 
     return true;

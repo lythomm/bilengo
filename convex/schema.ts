@@ -20,8 +20,7 @@ export default defineSchema({
 
   carpools: defineTable({
     eventId: v.id("events"),
-    driverName: v.string(),
-    driverPhone: v.string(),
+    driverId: v.id("event_participants"),
     departureAddress: v.string(),
     departureLat: v.optional(v.number()),
     departureLng: v.optional(v.number()),
@@ -32,18 +31,19 @@ export default defineSchema({
     description: v.optional(v.string()),
   })
     .index("by_event", ["eventId"])
-    .index("by_event_and_driver", ["eventId", "driverPhone"]),
+    .index("by_driver", ["driverId"])
+    .index("by_event_and_driver", ["eventId", "driverId"]),
 
   bookings: defineTable({
     carpoolId: v.id("carpools"),
-    passengerName: v.string(),
-    passengerPhone: v.string(),
+    passengerId: v.id("event_participants"),
     status: v.union(v.literal("pending"), v.literal("confirmed"), v.literal("cancelled")),
     validationToken: v.string(),
   })
     .index("by_carpool", ["carpoolId"])
-    .index("by_validation_token", ["validationToken"])
-    .index("by_passenger_phone", ["passengerPhone"]),
+    .index("by_passenger", ["passengerId"])
+    .index("by_carpool_and_passenger", ["carpoolId", "passengerId"])
+    .index("by_validation_token", ["validationToken"]),
 
   event_participants: defineTable({
     eventId: v.id("events"),

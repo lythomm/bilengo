@@ -31,11 +31,34 @@ export const createCarpool = mutation({
 
     await assertPhoneNotRegistered(ctx, driverPhone);
 
-    // Enforce single carpool or booking per user per event (indexed O(1) lookups)
+    const cleanPhoneStr = driverPhone.replace(/[^0-9]/g, "");
+    let participant = await ctx.db
+      .query("event_participants")
+      .withIndex("by_event_and_phone", (q) =>
+        q.eq("eventId", args.eventId).eq("phone", cleanPhoneStr)
+      )
+      .first();
+
+    if (!participant) {
+      const participantId = await ctx.db.insert("event_participants", {
+        eventId: args.eventId,
+        name: driverName,
+        phone: cleanPhoneStr,
+        transportMode: "driver",
+      });
+      participant = (await ctx.db.get(participantId))!;
+    } else {
+      await ctx.db.patch(participant._id, {
+        name: driverName,
+        transportMode: "driver",
+      });
+    }
+
+    // Enforce single carpool or booking per user per event
     const existingCarpool = await ctx.db
       .query("carpools")
       .withIndex("by_event_and_driver", (q) =>
-        q.eq("eventId", args.eventId).eq("driverPhone", driverPhone)
+        q.eq("eventId", args.eventId).eq("driverId", participant._id)
       )
       .filter((q) => q.neq(q.field("status"), "cancelled"))
       .first();
@@ -46,16 +69,14 @@ export const createCarpool = mutation({
 
     const passengerBookings = await ctx.db
       .query("bookings")
-      .withIndex("by_passenger_phone", (q) => q.eq("passengerPhone", driverPhone))
+      .withIndex("by_passenger", (q) => q.eq("passengerId", participant._id))
       .filter((q) => q.neq(q.field("status"), "cancelled"))
       .collect();
 
     for (const b of passengerBookings) {
       const c = await ctx.db.get(b.carpoolId);
       if (c && c.eventId === args.eventId) {
-        throw new Error(
-          "Vous participez déjà à cet événement en tant que passager."
-        );
+        throw new Error("Vous participez déjà à cet événement en tant que passager.");
       }
     }
 
@@ -63,8 +84,7 @@ export const createCarpool = mutation({
 
     const carpoolId = await ctx.db.insert("carpools", {
       eventId: args.eventId,
-      driverName,
-      driverPhone,
+      driverId: participant._id,
       departureAddress,
       departureLat: args.departureLat,
       departureLng: args.departureLng,
@@ -74,29 +94,6 @@ export const createCarpool = mutation({
       status: "active",
       description: args.description?.trim(),
     });
-
-    // Upsert participant record with driver transportMode
-    const cleanPhoneStr = driverPhone.replace(/[^0-9]/g, "");
-    const existingParticipant = await ctx.db
-      .query("event_participants")
-      .withIndex("by_event_and_phone", (q) =>
-        q.eq("eventId", args.eventId).eq("phone", cleanPhoneStr)
-      )
-      .first();
-
-    if (existingParticipant) {
-      await ctx.db.patch(existingParticipant._id, {
-        name: driverName,
-        transportMode: "driver",
-      });
-    } else {
-      await ctx.db.insert("event_participants", {
-        eventId: args.eventId,
-        name: driverName,
-        phone: cleanPhoneStr,
-        transportMode: "driver",
-      });
-    }
 
     return carpoolId;
   },
@@ -113,8 +110,9 @@ export const cancelCarpool = mutation({
       throw new Error("Trajet introuvable.");
     }
 
+    const driver = await ctx.db.get(carpool.driverId);
     const cleanP = (p: string) => p.replace(/[^0-9]/g, "");
-    if (!args.driverPhone || cleanP(carpool.driverPhone) !== cleanP(args.driverPhone)) {
+    if (!driver || !args.driverPhone || cleanP(driver.phone) !== cleanP(args.driverPhone)) {
       throw new Error("Non autorisé à annuler ce trajet.");
     }
 
@@ -170,14 +168,23 @@ export const deleteCarpoolByOrganizer = mutation({
 export const getUserEventRole = query({
   args: { eventId: v.id("events"), userPhone: v.string() },
   handler: async (ctx, args) => {
-    const cleanP = args.userPhone.trim();
+    const cleanP = args.userPhone.trim().replace(/[^0-9]/g, "");
     if (!cleanP) return null;
 
-    // Check if driver O(1)
+    const participant = await ctx.db
+      .query("event_participants")
+      .withIndex("by_event_and_phone", (q) =>
+        q.eq("eventId", args.eventId).eq("phone", cleanP)
+      )
+      .first();
+
+    if (!participant) return null;
+
+    // Check if driver
     const driverCarpool = await ctx.db
       .query("carpools")
       .withIndex("by_event_and_driver", (q) =>
-        q.eq("eventId", args.eventId).eq("driverPhone", cleanP)
+        q.eq("eventId", args.eventId).eq("driverId", participant._id)
       )
       .filter((q) => q.neq(q.field("status"), "cancelled"))
       .first();
@@ -195,8 +202,8 @@ export const getUserEventRole = query({
         role: "driver" as const,
         carpool: {
           _id: driverCarpool._id,
-          driverName: driverCarpool.driverName,
-          driverPhone: driverCarpool.driverPhone,
+          driverName: participant.name,
+          driverPhone: participant.phone,
           departureAddress: driverCarpool.departureAddress,
           departureTime: driverCarpool.departureTime,
           totalSeats: driverCarpool.totalSeats,
@@ -206,10 +213,10 @@ export const getUserEventRole = query({
       };
     }
 
-    // Check if passenger O(1)
+    // Check if passenger
     const userBookings = await ctx.db
       .query("bookings")
-      .withIndex("by_passenger_phone", (q) => q.eq("passengerPhone", cleanP))
+      .withIndex("by_passenger", (q) => q.eq("passengerId", participant._id))
       .filter((q) => q.neq(q.field("status"), "cancelled"))
       .collect();
 
@@ -224,18 +231,20 @@ export const getUserEventRole = query({
             .collect()
         ).length;
 
+        const driver = await ctx.db.get(c.driverId);
+
         return {
           role: "passenger" as const,
           booking: {
             _id: booking._id,
-            passengerName: booking.passengerName,
-            passengerPhone: booking.passengerPhone,
+            passengerName: participant.name,
+            passengerPhone: participant.phone,
             status: booking.status,
           },
           carpool: {
             _id: c._id,
-            driverName: c.driverName,
-            driverPhone: c.driverPhone,
+            driverName: driver?.name || "Conducteur",
+            driverPhone: driver?.phone || "",
             departureAddress: c.departureAddress,
             departureTime: c.departureTime,
             totalSeats: c.totalSeats,
@@ -268,6 +277,8 @@ export const getCarpoolsByEvent = query({
         .filter((q) => q.eq(q.field("status"), "confirmed"))
         .collect();
 
+      const driver = await ctx.db.get(c.driverId);
+
       const realAvailableSeats = Math.max(
         0,
         c.totalSeats - confirmedBookings.length
@@ -281,8 +292,7 @@ export const getCarpoolsByEvent = query({
 
       result.push({
         _id: c._id,
-        driverName: c.driverName,
-        driverPhone: c.driverPhone,
+        driverName: driver?.name || "Conducteur",
         departureAddress: c.departureAddress,
         departureLat: c.departureLat,
         departureLng: c.departureLng,

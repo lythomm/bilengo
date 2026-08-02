@@ -79,9 +79,18 @@ function getDistanceKm(lat1?: number, lng1?: number, lat2?: number, lng2?: numbe
 }
 
 function DriverPassengersList({ carpoolId }: { carpoolId: Id<"carpools"> }) {
+  const driverPhone = cleanPhone(
+    getParticipantSession()?.phone ||
+    (typeof window !== "undefined"
+      ? localStorage.getItem("bilengo_driver_phone") ||
+        localStorage.getItem("bilengo_phone") ||
+        ""
+      : "")
+  );
+
   const bookings = useQuery(
     api.bookings.getAllBookingsForCarpool,
-    { carpoolId }
+    { carpoolId, driverPhone: driverPhone || undefined }
   );
   const respondToBooking = useMutation(api.bookings.respondToBookingByDriver);
   const [respondingId, setRespondingId] = useState<string | null>(null);

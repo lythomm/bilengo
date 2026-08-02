@@ -41,12 +41,12 @@ export const createEvent = mutation({
 
     const eventId = await ctx.db.insert("events", {
       organizerId: userId,
-      title,
-      destinationAddress,
+      title: title.substring(0, 200),
+      destinationAddress: destinationAddress.substring(0, 300),
       destinationLat: args.destinationLat,
       destinationLng: args.destinationLng,
       eventDate: args.eventDate,
-      maxParticipants,
+      maxParticipants: Math.min(Math.max(1, args.maxParticipants), 5000),
       slug,
     });
 
@@ -67,13 +67,6 @@ export const getMyEvents = query({
       .withIndex("by_organizer", (q) => q.eq("organizerId", userId))
       .order("desc")
       .collect();
-  },
-});
-
-export const getAllEvents = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db.query("events").collect();
   },
 });
 
@@ -168,29 +161,40 @@ export const getOrganizerEventData = query({
     for (let i = 0; i < carpools.length; i++) {
       const c = carpools[i];
       const bookings = allBookings[i];
+      const driver = await ctx.db.get(c.driverId);
+      const driverName = driver?.name || "Conducteur";
+      const driverPhone = driver?.phone || "";
 
       const confirmedBookings = bookings.filter((b) => b.status === "confirmed");
       const pendingBookings = bookings.filter((b) => b.status === "pending");
 
+      const enrichedBookings = [];
+      for (const b of bookings) {
+        const passenger = await ctx.db.get(b.passengerId);
+        enrichedBookings.push({
+          _id: b._id,
+          passengerName: passenger?.name || "Passager",
+          passengerPhone: passenger?.phone || "",
+          status: b.status,
+        });
+      }
+
       carpoolDetails.push({
         ...c,
+        driverName,
+        driverPhone,
         confirmedBookingsCount: confirmedBookings.length,
         pendingBookingsCount: pendingBookings.length,
-        bookings: bookings.map((b) => ({
-          _id: b._id,
-          passengerName: b.passengerName,
-          passengerPhone: b.passengerPhone,
-          status: b.status,
-        })),
+        bookings: enrichedBookings,
       });
 
       // Add driver to guests list
-      const driverKey = normalizeGuestKey(c.driverPhone, c.driverName);
+      const driverKey = normalizeGuestKey(driverPhone, driverName);
       let driverEntry = guestsMap.get(driverKey);
       if (!driverEntry) {
         driverEntry = {
-          name: c.driverName,
-          phone: c.driverPhone,
+          name: driverName,
+          phone: driverPhone,
           proposesCarpool: true,
           isInCarpool: false,
           details: [`Départ : ${c.departureAddress} (${c.totalSeats} places)`],
@@ -207,7 +211,7 @@ export const getOrganizerEventData = query({
       }
 
       // Add passengers to guests list
-      for (const b of bookings) {
+      for (const b of enrichedBookings) {
         if (b.status === "cancelled") continue;
         const passengerKey = normalizeGuestKey(b.passengerPhone, b.passengerName);
         let passengerEntry = guestsMap.get(passengerKey);
@@ -218,7 +222,7 @@ export const getOrganizerEventData = query({
             proposesCarpool: false,
             isInCarpool: true,
             details: [
-              `Passager avec ${c.driverName} (${b.status === "confirmed" ? "confirmé" : "en attente"})`,
+              `Passager avec ${driverName} (${b.status === "confirmed" ? "confirmé" : "en attente"})`,
             ],
           };
           guestsMap.set(passengerKey, passengerEntry);
@@ -228,7 +232,7 @@ export const getOrganizerEventData = query({
             passengerEntry.details = [];
           }
           passengerEntry.details.push(
-            `Passager avec ${c.driverName} (${b.status === "confirmed" ? "confirmé" : "en attente"})`
+            `Passager avec ${driverName} (${b.status === "confirmed" ? "confirmé" : "en attente"})`
           );
         }
       }
