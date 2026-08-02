@@ -8,14 +8,7 @@ import { AddressAutocomplete } from "@/components/AddressAutocomplete";
 import { EventLocationPickerMap } from "@/components/EventLocationPickerMap";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
-
-const PARTICIPANT_OPTIONS = [
-  { label: "50", value: 50 },
-  { label: "100", value: 100 },
-  { label: "250", value: 250 },
-  { label: "500", value: 500 },
-  { label: "1000+", value: 1000 },
-];
+import { PRICING_TIERS, getTierByQuota } from "@/config/pricing";
 
 export function CreateEventClient() {
   const { isAuthenticated, isLoading: isAuthLoading } = useConvexAuth();
@@ -29,7 +22,7 @@ export function CreateEventClient() {
   const [destinationLat, setDestinationLat] = useState<number>(48.8566);
   const [destinationLng, setDestinationLng] = useState<number>(2.3522);
   const [pickedLocation, setPickedLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [maxParticipants, setMaxParticipants] = useState<number>(50);
+  const [maxParticipants, setMaxParticipants] = useState<number>(25);
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -151,6 +144,7 @@ export function CreateEventClient() {
     setLoading(true);
 
     try {
+      const selectedTier = getTierByQuota(Number(maxParticipants));
       const res = await createEvent({
         title,
         eventDate,
@@ -158,6 +152,7 @@ export function CreateEventClient() {
         destinationLat,
         destinationLng,
         maxParticipants: Number(maxParticipants),
+        tierId: selectedTier.id,
       });
 
       router.push(`/e/${res.slug}`);
@@ -225,25 +220,25 @@ export function CreateEventClient() {
         {/* Form Container */}
         <div className="space-y-6">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs font-medium">
+            <div className="mb-6 p-3.5 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs font-medium">
               {error}
             </div>
           )}
 
           {step === 1 && (
-            <form onSubmit={handleNext} className="space-y-5">
+            <form onSubmit={handleNext} className="space-y-6">
               <div>
-                <h1 className="text-xl font-bold text-neutral-900 tracking-tight mb-1 font-heading">
+                <h1 className="text-2xl font-bold font-heading text-neutral-900 tracking-tight">
                   Nom de l'événement
                 </h1>
-                <p className="text-neutral-500 text-xs">
+                <p className="text-xs text-neutral-500 mt-1">
                   Donnez un nom clair pour vos invités.
                 </p>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1">
-                  Titre de l'événement *
+                <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
+                  Titre de l'événement
                 </label>
                 <input
                   type="text"
@@ -259,14 +254,14 @@ export function CreateEventClient() {
                 <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">
                   Participants Max
                 </label>
-                <div className="grid grid-cols-5 gap-2">
-                  {PARTICIPANT_OPTIONS.map((opt) => (
+                <div className="grid grid-cols-7 gap-1.5">
+                  {PRICING_TIERS.map((opt) => (
                     <button
-                      key={opt.value}
+                      key={opt.quota}
                       type="button"
-                      onClick={() => setMaxParticipants(opt.value)}
-                      className={`py-2 px-3 text-xs font-semibold rounded-lg border transition-all ${
-                        maxParticipants === opt.value
+                      onClick={() => setMaxParticipants(opt.quota)}
+                      className={`py-2 px-2 text-xs font-semibold rounded-lg border transition-all ${
+                        maxParticipants === opt.quota
                           ? "bg-neutral-900 text-white border-neutral-900 shadow-sm"
                           : "bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-50 hover:border-neutral-300"
                       }`}

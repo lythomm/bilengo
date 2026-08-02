@@ -8,6 +8,8 @@ import { formatConvexError } from "@/lib/errors";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 
+import { PRICING_TIERS, getTierByQuota } from "@/config/pricing";
+
 interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -26,7 +28,7 @@ export function CreateEventModal({
   const [destinationLat, setDestinationLat] = useState<number | undefined>();
   const [destinationLng, setDestinationLng] = useState<number | undefined>();
   const [eventDate, setEventDate] = useState("");
-  const [maxParticipants, setMaxParticipants] = useState(50);
+  const [maxParticipants, setMaxParticipants] = useState(25);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,6 +38,7 @@ export function CreateEventModal({
     setLoading(true);
 
     try {
+      const selectedTier = getTierByQuota(maxParticipants);
       const res = await createEvent({
         title,
         destinationAddress,
@@ -43,6 +46,7 @@ export function CreateEventModal({
         destinationLng,
         eventDate,
         maxParticipants,
+        tierId: selectedTier.id,
       });
 
       onClose();

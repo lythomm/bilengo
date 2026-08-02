@@ -8,25 +8,9 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { formatConvexError } from "@/lib/errors";
 import { ShieldCheck } from "lucide-react";
+import { PRICING_TIERS, PricingTier } from "@/config/pricing";
 
-export interface QuotaTier {
-  quota: number;
-  label: string;
-  countText: string;
-  price: string;
-  isFree?: boolean;
-  badge?: string | null;
-  highlight?: boolean;
-}
-
-export const PRICING_TIERS: QuotaTier[] = [
-  { quota: 50, label: "50", countText: "50 invités", price: "9,99 €" },
-  { quota: 100, label: "100", countText: "100 invités", price: "14,99 €", badge: "Conseillé", highlight: true },
-  { quota: 150, label: "150", countText: "150 invités", price: "29,99 €" },
-  { quota: 250, label: "250", countText: "250 invités", price: "39,99 €", badge: "Populaire", highlight: true },
-  { quota: 500, label: "500", countText: "500 invités", price: "69,99 €" },
-  { quota: 1000, label: "1000+", countText: "1000+ invités", price: "119,99 €", badge: "Gros volume" },
-];
+const UPGRADE_TIERS = PRICING_TIERS.filter((t) => !t.isFree);
 
 interface UpdateQuotaModalProps {
   isOpen: boolean;
@@ -49,8 +33,8 @@ export function UpdateQuotaModal({
 
   const [selectedQuota, setSelectedQuota] = useState<number>(() => {
     const recommended =
-      PRICING_TIERS.find((t) => t.quota > currentQuota) ||
-      PRICING_TIERS[PRICING_TIERS.length - 1];
+      UPGRADE_TIERS.find((t) => t.quota > currentQuota) ||
+      UPGRADE_TIERS[UPGRADE_TIERS.length - 1];
     return recommended.quota;
   });
 
@@ -60,14 +44,14 @@ export function UpdateQuotaModal({
   useEffect(() => {
     if (isOpen) {
       const recommended =
-        PRICING_TIERS.find((t) => t.quota > currentQuota) ||
-        PRICING_TIERS[PRICING_TIERS.length - 1];
+        UPGRADE_TIERS.find((t) => t.quota > currentQuota) ||
+        UPGRADE_TIERS[UPGRADE_TIERS.length - 1];
       setSelectedQuota(recommended.quota);
       setError(null);
     }
   }, [isOpen, currentQuota]);
 
-  const selectedTier = PRICING_TIERS.find((t) => t.quota === selectedQuota) || PRICING_TIERS[0];
+  const selectedTier = UPGRADE_TIERS.find((t) => t.quota === selectedQuota) || UPGRADE_TIERS[0];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,6 +72,7 @@ export function UpdateQuotaModal({
       await updateQuota({
         eventId,
         maxParticipants: selectedQuota,
+        tierId: selectedTier.id,
       });
       if (onSuccess) onSuccess(selectedQuota);
       onClose();
@@ -136,7 +121,7 @@ export function UpdateQuotaModal({
             Choisir la nouvelle capacité :
           </label>
           <div className="grid grid-cols-6 gap-1.5 p-1.5 bg-neutral-100/90 rounded-2xl border border-neutral-200/60">
-            {PRICING_TIERS.map((tier) => {
+            {UPGRADE_TIERS.map((tier) => {
               const isSelected = selectedQuota === tier.quota;
               const isDisabled = tier.quota <= currentQuota;
 

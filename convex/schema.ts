@@ -13,6 +13,7 @@ export default defineSchema({
     destinationLng: v.optional(v.number()),
     eventDate: v.string(),
     maxParticipants: v.number(),
+    tierId: v.optional(v.string()),
     slug: v.string(),
   })
     .index("by_slug", ["slug"])

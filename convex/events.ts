@@ -33,6 +33,7 @@ export const createEvent = mutation({
     destinationLng: v.optional(v.number()),
     eventDate: v.string(),
     maxParticipants: v.number(),
+    tierId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -57,6 +58,7 @@ export const createEvent = mutation({
       destinationLng: args.destinationLng,
       eventDate: args.eventDate,
       maxParticipants: Math.min(Math.max(1, args.maxParticipants), 5000),
+      tierId: args.tierId,
       slug,
     });
 
@@ -274,6 +276,7 @@ export const updateEventQuota = mutation({
   args: {
     eventId: v.id("events"),
     maxParticipants: v.number(),
+    tierId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -287,7 +290,10 @@ export const updateEventQuota = mutation({
     }
 
     const maxParticipants = Math.max(1, args.maxParticipants);
-    await ctx.db.patch(args.eventId, { maxParticipants });
+    await ctx.db.patch(args.eventId, {
+      maxParticipants,
+      ...(args.tierId ? { tierId: args.tierId } : {}),
+    });
 
     return { success: true, maxParticipants };
   },

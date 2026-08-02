@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check, Sparkles, ShieldCheck, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
+import { PRICING_TIERS } from "@/config/pricing";
+
 interface PricingSectionProps {
   onAuthClick?: () => void;
 }
@@ -71,73 +73,12 @@ function SeniorOdometer({ priceStr }: { priceStr: string }) {
 }
 
 export function PricingSection({ onAuthClick }: PricingSectionProps) {
-  const tiers = [
-    {
-      id: "25",
-      label: "25",
-      countText: "25 invités",
-      price: "0 €",
-      period: "Gratuit à vie",
-      badge: "Gratuit",
-      isFree: true,
-    },
-    {
-      id: "50",
-      label: "50",
-      countText: "50 invités",
-      price: "9,99 €",
-      period: "Paiement unique / événement",
-      badge: null,
-      isFree: false,
-    },
-    {
-      id: "100",
-      label: "100",
-      countText: "100 invités",
-      price: "14,99 €",
-      period: "Paiement unique / événement",
-      badge: "Offre conseillée",
-      isFree: false,
-    },
-    {
-      id: "150",
-      label: "150",
-      countText: "150 invités",
-      price: "29,99 €",
-      period: "Paiement unique / événement",
-      badge: null,
-      isFree: false,
-    },
-    {
-      id: "250",
-      label: "250",
-      countText: "250 invités",
-      price: "39,99 €",
-      period: "Paiement unique / événement",
-      badge: "Populaire",
-      isFree: false,
-    },
-    {
-      id: "500",
-      label: "500",
-      countText: "500 invités",
-      price: "69,99 €",
-      period: "Paiement unique / événement",
-      badge: null,
-      isFree: false,
-    },
-    {
-      id: "1000",
-      label: "1000+",
-      countText: "1000+ invités",
-      price: "119,99 €",
-      period: "Paiement unique / événement",
-      badge: "Gros volume",
-      isFree: false,
-    },
-  ];
+  const tiers = PRICING_TIERS.map((t) => ({
+    ...t,
+    period: t.isFree ? "Gratuit à vie" : "Paiement unique / événement",
+  }));
 
-  const [selectedTierId, setSelectedTierId] = useState<string>("25");
+  const [selectedTierId, setSelectedTierId] = useState<string>(tiers[0].id);
 
   const currentTier = tiers.find((t) => t.id === selectedTierId) || tiers[0];
 
