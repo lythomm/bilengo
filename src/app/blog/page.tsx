@@ -3,9 +3,11 @@ import Link from 'next/link';
 import { getAllPosts } from '@/lib/blog';
 import { JsonLd, getAppSchema } from '@/components/seo/JsonLd';
 import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { ArrowRight, Calendar, User, ArrowLeft } from 'lucide-react';
+import { formatDate } from '@/utils/date';
 
 export const metadata = {
   title: 'Blog & Guides Covoiturage Événementiel - BilenGo',
@@ -24,7 +26,7 @@ export default async function BlogIndexPage() {
       {/* Top Navbar */}
       <Navbar />
 
-      <main className="flex-1 w-full bg-gradient-to-b from-neutral-50/60 via-white to-white py-12">
+      <main className="flex-1 w-full py-12  bg-neutral-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           {/* Back Button */}
           <nav className="mb-6">
@@ -53,13 +55,14 @@ export default async function BlogIndexPage() {
             {posts.map((post) => (
               <Card
                 key={post.slug}
-                className="p-6 sm:p-8 flex flex-col justify-between hover:border-neutral-300 transition-all group bg-white shadow-xs"
+                className="p-6 sm:p-8 flex flex-col justify-between hover:border-neutral-300 transition-all group shadow-xs"
+                variant='white'
               >
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 text-xs text-neutral-500">
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5 text-neutral-400" />
-                      <time dateTime={post.date}>{post.date}</time>
+                      <time dateTime={post.date}>{formatDate(post.date)}</time>
                     </span>
                     <span>•</span>
                     <span className="flex items-center gap-1">
@@ -103,30 +106,8 @@ export default async function BlogIndexPage() {
         </div>
       </main>
 
-      {/* Dark Signature Footer */}
-      <footer className="bg-[#101010] text-neutral-400 py-12 border-t border-neutral-800">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-xs">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-white text-[#101010] flex items-center justify-center font-bold text-sm font-heading">
-              B
-            </div>
-            <span className="text-white font-bold tracking-tight text-base font-heading">
-              BilenGo
-            </span>
-            <span className="text-neutral-600">|</span>
-            <span className="text-neutral-400">Covoiturage Événementiel Sans Friction</span>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <Link href="/" className="hover:text-white transition-colors">Accueil</Link>
-            <Link href="/blog" className="hover:text-white transition-colors">Blog & Guides</Link>
-          </div>
-
-          <p className="text-neutral-500">
-            © 2026 BilenGo. Tous droits réservés.
-          </p>
-        </div>
-      </footer>
+      {/* Dedicated Footer */}
+      <Footer />
     </div>
   );
 }

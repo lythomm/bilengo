@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
 import { UseCasesStackedSection } from "@/components/UseCasesStackedSection";
 import { PricingSection } from "@/components/PricingSection";
@@ -446,76 +447,6 @@ export function HomeClient() {
           </motion.div>
         </section>
 
-        {/* ================= BLOG PREVIEW SECTION ================= */}
-        <section className="py-20  bg-neutral-50">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
-              <div className="space-y-2">
-                <Badge variant="default">Blog & Guides</Badge>
-                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 font-heading">
-                  Conseils pour vos covoiturages événementiels
-                </h2>
-                <p className="text-sm text-neutral-600 max-w-xl">
-                  Découvrez nos guides pratiques et conseils pour organiser la mobilité de vos événements sans commission.
-                </p>
-              </div>
-              <Link
-                href="/blog"
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-neutral-900 hover:text-neutral-600 transition-colors shrink-0"
-              >
-                Voir tous les articles
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="p-6 space-y-4 hover:border-neutral-300 transition-colors group" variant="white">
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full bg-neutral-100 text-neutral-700 text-xs font-semibold">
-                    Guide Pilier
-                  </span>
-                  <span className="text-xs text-neutral-400">02 Août 2026</span>
-                </div>
-                <h3 className="text-lg font-bold text-neutral-900 font-heading group-hover:text-neutral-600 transition-colors">
-                  Covoiturage Événementiel Gratuit : La Solution Ultime pour Mariages, Festivals et Sports
-                </h3>
-                <p className="text-xs text-neutral-600 leading-relaxed">
-                  Découvrez comment organiser le covoiturage d'un événement privé ou public sans frais ni commission grâce à BilenGo.
-                </p>
-                <Link
-                  href="/blog/covoiturage-evenementiel-gratuit"
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-neutral-900 group-hover:underline pt-2"
-                >
-                  Lire le guide complet
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </Card>
-
-              <Card className="p-6 space-y-4 hover:border-neutral-300 transition-colors group" variant="white">
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full bg-neutral-100 text-neutral-700 text-xs font-semibold">
-                    Organisateurs
-                  </span>
-                  <span className="text-xs text-neutral-400">02 Août 2026</span>
-                </div>
-                <h3 className="text-lg font-bold text-neutral-900 font-heading group-hover:text-neutral-600 transition-colors">
-                  Comment simplifier les trajets de vos invités sans créer de groupe WhatsApp ?
-                </h3>
-                <p className="text-xs text-neutral-600 leading-relaxed">
-                  Centralisez les départs des invités sur une carte unique et évitez les discussions illisibles.
-                </p>
-                <Link
-                  href="/blog"
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-neutral-900 group-hover:underline pt-2"
-                >
-                  Découvrir les astuces
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </Card>
-            </div>
-          </div>
-        </section>
-
         {/* ================= 8. CLOSING CONVERSION CTA ================= */}
         <section className="py-20 sm:py-24 bg-white">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -565,31 +496,8 @@ export function HomeClient() {
         </section>
       </main>
 
-      {/* ================= 9. DARK SIGNATURE FOOTER ================= */}
-      <footer className="bg-[#101010] text-neutral-400 py-12 border-t border-neutral-800">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-xs">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-white text-[#101010] flex items-center justify-center font-bold text-sm font-heading">
-              B
-            </div>
-            <span className="text-white font-bold tracking-tight text-base font-heading">
-              BilenGo
-            </span>
-            <span className="text-neutral-600">|</span>
-            <span className="text-neutral-400">Covoiturage Événementiel Sans Friction</span>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <Link href="/blog" className="hover:text-white transition-colors">
-              Blog & Guides
-            </Link>
-          </div>
-
-          <p className="text-neutral-500">
-            © 2026 BilenGo. Tous droits réservés.
-          </p>
-        </div>
-      </footer>
+      {/* Dedicated Footer */}
+      <Footer />
 
       {/* Modals */}
       <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />

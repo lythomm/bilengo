@@ -5,9 +5,11 @@ import { getAllPosts, getPostBySlug } from '@/lib/blog';
 import { GeoAnswerBlock } from '@/components/seo/GeoAnswerBlock';
 import { JsonLd, getArticleSchema, getFaqSchema } from '@/components/seo/JsonLd';
 import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { ArrowLeft, Calendar, User, ArrowRight } from 'lucide-react';
+import { formatDate } from '@/utils/date';
 
 export const dynamic = 'force-static';
 
@@ -119,7 +121,7 @@ export default async function BlogPostPage({
               <div className="flex items-center gap-3 pt-2 text-xs text-neutral-500 border-b border-neutral-200/80 pb-6">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5 text-neutral-400" />
-                  <time dateTime={post.date}>{post.date}</time>
+                  <time dateTime={post.date}>{formatDate(post.date)}</time>
                 </span>
                 <span>•</span>
                 <span className="flex items-center gap-1">
@@ -271,7 +273,7 @@ export default async function BlogPostPage({
             )}
 
             {/* CTA Box */}
-            <Card className="mt-14 p-8 bg-neutral-900 text-white rounded-3xl text-center space-y-4">
+            <Card className="mt-14 p-8 bg-neutral-900 text-white rounded-3xl text-center space-y-4" variant='dark'>
               <h3 className="text-xl sm:text-2xl font-bold font-heading text-white">
                 Prêt à organiser le covoiturage de votre événement ?
               </h3>
@@ -292,34 +294,8 @@ export default async function BlogPostPage({
         </div>
       </main>
 
-      {/* Dark Signature Footer */}
-      <footer className="bg-[#101010] text-neutral-400 py-12 border-t border-neutral-800">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-xs">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-white text-[#101010] flex items-center justify-center font-bold text-sm font-heading">
-              B
-            </div>
-            <span className="text-white font-bold tracking-tight text-base font-heading">
-              BilenGo
-            </span>
-            <span className="text-neutral-600">|</span>
-            <span className="text-neutral-400">Covoiturage Événementiel Sans Friction</span>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <Link href="/" className="hover:text-white transition-colors">
-              Accueil
-            </Link>
-            <Link href="/blog" className="hover:text-white transition-colors">
-              Blog & Guides
-            </Link>
-          </div>
-
-          <p className="text-neutral-500">
-            © 2026 BilenGo. Tous droits réservés.
-          </p>
-        </div>
-      </footer>
+      {/* Dedicated Footer */}
+      <Footer />
     </div>
   );
 }
